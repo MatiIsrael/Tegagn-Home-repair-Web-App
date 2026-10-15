@@ -1,0 +1,30 @@
+# Environment variables
+.env
+.env.local
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Database (local test SQLite)
+*.sqlite3
+db.sqlite3-journal
+
+# Static & media files
+media/
+staticfiles/
+
+# Logs & coverage
+*.log
+.coverage
+htmlcov/
+.pytest_cache/
