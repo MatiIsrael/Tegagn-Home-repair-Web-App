@@ -11,7 +11,7 @@
  * ============================================================================
  */
 
-import { Category, WorkerProfile, Booking, Review, WorkerServiceItem } from '../types';
+import { Category, WorkerProfile, Booking, Review, WorkerServiceItem, WorkerPost, WorkerPostComment } from '../types';
 
 export const PLACEHOLDER_CATEGORIES: Category[] = [
   {
@@ -444,9 +444,14 @@ export const PLACEHOLDER_WORKER_REQUESTS: Booking[] = [
     serviceDescription: 'Urgent main supply line valve replacement before water tank fill',
     scheduledDate: '2026-10-16',
     scheduledTime: '09:30 AM',
-    location: 'Kazanchis, Near ECA Building',
+    location: 'Kazanchis, Near ECA Building, House #204, Addis Ababa',
+    gpsCoordinates: {
+      lat: 9.0185,
+      lng: 38.7698,
+      label: 'Kazanchis, Addis Ababa'
+    },
     status: 'pending',
-    estimatedCost: 85,
+    estimatedCost: 850,
     createdAt: '2026-10-15',
     notes: 'Access key available at security gate. Please call upon arrival.'
   },
@@ -461,9 +466,14 @@ export const PLACEHOLDER_WORKER_REQUESTS: Booking[] = [
     serviceDescription: 'Bathroom remodeling plumbing inspection and waste line rough-in',
     scheduledDate: '2026-10-19',
     scheduledTime: '11:00 AM',
-    location: 'Sarbet, Behind Canadian Embassy',
+    location: 'Sarbet, Behind Canadian Embassy, Addis Ababa',
+    gpsCoordinates: {
+      lat: 8.9950,
+      lng: 38.7420,
+      label: 'Sarbet, Addis Ababa'
+    },
     status: 'accepted',
-    estimatedCost: 140,
+    estimatedCost: 1400,
     createdAt: '2026-10-14'
   }
 ];
@@ -523,5 +533,151 @@ export const PLACEHOLDER_SERVICES: WorkerServiceItem[] = [
     price: 35,
     durationEstimate: '2 - 3 hours',
     isActive: false,
+  }
+];
+
+export const PLACEHOLDER_WORKER_POSTS: WorkerPost[] = [
+  {
+    id: 'post-101',
+    workerId: 'worker-101',
+    workerName: 'Abebe Tadesse',
+    workerTrade: 'Master Plumber',
+    workerAvatar: 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?auto=format&fit=crop&q=80&w=400',
+    workerRating: 4.9,
+    workerHourlyRate: 350,
+    workerExperience: 8,
+    title: 'Complete Bathroom PPR Pipe Overhaul & Silent Water Booster Installation',
+    description: 'Removed 15-year-old corroded galvanized steel pipes behind bathroom tiles and replaced them with fusion-welded PPR piping. Installed a quiet automatic pressure booster pump so all showers now receive constant high pressure.',
+    category: 'plumbing',
+    imageUrl: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&q=80&w=800',
+    priceCharged: 850,
+    currency: 'ETB',
+    duration: '4 hours',
+    location: 'Bole Medhanialem, Addis Ababa',
+    gpsCoordinates: {
+      lat: 9.0084,
+      lng: 38.7891,
+      label: 'Bole Medhanialem'
+    },
+    likesCount: 38,
+    isLiked: false,
+    comments: [
+      {
+        id: 'c-1',
+        postId: 'post-101',
+        authorName: 'Bethlehem Assefa',
+        authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
+        comment: 'Abebe did this in my house! Very clean work, no unnecessary tile breakage. Highly recommend him.',
+        createdAt: '2026-10-15 14:20'
+      },
+      {
+        id: 'c-2',
+        postId: 'post-101',
+        authorName: 'Yonas Gebre',
+        authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150',
+        comment: 'Do you also service apartment complexes in Kazanchis?',
+        createdAt: '2026-10-15 17:05'
+      }
+    ],
+    createdAt: '2026-10-15T12:00:00Z'
+  },
+  {
+    id: 'post-102',
+    workerId: 'worker-102',
+    workerName: 'Marta Bekele',
+    workerTrade: 'Certified Electrician',
+    workerAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400',
+    workerRating: 4.95,
+    workerHourlyRate: 400,
+    workerExperience: 6,
+    title: 'Smart Breaker Panel Upgrade & Generator Transfer Switch Wiring',
+    description: 'Diagnosed persistent power surges that caused kitchen appliance failures. Replaced old fuses with European-standard miniature circuit breakers and integrated an automated backup generator changeover switch.',
+    category: 'electrician',
+    imageUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=800',
+    priceCharged: 1200,
+    currency: 'ETB',
+    duration: '5 hours',
+    location: 'Gotera / Sarbet, Addis Ababa',
+    gpsCoordinates: {
+      lat: 8.9950,
+      lng: 38.7420,
+      label: 'Sarbet'
+    },
+    likesCount: 52,
+    isLiked: true,
+    comments: [
+      {
+        id: 'c-3',
+        postId: 'post-102',
+        authorName: 'Dawit Mengistu',
+        authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
+        comment: 'Extremely neat wiring cable labeling. Makes future maintenance effortless.',
+        createdAt: '2026-10-14 11:30'
+      }
+    ],
+    createdAt: '2026-10-14T09:30:00Z'
+  },
+  {
+    id: 'post-103',
+    workerId: 'worker-103',
+    workerName: 'Dawit Alemayehu',
+    workerTrade: 'Custom Woodworker',
+    workerAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400',
+    workerRating: 4.85,
+    workerHourlyRate: 300,
+    workerExperience: 10,
+    title: 'Custom Wanza Hardwood Dining Table & Soft-Close Kitchen Cabinetry',
+    description: 'Built a 6-seat dining table from seasoned local Wanza wood with matte protective lacquer finish. Also repaired sagging kitchen cabinet doors and replaced hinges with soft-close Blum fittings.',
+    category: 'carpenter',
+    imageUrl: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=800',
+    priceCharged: 2400,
+    currency: 'ETB',
+    duration: '2 days',
+    location: 'CMC Michael, Addis Ababa',
+    gpsCoordinates: {
+      lat: 9.0250,
+      lng: 38.8300,
+      label: 'CMC Michael'
+    },
+    likesCount: 64,
+    isLiked: false,
+    comments: [
+      {
+        id: 'c-4',
+        postId: 'post-103',
+        authorName: 'Helen Girma',
+        authorAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=150',
+        comment: 'Beautiful wood grain pattern! True Ethiopian artisanal craftsmanship.',
+        createdAt: '2026-10-13 18:45'
+      }
+    ],
+    createdAt: '2026-10-13T16:00:00Z'
+  },
+  {
+    id: 'post-104',
+    workerId: 'worker-104',
+    workerName: 'Helen Girma',
+    workerTrade: 'Interior & Exterior Painter',
+    workerAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400',
+    workerRating: 4.8,
+    workerHourlyRate: 250,
+    workerExperience: 5,
+    title: 'Anti-Mold Waterproof Plastering & Satin Wall Painting',
+    description: 'Treated recurring moisture mold on exterior-facing bedroom wall with anti-fungal primer and applied two coats of washable satin emulsion paint. Room completely masked and cleaned afterward.',
+    category: 'painter',
+    imageUrl: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=800',
+    priceCharged: 750,
+    currency: 'ETB',
+    duration: '6 hours',
+    location: 'Arada / Piassa, Addis Ababa',
+    gpsCoordinates: {
+      lat: 9.0350,
+      lng: 38.7520,
+      label: 'Piassa'
+    },
+    likesCount: 29,
+    isLiked: false,
+    comments: [],
+    createdAt: '2026-10-12T10:15:00Z'
   }
 ];

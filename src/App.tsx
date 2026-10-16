@@ -7,6 +7,8 @@ import { WorkerDetailPage } from './pages/WorkerDetailPage';
 import { CustomerSignUpPage } from './pages/CustomerSignUpPage';
 import { WorkerSignUpPage } from './pages/WorkerSignUpPage';
 import { LoginPage } from './pages/LoginPage';
+import { CustomerLoginPage } from './pages/CustomerLoginPage';
+import { WorkerLoginPage } from './pages/WorkerLoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { CustomerDashboard } from './pages/CustomerDashboard';
 import { WorkerDashboard } from './pages/WorkerDashboard';
@@ -45,19 +47,21 @@ export const App: React.FC = () => {
           {/* 3. Worker Details */}
           <Route path="workers/:id" element={<WorkerDetailPage />} />
 
-          {/* 4. Customer Sign Up */}
+          {/* 4. Customer Authentication & Registration */}
+          <Route path="customer/login" element={<CustomerLoginPage />} />
+          <Route path="customer/register" element={<CustomerSignUpPage />} />
           <Route path="register/customer" element={<CustomerSignUpPage />} />
           <Route path="signup/customer" element={<CustomerSignUpPage />} />
 
-          {/* 5. Worker Sign Up */}
+          {/* 5. Worker Authentication & Registration */}
+          <Route path="worker/login" element={<WorkerLoginPage />} />
+          <Route path="worker/register" element={<WorkerSignUpPage />} />
           <Route path="register/worker" element={<WorkerSignUpPage />} />
           <Route path="signup/worker" element={<WorkerSignUpPage />} />
 
-          {/* Unified Register Hub */}
+          {/* Unified Hubs */}
           <Route path="register" element={<RegisterPage />} />
           <Route path="signup" element={<RegisterPage />} />
-
-          {/* 6. Login */}
           <Route path="login" element={<LoginPage />} />
 
           {/* 7. Customer Dashboard */}

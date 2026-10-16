@@ -94,10 +94,52 @@ export interface Booking {
   scheduledDate: string;
   scheduledTime: string;
   location: string;
+  gpsCoordinates?: {
+    lat: number;
+    lng: number;
+    label?: string;
+  };
   status: BookingStatus;
   estimatedCost: number;
   createdAt: string;
   notes?: string;
+}
+
+export interface WorkerPostComment {
+  id: string;
+  postId: string;
+  authorName: string;
+  authorAvatar?: string;
+  comment: string;
+  createdAt: string;
+}
+
+export interface WorkerPost {
+  id: string;
+  workerId: string;
+  workerName: string;
+  workerTrade: string;
+  workerAvatar: string;
+  workerRating?: number;
+  workerHourlyRate?: number;
+  workerExperience?: number;
+  title: string;
+  description: string;
+  category: string;
+  imageUrl: string;
+  priceCharged: number;
+  currency: string;
+  duration: string;
+  location: string;
+  gpsCoordinates?: {
+    lat: number;
+    lng: number;
+    label?: string;
+  };
+  likesCount: number;
+  isLiked?: boolean;
+  comments: WorkerPostComment[];
+  createdAt: string;
 }
 
 export interface WorkerServiceItem {
