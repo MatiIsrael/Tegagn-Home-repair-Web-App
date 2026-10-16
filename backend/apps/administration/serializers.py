@@ -1,3 +1,4 @@
+from decimal import Decimal
 from rest_framework import serializers
 from django.utils import timezone
 from apps.accounts.models import User
@@ -180,6 +181,10 @@ class AdminBookingListSerializer(serializers.ModelSerializer):
     customer_email = serializers.EmailField(source='customer.email', read_only=True)
     worker_name = serializers.CharField(source='worker.user.get_full_name', read_only=True)
     worker_trade = serializers.CharField(source='worker.trade_title', read_only=True)
+    worker_hourly_rate = serializers.DecimalField(source='worker.hourly_rate', max_digits=10, decimal_places=2, read_only=True)
+    is_high_price_flagged = serializers.SerializerMethodField()
+    benchmark_price = serializers.SerializerMethodField()
+    excess_ratio = serializers.SerializerMethodField()
 
     class Meta:
         model = Booking
@@ -192,16 +197,43 @@ class AdminBookingListSerializer(serializers.ModelSerializer):
             'worker_id',
             'worker_name',
             'worker_trade',
+            'worker_hourly_rate',
             'service_title',
             'status',
             'scheduled_date',
             'scheduled_time_slot',
             'agreed_price',
             'currency',
+            'is_high_price_flagged',
+            'benchmark_price',
+            'excess_ratio',
             'created_at',
             'updated_at',
         ]
         read_only_fields = fields
+
+    def get_is_high_price_flagged(self, obj):
+        try:
+            worker_rate = obj.worker.hourly_rate
+            threshold = max(worker_rate * Decimal('2.5'), Decimal('1200.00'))
+            return bool(obj.agreed_price and obj.agreed_price > threshold)
+        except Exception:
+            return False
+
+    def get_benchmark_price(self, obj):
+        try:
+            return round(obj.worker.hourly_rate * Decimal('1.5'), 2)
+        except Exception:
+            return obj.agreed_price
+
+    def get_excess_ratio(self, obj):
+        try:
+            rate = float(obj.worker.hourly_rate)
+            if rate > 0 and obj.agreed_price:
+                return round(float(obj.agreed_price) / rate, 2)
+            return 1.0
+        except Exception:
+            return 1.0
 
 
 class AdminBookingDetailSerializer(serializers.ModelSerializer):
@@ -211,6 +243,10 @@ class AdminBookingDetailSerializer(serializers.ModelSerializer):
     customer_phone = serializers.CharField(source='customer.phone_number', read_only=True)
     worker_name = serializers.CharField(source='worker.user.get_full_name', read_only=True)
     worker_phone = serializers.CharField(source='worker.user.phone_number', read_only=True)
+    worker_hourly_rate = serializers.DecimalField(source='worker.hourly_rate', max_digits=10, decimal_places=2, read_only=True)
+    is_high_price_flagged = serializers.SerializerMethodField()
+    benchmark_price = serializers.SerializerMethodField()
+    excess_ratio = serializers.SerializerMethodField()
     status_history = serializers.SerializerMethodField()
 
     class Meta:
@@ -225,20 +261,47 @@ class AdminBookingDetailSerializer(serializers.ModelSerializer):
             'worker_id',
             'worker_name',
             'worker_phone',
+            'worker_hourly_rate',
             'service_title',
-            'problem_description',
+            'customer_notes',
             'status',
             'scheduled_date',
             'scheduled_time_slot',
             'service_address',
             'agreed_price',
             'currency',
+            'is_high_price_flagged',
+            'benchmark_price',
+            'excess_ratio',
             'cancellation_reason',
             'status_history',
             'created_at',
             'updated_at',
         ]
         read_only_fields = fields
+
+    def get_is_high_price_flagged(self, obj):
+        try:
+            worker_rate = obj.worker.hourly_rate
+            threshold = max(worker_rate * Decimal('2.5'), Decimal('1200.00'))
+            return bool(obj.agreed_price and obj.agreed_price > threshold)
+        except Exception:
+            return False
+
+    def get_benchmark_price(self, obj):
+        try:
+            return round(obj.worker.hourly_rate * Decimal('1.5'), 2)
+        except Exception:
+            return obj.agreed_price
+
+    def get_excess_ratio(self, obj):
+        try:
+            rate = float(obj.worker.hourly_rate)
+            if rate > 0 and obj.agreed_price:
+                return round(float(obj.agreed_price) / rate, 2)
+            return 1.0
+        except Exception:
+            return 1.0
 
     def get_status_history(self, obj):
         return [
@@ -251,6 +314,27 @@ class AdminBookingDetailSerializer(serializers.ModelSerializer):
             }
             for h in obj.status_history.select_related('changed_by').all()
         ]
+
+
+class AdminPriceMediationSerializer(serializers.Serializer):
+    """
+    Allows platform regulator / admin to mediate and regulate booking price,
+    intervening when workers ask excessive money or engage in price gouging.
+    """
+    ACTION_CHOICES = (
+        ('cap_price', 'Cap and Adjust Price'),
+        ('warn_worker', 'Issue Regulatory Price Warning'),
+        ('cancel_predatory', 'Cancel Booking Due to Price Gouging'),
+    )
+    action = serializers.ChoiceField(choices=ACTION_CHOICES, default='cap_price')
+    new_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, min_value=0.00)
+    reason = serializers.CharField(max_length=500, required=True)
+    regulatory_note = serializers.CharField(max_length=1000, required=False, allow_blank=True, default='')
+
+    def validate(self, attrs):
+        if attrs.get('action') == 'cap_price' and attrs.get('new_price') is None:
+            raise serializers.ValidationError({"new_price": "A new regulated price is required when capping price."})
+        return attrs
 
 
 # -------------------------------------------------------------

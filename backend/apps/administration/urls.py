@@ -9,6 +9,7 @@ from .views import (
     AdminCategoryDetailView,
     AdminBookingListView,
     AdminBookingDetailView,
+    AdminBookingPriceMediationView,
     AdminReviewListView,
     AdminReviewModerateView,
     AdminPlatformStatsView,
@@ -31,9 +32,10 @@ urlpatterns = [
     path('categories/', AdminCategoryListCreateView.as_view(), name='admin-category-list-create'),
     path('categories/<slug:slug>/', AdminCategoryDetailView.as_view(), name='admin-category-detail'),
 
-    # Booking Overview
+    # Booking Overview & Price Mediation
     path('bookings/', AdminBookingListView.as_view(), name='admin-booking-list'),
     path('bookings/<uuid:pk>/', AdminBookingDetailView.as_view(), name='admin-booking-detail'),
+    path('bookings/<uuid:pk>/mediate-price/', AdminBookingPriceMediationView.as_view(), name='admin-booking-mediate-price'),
 
     # Review Moderation
     path('reviews/', AdminReviewListView.as_view(), name='admin-review-list'),

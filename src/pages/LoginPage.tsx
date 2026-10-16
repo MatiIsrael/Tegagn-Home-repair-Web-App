@@ -90,7 +90,7 @@ export const LoginPage: React.FC = () => {
               Select Account Role
             </label>
             <div className="grid grid-cols-3 gap-1.5 bg-slate-100 p-1.5 rounded-xl text-xs font-bold" role="tablist">
-              {(['customer', 'worker', 'admin'] as const).map((role) => (
+              {(['customer', 'worker'] as const).map((role) => (
                 <button
                   key={role}
                   type="button"
@@ -103,9 +103,16 @@ export const LoginPage: React.FC = () => {
                       : 'text-slate-600 hover:text-navy-950 hover:bg-white/50'
                   }`}
                 >
-                  {role === 'customer' ? 'Customer' : role === 'worker' ? 'Pro Worker' : 'Admin'}
+                  {role === 'customer' ? 'Customer' : 'Pro Worker'}
                 </button>
               ))}
+              <Link
+                to="/admin/login"
+                className="py-2 rounded-lg transition-all text-center capitalize cursor-pointer bg-slate-900 hover:bg-sky-950 text-sky-400 border border-sky-800/40 hover:border-sky-500/60 font-black shadow-xs flex items-center justify-center gap-1"
+                title="Strictly for Platform Regulators & Administrators"
+              >
+                <span>Admin 🏛️</span>
+              </Link>
             </div>
           </div>
 

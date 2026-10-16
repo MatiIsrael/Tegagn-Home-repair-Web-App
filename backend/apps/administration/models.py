@@ -16,6 +16,8 @@ class AuditLog(models.Model):
         CATEGORY_DELETED = 'CATEGORY_DELETED', 'Service Category Deleted'
         REVIEW_MODERATED = 'REVIEW_MODERATED', 'Review Moderated'
         DISPUTE_UPDATED = 'DISPUTE_UPDATED', 'Booking Dispute Updated'
+        PRICE_ADJUSTED = 'PRICE_ADJUSTED', 'Price Capped / Regulated'
+        WARNING_ISSUED = 'WARNING_ISSUED', 'Regulatory Warning Issued'
 
     id = models.BigAutoField(primary_key=True)
     actor = models.ForeignKey(

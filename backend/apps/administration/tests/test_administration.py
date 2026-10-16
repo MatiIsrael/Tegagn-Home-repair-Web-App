@@ -369,3 +369,47 @@ class SecureAdministrationAPITests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(response.data['count'], 1)
         self.assertEqual(response.data['results'][0]['action'], 'USER_SUSPENDED')
+
+    def test_admin_can_mediate_and_cap_excessive_price(self):
+        """Administrator can intervene and cap an excessive booking price."""
+        self.client.force_authenticate(user=self.admin_user)
+        url = reverse('administration:admin-booking-mediate-price', kwargs={'pk': self.booking.id})
+        payload = {
+            'action': 'cap_price',
+            'new_price': '85.00',
+            'reason': 'Excessive fee mediation. Price capped to fair category benchmark.',
+            'regulatory_note': 'Warning communicated to worker.'
+        }
+        response = self.client.post(url, data=payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.booking.refresh_from_db()
+        self.assertEqual(float(self.booking.agreed_price), 85.00)
+
+        # Verify audit log was created
+        log = AuditLog.objects.filter(action=AuditLog.Action.PRICE_ADJUSTED, resource_id=str(self.booking.id)).first()
+        self.assertIsNotNone(log)
+        self.assertIn('85.00', log.description)
+
+    def test_non_admin_cannot_mediate_price(self):
+        """Customers or unauthorized users cannot mediate booking prices."""
+        self.client.force_authenticate(user=self.customer)
+        url = reverse('administration:admin-booking-mediate-price', kwargs={'pk': self.booking.id})
+        response = self.client.post(url, data={'action': 'cap_price', 'new_price': '50.00', 'reason': 'Test'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_issue_regulatory_price_warning(self):
+        """Administrator can issue formal price gouging warning to a worker."""
+        self.client.force_authenticate(user=self.admin_user)
+        url = reverse('administration:admin-booking-mediate-price', kwargs={'pk': self.booking.id})
+        payload = {
+            'action': 'warn_worker',
+            'reason': 'Worker quoted fee 4x above platform baseline.',
+            'regulatory_note': 'First formal warning. Recurrence will trigger suspension.'
+        }
+        response = self.client.post(url, data=payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        log = AuditLog.objects.filter(action=AuditLog.Action.WARNING_ISSUED, resource_id=str(self.booking.worker.id)).first()
+        self.assertIsNotNone(log)
+        self.assertIn('First formal warning', log.payload.get('note', ''))

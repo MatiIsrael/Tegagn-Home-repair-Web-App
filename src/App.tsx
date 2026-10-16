@@ -14,6 +14,7 @@ import { WorkerProfileEdit } from './pages/WorkerProfileEdit';
 import { ServiceManagementPage } from './pages/ServiceManagementPage';
 import { BookingDetailPage } from './pages/BookingDetailPage';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminLoginPage } from './pages/AdminLoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 /**
@@ -75,8 +76,10 @@ export const App: React.FC = () => {
           {/* 11. Booking Details */}
           <Route path="bookings/:id" element={<BookingDetailPage />} />
 
-          {/* 12. Admin Dashboard */}
+          {/* 12. Admin Governance & Regulatory Authority */}
+          <Route path="admin/login" element={<AdminLoginPage />} />
           <Route path="admin" element={<AdminDashboard />} />
+          <Route path="admin/dashboard" element={<AdminDashboard />} />
 
           {/* 404 Catch-all */}
           <Route path="*" element={<NotFoundPage />} />

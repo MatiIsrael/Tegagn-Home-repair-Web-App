@@ -635,6 +635,24 @@ export const adminService = {
     return res.json();
   },
 
+  async mediatePrice(bookingId: string, payload: {
+    action: 'cap_price' | 'warn_worker' | 'cancel_predatory';
+    new_price?: number;
+    reason: string;
+    regulatory_note?: string;
+  }): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/admin/bookings/${bookingId}/mediate-price/`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new ApiError(res.status, err.detail || 'Failed to mediate booking price.', err);
+    }
+    return res.json();
+  },
+
   async moderateReview(reviewId: string, isPublic: boolean, reason?: string): Promise<any> {
     const res = await fetch(`${API_BASE_URL}/admin/reviews/${reviewId}/moderate/`, {
       method: 'POST',

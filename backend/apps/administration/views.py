@@ -10,7 +10,7 @@ from rest_framework.filters import OrderingFilter
 from apps.accounts.models import User
 from apps.workers.models import WorkerProfile
 from apps.services.models import ServiceCategory
-from apps.bookings.models import Booking
+from apps.bookings.models import Booking, BookingStatusHistory
 from apps.reviews.models import Review
 from .models import AuditLog, log_admin_event
 from .permissions import IsPlatformAdministrator
@@ -23,6 +23,7 @@ from .serializers import (
     AdminServiceCategorySerializer,
     AdminBookingListSerializer,
     AdminBookingDetailSerializer,
+    AdminPriceMediationSerializer,
     AdminReviewListSerializer,
     AdminReviewModerationSerializer,
     AuditLogSerializer,
@@ -246,6 +247,113 @@ class AdminBookingDetailView(generics.RetrieveAPIView):
     queryset = Booking.objects.select_related('customer', 'worker__user').prefetch_related('status_history__changed_by').all()
     serializer_class = AdminBookingDetailSerializer
     permission_classes = [permissions.IsAuthenticated, IsPlatformAdministrator]
+
+
+class AdminBookingPriceMediationView(APIView):
+    """
+    Allows platform regulator / administrator to intervene in booking pricing:
+    1. Cap & Adjust Price: Override high/predatory prices demanded from customer.
+    2. Issue Regulatory Warning: Formal price-gouging violation notice logged to worker.
+    3. Cancel Predatory Booking: Cancel booking directly with protective remediation.
+    All actions are immutably logged with admin identity and rationale.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsPlatformAdministrator]
+
+    def post(self, request, pk):
+        booking = get_object_or_404(
+            Booking.objects.select_related('customer', 'worker__user'),
+            pk=pk
+        )
+        serializer = AdminPriceMediationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        action = serializer.validated_data['action']
+        reason = serializer.validated_data['reason']
+        regulatory_note = serializer.validated_data.get('regulatory_note', '')
+
+        if action == 'cap_price':
+            old_price = booking.agreed_price
+            new_price = serializer.validated_data['new_price']
+            booking.agreed_price = new_price
+            booking.save(update_fields=['agreed_price'])
+
+            BookingStatusHistory.objects.create(
+                booking=booking,
+                from_status=booking.status,
+                to_status=booking.status,
+                changed_by=request.user,
+                reason=f"Regulated Price Adjustment: Capped from {old_price} to {new_price} ETB. Reason: {reason}"
+            )
+
+            log_admin_event(
+                actor=request.user,
+                action=AuditLog.Action.PRICE_ADJUSTED,
+                resource_type='booking',
+                resource_id=booking.id,
+                description=f"Admin capped booking {booking.reference_number} price: {old_price} -> {new_price} ETB. Reason: {reason}",
+                payload={
+                    'reference_number': booking.reference_number,
+                    'old_price': str(old_price),
+                    'new_price': str(new_price),
+                    'worker_id': str(booking.worker.id),
+                    'customer_id': str(booking.customer.id),
+                    'reason': reason,
+                    'regulatory_note': regulatory_note
+                },
+                request=request
+            )
+
+            message = f"Price successfully regulated and capped from {old_price} to {new_price} ETB."
+
+        elif action == 'warn_worker':
+            log_admin_event(
+                actor=request.user,
+                action=AuditLog.Action.WARNING_ISSUED,
+                resource_type='worker',
+                resource_id=booking.worker.id,
+                description=f"Price Gouging Regulatory Warning issued to {booking.worker.user.get_full_name()} for booking {booking.reference_number}. Reason: {reason}",
+                payload={
+                    'booking_id': str(booking.id),
+                    'booking_ref': booking.reference_number,
+                    'worker_id': str(booking.worker.id),
+                    'agreed_price': str(booking.agreed_price),
+                    'reason': reason,
+                    'note': regulatory_note,
+                    'regulatory_note': regulatory_note
+                },
+                request=request
+            )
+            message = f"Official regulatory price warning issued to {booking.worker.user.get_full_name()}."
+
+        elif action == 'cancel_predatory':
+            booking.transition_to(
+                Booking.Status.CANCELLED,
+                request.user,
+                reason=f"Regulatory Cancellation (Excessive Fee / Price Gouging): {reason}"
+            )
+            log_admin_event(
+                actor=request.user,
+                action=AuditLog.Action.DISPUTE_UPDATED,
+                resource_type='booking',
+                resource_id=booking.id,
+                description=f"Booking {booking.reference_number} cancelled due to price gouging. Reason: {reason}",
+                payload={
+                    'booking_ref': booking.reference_number,
+                    'agreed_price': str(booking.agreed_price),
+                    'reason': reason,
+                    'regulatory_note': regulatory_note
+                },
+                request=request
+            )
+            message = f"Booking {booking.reference_number} cancelled due to predatory pricing violation."
+
+        # Return updated booking representation
+        updated_data = AdminBookingDetailSerializer(booking).data
+        return Response({
+            'booking': updated_data,
+            'action': action,
+            'message': message
+        }, status=status.HTTP_200_OK)
 
 
 # -------------------------------------------------------------
