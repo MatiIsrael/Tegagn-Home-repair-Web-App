@@ -19,8 +19,9 @@ import { Button } from '../components/common/Button';
 export const CustomerLoginPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('bethlehem@example.com');
-  const [password, setPassword] = useState('Password123!');
+  const storedUser = authService.getStoredUser();
+  const [email, setEmail] = useState(storedUser?.role === 'customer' ? storedUser.email : '');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,14 +49,28 @@ export const CustomerLoginPage: React.FC = () => {
         navigate('/customer/dashboard');
       }, 600);
     } catch (err: any) {
-      // Offline fallback mock session
+      // Offline fallback mock session - dynamically resolve name from email or previous session
+      const previousUser = authService.getStoredUser();
+      let firstName = 'Customer';
+      let lastName = '';
+
+      if (previousUser && previousUser.email.toLowerCase() === email.trim().toLowerCase()) {
+        firstName = previousUser.firstName;
+        lastName = previousUser.lastName;
+      } else {
+        const usernamePart = email.split('@')[0] || 'Customer';
+        const parts = usernamePart.split(/[._-]/);
+        firstName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : 'Customer';
+        lastName = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : '';
+      }
+
       const mockCustomerUser = {
-        id: 'cust-1',
+        id: previousUser?.id || `cust-${Date.now()}`,
         email: email.trim(),
-        firstName: 'Bethlehem',
-        lastName: 'Assefa',
+        firstName,
+        lastName,
         role: 'customer' as const,
-        phoneNumber: '+251 91 123 4567',
+        phoneNumber: previousUser?.phoneNumber || '+251 91 123 4567',
       };
       authService.setSession('mock_cust_access', 'mock_cust_refresh', mockCustomerUser);
       setLoginSuccess(true);

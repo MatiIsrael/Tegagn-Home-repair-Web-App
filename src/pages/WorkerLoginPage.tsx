@@ -19,8 +19,9 @@ import { Button } from '../components/common/Button';
 export const WorkerLoginPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('electrician@example.com');
-  const [password, setPassword] = useState('WorkerPassword123!');
+  const storedUser = authService.getStoredUser();
+  const [email, setEmail] = useState(storedUser?.role === 'worker' ? storedUser.email : '');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,14 +49,28 @@ export const WorkerLoginPage: React.FC = () => {
         navigate('/worker/dashboard');
       }, 600);
     } catch (err: any) {
-      // Offline fallback mock session for worker
+      // Offline fallback mock session for worker - dynamically resolve name
+      const previousUser = authService.getStoredUser();
+      let firstName = 'Pro';
+      let lastName = 'Worker';
+
+      if (previousUser && previousUser.email.toLowerCase() === email.trim().toLowerCase()) {
+        firstName = previousUser.firstName;
+        lastName = previousUser.lastName;
+      } else {
+        const usernamePart = email.split('@')[0] || 'Worker';
+        const parts = usernamePart.split(/[._-]/);
+        firstName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : 'Pro';
+        lastName = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : 'Worker';
+      }
+
       const mockWorkerUser = {
-        id: 'worker-101',
+        id: previousUser?.id || 'worker-101',
         email: email.trim(),
-        firstName: 'Abebe',
-        lastName: 'Tadesse',
+        firstName,
+        lastName,
         role: 'worker' as const,
-        phoneNumber: '+251 91 123 4567',
+        phoneNumber: previousUser?.phoneNumber || '+251 91 123 4567',
       };
       authService.setSession('mock_worker_access', 'mock_worker_refresh', mockWorkerUser);
       setLoginSuccess(true);

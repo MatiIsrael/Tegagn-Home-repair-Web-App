@@ -40,6 +40,12 @@ import { authService } from '../services/api';
 export const CustomerDashboard: React.FC = () => {
   const storedUser = authService.getStoredUser();
 
+  const customerDisplayName = storedUser?.firstName
+    ? `${storedUser.firstName}${storedUser.lastName ? ` ${storedUser.lastName}` : ''}`.trim()
+    : storedUser?.email
+      ? storedUser.email.split('@')[0]
+      : 'Valued Customer';
+
   // Bookings State
   const [bookings, setBookings] = useState<Booking[]>(PLACEHOLDER_CUSTOMER_BOOKINGS);
   const [selectedTab, setSelectedTab] = useState<'feed' | 'compare' | 'bookings'>('feed');
@@ -103,8 +109,8 @@ export const CustomerDashboard: React.FC = () => {
     const newComment = {
       id: `c-${Date.now()}`,
       postId,
-      authorName: storedUser?.firstName ? `${storedUser.firstName} ${storedUser.lastName}` : 'Bethlehem Assefa',
-      authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
+      authorName: customerDisplayName,
+      authorAvatar: storedUser?.avatarUrl || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
       comment: commentText,
       createdAt: 'Just now'
     };
@@ -154,7 +160,7 @@ export const CustomerDashboard: React.FC = () => {
     const newBooking: Booking = {
       id: `bk-${Date.now().toString().slice(-4)}`,
       customerId: storedUser?.id || 'cust-1',
-      customerName: storedUser?.firstName ? `${storedUser.firstName} ${storedUser.lastName}` : 'Bethlehem Assefa',
+      customerName: customerDisplayName,
       customerPhone: storedUser?.phoneNumber || '+251 91 123 4567',
       workerId: bookingModalWorker.id,
       workerName: `${bookingModalWorker.user.firstName} ${bookingModalWorker.user.lastName}`,
@@ -224,7 +230,7 @@ export const CustomerDashboard: React.FC = () => {
             <span>Customer Hub & Community Showcase</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Hello, {storedUser?.firstName || 'Bethlehem'} Assefa 👋
+            Hello, {customerDisplayName} 👋
           </h1>
           <p className="text-sm text-slate-300 max-w-xl">
             Explore real repair work posts from trade professionals, react with likes and comments, compare transparent prices & ratings, and book with GPS coordinates.

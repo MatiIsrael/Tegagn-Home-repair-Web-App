@@ -9,9 +9,11 @@ import {
   ShieldCheck, 
   Search, 
   PlusCircle, 
-  LogIn 
+  LogIn,
+  LogOut
 } from 'lucide-react';
 import { Button } from '../common/Button';
+import { authService } from '../../services/api';
 
 export const Navbar: React.FC = () => {
   // React State: Controls whether the mobile navigation drawer is visible
@@ -50,13 +52,27 @@ export const Navbar: React.FC = () => {
     };
   }, [mobileMenuOpen]);
 
-  // Array of navigation link objects
+  // Get current session user
+  const storedUser = authService.getStoredUser();
+
+  // Navigation links: Customer Hub & Worker Portal appear ONLY after login/register
   const navLinks = [
     { name: 'Find Professionals', path: '/workers', icon: <Search className="w-4 h-4 text-accent-500" /> },
-    { name: 'Customer Hub', path: '/customer/dashboard', icon: <User className="w-4 h-4 text-slate-400" /> },
-    { name: 'Worker Portal', path: '/worker/dashboard', icon: <Briefcase className="w-4 h-4 text-slate-400" /> },
-    { name: 'Admin', path: '/admin', icon: <ShieldCheck className="w-4 h-4 text-slate-400" /> },
+    ...(storedUser && storedUser.role === 'customer'
+      ? [{ name: 'Customer Hub', path: '/customer/dashboard', icon: <User className="w-4 h-4 text-brand-600" /> }]
+      : []),
+    ...(storedUser && storedUser.role === 'worker'
+      ? [{ name: 'Worker Portal', path: '/worker/dashboard', icon: <Briefcase className="w-4 h-4 text-amber-500" /> }]
+      : []),
+    ...(storedUser && storedUser.role === 'admin'
+      ? [{ name: 'Admin Portal', path: '/admin', icon: <ShieldCheck className="w-4 h-4 text-sky-500" /> }]
+      : []),
   ];
+
+  const handleSignOut = () => {
+    authService.logout();
+    window.location.href = '/';
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
@@ -98,16 +114,49 @@ export const Navbar: React.FC = () => {
 
           {/* Desktop Action Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/login">
-              <Button variant="ghost" size="sm" icon={<LogIn className="w-4 h-4" />}>
-                Log In
-              </Button>
-            </Link>
-            <Link to="/register/worker">
-              <Button variant="accent" size="sm" icon={<PlusCircle className="w-4 h-4" />}>
-                Join as a Pro
-              </Button>
-            </Link>
+            {storedUser ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  to={
+                    storedUser.role === 'customer'
+                      ? '/customer/dashboard'
+                      : storedUser.role === 'worker'
+                      ? '/worker/dashboard'
+                      : '/admin'
+                  }
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-900 border border-slate-200 transition-colors"
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>
+                    Hello, {storedUser.firstName ? storedUser.firstName : storedUser.email.split('@')[0]}
+                  </span>
+                  <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-white text-slate-600 border border-slate-200">
+                    {storedUser.role}
+                  </span>
+                </Link>
+
+                <button
+                  onClick={handleSignOut}
+                  className="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer border border-transparent hover:border-rose-200"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm" icon={<LogIn className="w-4 h-4" />}>
+                    Log In
+                  </Button>
+                </Link>
+                <Link to="/register/worker">
+                  <Button variant="accent" size="sm" icon={<PlusCircle className="w-4 h-4" />}>
+                    Join as a Pro
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button with Accessibility Attributes */}
@@ -159,16 +208,38 @@ export const Navbar: React.FC = () => {
           </div>
 
           <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
-            <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="outline" size="md" className="w-full justify-center">
-                Log In
-              </Button>
-            </Link>
-            <Link to="/register/worker" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="accent" size="md" className="w-full justify-center font-bold">
-                Join as a Pro
-              </Button>
-            </Link>
+            {storedUser ? (
+              <div className="space-y-2">
+                <div className="px-3 py-2 bg-slate-50 rounded-xl text-xs text-slate-700">
+                  Signed in as <strong>{storedUser.firstName || storedUser.email}</strong> ({storedUser.role})
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="md" 
+                  className="w-full justify-center text-rose-600 hover:bg-rose-50 border-rose-200"
+                  icon={<LogOut className="w-4 h-4" />}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleSignOut();
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" size="md" className="w-full justify-center">
+                    Log In
+                  </Button>
+                </Link>
+                <Link to="/register/worker" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="accent" size="md" className="w-full justify-center font-bold">
+                    Join as a Pro
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
