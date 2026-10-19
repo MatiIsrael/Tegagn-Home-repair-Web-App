@@ -27,22 +27,51 @@ export const RegisterPage: React.FC = () => {
     experienceYears: '3',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const sessionUser = {
-      id: `${role}-${Date.now()}`,
-      email: formData.email.trim(),
-      firstName: formData.firstName.trim() || (role === 'worker' ? 'Pro' : 'Customer'),
-      lastName: formData.lastName.trim(),
-      role: role,
-      phoneNumber: formData.phone.trim() || '+251 91 123 4567',
-    };
-    authService.setSession(`mock_${role}_reg_access`, `mock_${role}_reg_refresh`, sessionUser);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    if (role === 'worker') {
-      navigate('/worker/dashboard');
-    } else {
-      navigate('/customer/dashboard');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    if (!formData.email.trim() || !formData.password) {
+      setErrorMessage('Email and password are required.');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage('Passwords do not match.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      if (role === 'worker') {
+        await authService.registerWorker({
+          email: formData.email.trim(),
+          firstName: formData.firstName.trim() || 'Pro',
+          lastName: formData.lastName.trim(),
+          phoneNumber: formData.phone.trim() || '+251 91 123 4567',
+          trade: formData.trade,
+          city: formData.city,
+          experienceYears: Number(formData.experienceYears) || 3,
+          password: formData.password,
+        });
+        navigate('/worker/dashboard');
+      } else {
+        await authService.registerCustomer({
+          email: formData.email.trim(),
+          firstName: formData.firstName.trim() || 'Customer',
+          lastName: formData.lastName.trim(),
+          phoneNumber: formData.phone.trim() || '+251 91 123 4567',
+          password: formData.password,
+        });
+        navigate('/customer/dashboard');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Registration failed. An account with this email may already exist.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -117,6 +146,13 @@ export const RegisterPage: React.FC = () => {
 
         {/* Register Card */}
         <Card className="p-8 shadow-xl border-slate-200">
+          {errorMessage && (
+            <div className="mb-4 rounded-xl bg-rose-50 border border-rose-200 p-3.5 text-xs text-rose-800 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -133,44 +133,22 @@ export const CustomerSignUpPage: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    const sessionUser = {
-      id: `cust-${Date.now()}`,
-      email: formData.email.trim(),
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
-      role: 'customer' as const,
-      phoneNumber: formData.phone.trim() || '+251 91 123 4567',
-    };
 
     try {
-      const res = await authService.registerCustomer({
+      await authService.registerCustomer({
         email: formData.email.trim(),
-        first_name: formData.firstName.trim(),
-        last_name: formData.lastName.trim(),
-        phone_number: formData.phone.trim(),
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        phoneNumber: formData.phone.trim(),
         password: formData.password,
-        confirm_password: formData.confirmPassword,
         city: formData.city,
         neighborhood: formData.neighborhood,
       });
-      if (res?.tokens) {
-        authService.setSession(res.tokens.access, res.tokens.refresh, {
-          id: res.user?.id || sessionUser.id,
-          email: res.user?.email || sessionUser.email,
-          firstName: res.user?.first_name || sessionUser.firstName,
-          lastName: res.user?.last_name || sessionUser.lastName,
-          role: 'customer',
-          phoneNumber: res.user?.phone_number || sessionUser.phoneNumber,
-        });
-      } else {
-        authService.setSession('mock_cust_reg_access', 'mock_cust_reg_refresh', sessionUser);
-      }
-    } catch {
-      // Local fallback: set session with customer's submitted name
-      authService.setSession('mock_cust_reg_access', 'mock_cust_reg_refresh', sessionUser);
-    } finally {
       setIsSubmitting(false);
       navigate(redirectTarget);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setErrors(prev => ({ ...prev, email: err.message || 'Registration failed. An account with this email may already exist.' }));
     }
   };
 

@@ -43,43 +43,22 @@ export const WorkerLoginPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await authService.login(email.trim(), password);
+      await authService.login(email.trim(), password, 'worker');
       setLoginSuccess(true);
       setTimeout(() => {
         navigate('/worker/dashboard');
       }, 600);
     } catch (err: any) {
-      // Offline fallback mock session for worker - dynamically resolve name
-      const previousUser = authService.getStoredUser();
-      let firstName = 'Pro';
-      let lastName = 'Worker';
-
-      if (previousUser && previousUser.email.toLowerCase() === email.trim().toLowerCase()) {
-        firstName = previousUser.firstName;
-        lastName = previousUser.lastName;
-      } else {
-        const usernamePart = email.split('@')[0] || 'Worker';
-        const parts = usernamePart.split(/[._-]/);
-        firstName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : 'Pro';
-        lastName = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : 'Worker';
-      }
-
-      const mockWorkerUser = {
-        id: previousUser?.id || 'worker-101',
-        email: email.trim(),
-        firstName,
-        lastName,
-        role: 'worker' as const,
-        phoneNumber: previousUser?.phoneNumber || '+251 91 123 4567',
-      };
-      authService.setSession('mock_worker_access', 'mock_worker_refresh', mockWorkerUser);
-      setLoginSuccess(true);
-      setTimeout(() => {
-        navigate('/worker/dashboard');
-      }, 600);
+      setErrorMessage(err.message || 'Authentication failed. Please verify your credentials or register as a tradesperson.');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const fillSampleWorker = () => {
+    setEmail('abebe.plumber@gmail.com');
+    setPassword('worker123');
+    setErrorMessage(null);
   };
 
   return (
@@ -121,6 +100,23 @@ export const WorkerLoginPage: React.FC = () => {
               <span>Authenticated! Loading Worker Dashboard...</span>
             </div>
           )}
+
+          {/* Real Database Credentials Callout */}
+          <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+            <div className="text-xs">
+              <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Verified Database Tradesperson:</span>
+              <span className="font-mono text-amber-400 font-bold">abebe.plumber@gmail.com</span>
+              <span className="text-slate-500 mx-1.5">•</span>
+              <span className="font-mono text-slate-300">worker123</span>
+            </div>
+            <button
+              type="button"
+              onClick={fillSampleWorker}
+              className="text-xs font-bold text-amber-400 hover:text-amber-300 bg-amber-950/60 hover:bg-amber-900/60 border border-amber-800/60 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+            >
+              Fill Credentials
+            </button>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             

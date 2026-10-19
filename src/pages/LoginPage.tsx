@@ -18,7 +18,7 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
 
   // React State: Validation errors & loading state
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Email format regular expression variable
@@ -26,7 +26,7 @@ export const LoginPage: React.FC = () => {
 
   // Validation function with conditions
   const validateLogin = () => {
-    const errs: { email?: string; password?: string } = {};
+    const errs: { email?: string; password?: string; general?: string } = {};
 
     if (!email.trim()) {
       errs.email = 'Email address is required.';
@@ -56,7 +56,7 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const res = await authService.login(email.trim(), password);
+      const res = await authService.login(email.trim(), password, roleHint);
       setIsSubmitting(false);
       if (res.user.role === 'worker') {
         navigate('/worker/dashboard');
@@ -65,40 +65,9 @@ export const LoginPage: React.FC = () => {
       } else {
         navigate(redirectTarget || '/customer/dashboard');
       }
-    } catch {
-      // Local fallback: derive user name from previous session or entered email
-      const previousUser = authService.getStoredUser();
-      let firstName = 'User';
-      let lastName = '';
-
-      if (previousUser && previousUser.email.toLowerCase() === email.trim().toLowerCase()) {
-        firstName = previousUser.firstName;
-        lastName = previousUser.lastName;
-      } else {
-        const usernamePart = email.split('@')[0] || 'User';
-        const parts = usernamePart.split(/[._-]/);
-        firstName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : 'User';
-        lastName = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : '';
-      }
-
-      const sessionUser = {
-        id: previousUser?.id || `${roleHint}-${Date.now()}`,
-        email: email.trim(),
-        firstName,
-        lastName,
-        role: roleHint,
-        phoneNumber: previousUser?.phoneNumber || '+251 91 123 4567',
-      };
-      authService.setSession(`mock_${roleHint}_access`, `mock_${roleHint}_refresh`, sessionUser);
-
+    } catch (err: any) {
       setIsSubmitting(false);
-      if (roleHint === 'worker') {
-        navigate('/worker/dashboard');
-      } else if (roleHint === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate(redirectTarget || '/customer/dashboard');
-      }
+      setErrors({ general: err.message || 'Authentication failed. Please verify credentials or register.' });
     }
   };
 
@@ -153,6 +122,13 @@ export const LoginPage: React.FC = () => {
               </Link>
             </div>
           </div>
+
+          {errors.general && (
+            <div className="mb-4 rounded-xl bg-rose-50 border border-rose-200 p-3.5 text-xs text-rose-800 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <span>{errors.general}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <FormInput

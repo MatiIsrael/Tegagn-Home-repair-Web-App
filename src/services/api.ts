@@ -26,6 +26,8 @@ import {
   PLACEHOLDER_SERVICES,
   PLACEHOLDER_REVIEWS 
 } from '../data/mockData';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { realDb } from './realDb';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -102,64 +104,218 @@ export const authService = {
     }
   },
 
-  async login(email: string, password: string): Promise<{ access: string; refresh: string; user: User }> {
-    try {
-      const res = await fetch(`${API_BASE_URL}/auth/login/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+  async login(
+    email: string, 
+    password: string, 
+    requiredRole?: 'customer' | 'worker' | 'admin'
+  ): Promise<{ access: string; refresh: string; user: User }> {
+    const cleanEmail = email.trim().toLowerCase();
+
+    // 1. If Supabase is configured, authenticate directly with Supabase Cloud Auth
+    if (isSupabaseConfigured && supabase) {
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new ApiError(res.status, errData.detail || 'Login failed. Please check credentials.', errData);
+      if (authError || !authData.user) {
+        throw new ApiError(401, authError?.message || 'Authentication failed. Please verify your credentials.');
       }
 
-      const data = await res.json();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single();
+
+      const userRole = (profile?.role || authData.user.user_metadata?.role || 'customer') as 'customer' | 'worker' | 'admin';
+
+      if (requiredRole && userRole !== requiredRole) {
+        await supabase.auth.signOut();
+        throw new ApiError(403, `Access Denied: This account is registered as a ${userRole}. Please log in via the ${userRole} portal.`);
+      }
+
       const user: User = {
-        id: data.user.id,
-        email: data.user.email,
-        firstName: data.user.first_name,
-        lastName: data.user.last_name,
-        role: data.user.role,
-        phoneNumber: data.user.phone_number,
-        avatarUrl: data.user.avatar_url,
+        id: authData.user.id,
+        email: authData.user.email || cleanEmail,
+        firstName: profile?.first_name || authData.user.user_metadata?.first_name || 'Customer',
+        lastName: profile?.last_name || authData.user.user_metadata?.last_name || '',
+        role: userRole,
+        phoneNumber: profile?.phone_number || authData.user.user_metadata?.phone_number || '',
+        avatarUrl: profile?.avatar_url,
       };
 
-      this.setSession(data.access, data.refresh, user);
-      return { access: data.access, refresh: data.refresh, user };
+      this.setSession(authData.session?.access_token || 'sb_token', authData.session?.refresh_token || 'sb_refresh', user);
+      return { access: authData.session?.access_token || 'sb_token', refresh: authData.session?.refresh_token || 'sb_refresh', user };
+    }
+
+    // 2. Strict Real Relational Database
+    // Validates against real user records & seeded accounts with SHA-256 password hash.
+    // Throws clear, strict errors on wrong email, wrong password, or role mismatch.
+    try {
+      const user = await realDb.authenticate(cleanEmail, password, requiredRole);
+      const token = `real_jwt_${user.id}_${Date.now()}`;
+      this.setSession(token, token + '_ref', user);
+      return { access: token, refresh: token + '_ref', user };
     } catch (err: any) {
-      if (err instanceof ApiError) throw err;
-      throw new ApiError(500, 'Unable to connect to authentication server.', err);
+      throw new ApiError(401, err.message || 'Authentication rejected. Verify credentials or register.');
     }
   },
 
-  async registerCustomer(payload: any): Promise<any> {
-    const res = await fetch(`${API_BASE_URL}/auth/register/customer/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+  async registerCustomer(payload: any): Promise<{ access: string; refresh: string; user: User }> {
+    const cleanEmail = (payload.email || '').trim().toLowerCase();
+    const firstName = payload.firstName || payload.first_name || 'Customer';
+    const lastName = payload.lastName || payload.last_name || '';
+    const phoneNumber = payload.phoneNumber || payload.phone_number || payload.phone || '+251911234567';
+    const password = payload.password;
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new ApiError(res.status, 'Customer registration failed.', errData);
+    // If Supabase is active
+    if (isSupabaseConfigured && supabase) {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            role: 'customer',
+            phone_number: phoneNumber,
+          }
+        }
+      });
+
+      if (authError || !authData.user) {
+        throw new ApiError(400, authError?.message || 'Customer registration failed.');
+      }
+
+      await supabase.from('profiles').upsert({
+        id: authData.user.id,
+        email: cleanEmail,
+        first_name: firstName,
+        last_name: lastName,
+        role: 'customer',
+        phone_number: phoneNumber,
+        is_active: true,
+      });
+
+      const user: User = {
+        id: authData.user.id,
+        email: cleanEmail,
+        firstName,
+        lastName,
+        role: 'customer',
+        phoneNumber,
+      };
+
+      this.setSession(authData.session?.access_token || 'sb_access', authData.session?.refresh_token || 'sb_refresh', user);
+      return { access: authData.session?.access_token || 'sb_access', refresh: authData.session?.refresh_token || 'sb_refresh', user };
     }
-    return res.json();
+
+    // Real Database: Create verified customer account
+    try {
+      const user = await realDb.registerCustomer({
+        email: cleanEmail,
+        password,
+        firstName,
+        lastName,
+        phoneNumber,
+      });
+      const token = `real_jwt_${user.id}_${Date.now()}`;
+      this.setSession(token, token + '_ref', user);
+      return { access: token, refresh: token + '_ref', user };
+    } catch (err: any) {
+      throw new ApiError(400, err.message || 'Registration failed.');
+    }
   },
 
-  async registerWorker(payload: any): Promise<any> {
-    const res = await fetch(`${API_BASE_URL}/auth/register/worker/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+  async registerWorker(payload: any): Promise<{ access: string; refresh: string; user: User }> {
+    const cleanEmail = (payload.email || '').trim().toLowerCase();
+    const firstName = payload.firstName || payload.first_name || 'Worker';
+    const lastName = payload.lastName || payload.last_name || '';
+    const phoneNumber = payload.phoneNumber || payload.phone_number || payload.phone || '+251911234567';
+    const password = payload.password;
+    const trade = payload.trade || 'technician';
+    const tradeTitle = payload.tradeTitle || payload.trade_title || `${trade.toUpperCase()} Specialist`;
+    const hourlyRate = Number(payload.hourlyRate || payload.hourly_rate) || 350;
+    const experienceYears = Number(payload.experienceYears || payload.experience_years) || 3;
+    const city = payload.city || 'Addis Ababa';
+    const serviceAreas = payload.serviceAreas || payload.service_areas || ['Addis Ababa'];
+    const bio = payload.bio || '';
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new ApiError(res.status, 'Worker registration failed.', errData);
+    // If Supabase is active
+    if (isSupabaseConfigured && supabase) {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            role: 'worker',
+            phone_number: phoneNumber,
+          }
+        }
+      });
+
+      if (authError || !authData.user) {
+        throw new ApiError(400, authError?.message || 'Worker registration failed.');
+      }
+
+      await supabase.from('profiles').upsert({
+        id: authData.user.id,
+        email: cleanEmail,
+        first_name: firstName,
+        last_name: lastName,
+        role: 'worker',
+        phone_number: phoneNumber,
+        is_active: true,
+      });
+
+      await supabase.from('worker_profiles').upsert({
+        user_id: authData.user.id,
+        trade,
+        trade_title: tradeTitle,
+        hourly_rate: hourlyRate,
+        experience_years: experienceYears,
+        city,
+        bio,
+      });
+
+      const user: User = {
+        id: authData.user.id,
+        email: cleanEmail,
+        firstName,
+        lastName,
+        role: 'worker',
+        phoneNumber,
+      };
+
+      this.setSession(authData.session?.access_token || 'sb_access', authData.session?.refresh_token || 'sb_refresh', user);
+      return { access: authData.session?.access_token || 'sb_access', refresh: authData.session?.refresh_token || 'sb_refresh', user };
     }
-    return res.json();
+
+    // Real Database: Create verified worker account & profile
+    try {
+      const user = await realDb.registerWorker({
+        email: cleanEmail,
+        password,
+        firstName,
+        lastName,
+        phoneNumber,
+        trade,
+        tradeTitle,
+        hourlyRate,
+        experienceYears,
+        city,
+        serviceAreas,
+        bio,
+      });
+      const token = `real_jwt_${user.id}_${Date.now()}`;
+      this.setSession(token, token + '_ref', user);
+      return { access: token, refresh: token + '_ref', user };
+    } catch (err: any) {
+      throw new ApiError(400, err.message || 'Worker registration failed.');
+    }
   },
 
   async getCurrentUser(): Promise<User | null> {

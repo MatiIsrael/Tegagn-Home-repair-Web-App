@@ -47,47 +47,18 @@ export const AdminLoginPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Connect to real auth endpoint
-      const result = await authService.login(email.trim(), password);
-
-      // Verify that the authenticated account holds administrative privileges
-      if (result.user.role !== 'admin') {
-        authService.clearSession();
-        setErrorMessage(
-          'Access Denied: The provided account is registered as a regular participant (' +
-            result.user.role +
-            ') and lacks platform regulatory authorization.'
-        );
-        setIsSubmitting(false);
-        return;
-      }
+      // Authenticate against database with strict 'admin' role check
+      const result = await authService.login(email.trim(), password, 'admin');
 
       setLoginSuccess(true);
       setTimeout(() => {
         navigate('/admin');
       }, 700);
     } catch (err: any) {
-      // Fallback credentials support
-      if (email.trim() === 'admin@gmail.com' && password === 'admin123') {
-        const mockAdminUser = {
-          id: 'admin-gov-root',
-          email: 'admin@gmail.com',
-          firstName: 'System',
-          lastName: 'Administrator',
-          role: 'admin' as const,
-          phoneNumber: '+251911000000',
-        };
-        authService.setSession('mock_admin_jwt_access', 'mock_admin_jwt_refresh', mockAdminUser);
-        setLoginSuccess(true);
-        setTimeout(() => {
-          navigate('/admin');
-        }, 700);
-        return;
-      }
-
       setErrorMessage(
         err.message || 'Authentication rejected. Verify administrative credentials or contact Platform SecOps.'
       );
+    } finally {
       setIsSubmitting(false);
     }
   };
