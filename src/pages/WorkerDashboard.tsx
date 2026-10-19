@@ -38,6 +38,7 @@ import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { authService } from '../services/api';
+import { postService } from '../services/postService';
 
 export const WorkerDashboard: React.FC = () => {
   const currentWorker = PLACEHOLDER_WORKERS[0];
@@ -55,6 +56,8 @@ export const WorkerDashboard: React.FC = () => {
       ? storedUser.email.split('@')[0]
       : 'Trade Professional';
 
+  const workerId = storedUser?.id || currentWorker.id;
+
   // Requests state with GPS coordinates
   const [requests, setRequests] = useState<Booking[]>(PLACEHOLDER_WORKER_REQUESTS);
   const [isAvailable, setIsAvailable] = useState(currentWorker.isAvailable);
@@ -62,10 +65,22 @@ export const WorkerDashboard: React.FC = () => {
   // Tab state: 'requests' | 'posts' | 'profile' | 'notifications'
   const [activeTab, setActiveTab] = useState<'requests' | 'posts' | 'profile' | 'notifications'>('requests');
 
-  // Worker Posts Showcase state
-  const [posts, setPosts] = useState<WorkerPost[]>(
-    PLACEHOLDER_WORKER_POSTS.filter(p => p.workerId === currentWorker.id)
-  );
+  // Worker Posts Showcase state loaded from centralized postService
+  const [posts, setPosts] = useState<WorkerPost[]>(() => {
+    const workerPosts = postService.getWorkerPosts(workerId);
+    return workerPosts.length > 0 ? workerPosts : postService.getAllPosts().slice(0, 3);
+  });
+
+  const [postSubmittedNotice, setPostSubmittedNotice] = useState(false);
+
+  useEffect(() => {
+    const handlePostsChange = () => {
+      const updated = postService.getWorkerPosts(workerId);
+      setPosts(updated.length > 0 ? updated : postService.getAllPosts().slice(0, 3));
+    };
+    window.addEventListener('tegagn_posts_changed', handlePostsChange);
+    return () => window.removeEventListener('tegagn_posts_changed', handlePostsChange);
+  }, [workerId]);
 
   // Profile Quick Edit State ("ability write money fill everything")
   const [profileData, setProfileData] = useState({
@@ -128,13 +143,12 @@ export const WorkerDashboard: React.FC = () => {
     );
   };
 
-  // Submit new work post
+  // Submit new work post -> Goes to Admin first for regulatory review
   const handlePublishPost = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPost.title.trim()) return;
 
-    const createdPost: WorkerPost = {
-      id: `post-${Date.now()}`,
+    postService.createPost({
       workerId: storedUser?.id || currentWorker.id,
       workerName: workerDisplayName,
       workerTrade: profileData.tradeTitle || currentWorker.tradeTitle,
@@ -146,23 +160,17 @@ export const WorkerDashboard: React.FC = () => {
       description: newPost.description,
       category: newPost.category,
       imageUrl: newPost.imageUrl,
-      priceCharged: newPost.priceCharged,
-      currency: newPost.currency,
+      priceCharged: Number(newPost.priceCharged),
+      currency: newPost.currency || 'ETB',
       duration: newPost.duration,
       location: newPost.location,
-      gpsCoordinates: {
-        lat: newPost.lat,
-        lng: newPost.lng,
-        label: newPost.location
-      },
-      likesCount: 0,
-      isLiked: false,
-      comments: [],
-      createdAt: new Date().toISOString()
-    };
+      lat: newPost.lat,
+      lng: newPost.lng,
+    });
 
-    setPosts([createdPost, ...posts]);
     setIsPostModalOpen(false);
+    setPostSubmittedNotice(true);
+    setTimeout(() => setPostSubmittedNotice(false), 8000);
 
     // Reset post form
     setNewPost({
@@ -545,76 +553,109 @@ export const WorkerDashboard: React.FC = () => {
             </Button>
           </div>
 
+          {postSubmittedNotice && (
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-950 flex items-start gap-3 shadow-xs">
+              <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-sm text-amber-950">Job Showcase Released & Sent to Admin for Review</p>
+                <p className="text-amber-800 mt-0.5">
+                  Your new job post has been routed to the Platform Administrator for fair price and quality verification. It will appear live on the Customer Hub community feed as soon as the admin approves it.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Posts Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {posts.map((post) => (
-              <Card key={post.id} className="overflow-hidden p-0 border border-slate-200 hover:shadow-lg transition-shadow">
+              <Card key={post.id} className="overflow-hidden p-0 border border-slate-200 hover:shadow-lg transition-shadow bg-white flex flex-col justify-between">
                 
-                {/* Photo Image */}
-                <div className="relative h-56 bg-slate-100 overflow-hidden group">
-                  <img
-                    src={post.imageUrl}
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-3 left-3 flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-sm text-white text-[11px] font-bold uppercase tracking-wider">
-                      {post.category}
-                    </span>
-                  </div>
-                  <div className="absolute top-3 right-3">
-                    <span className="px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-black font-mono shadow-md">
-                      {post.priceCharged} {post.currency}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-5 space-y-3">
-                  <h3 className="font-extrabold text-base text-slate-900 line-clamp-2">
-                    {post.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
-                    {post.description}
-                  </p>
-
-                  {/* Metadata: Price, duration, location */}
-                  <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-slate-500">
-                    <span>⏱️ Duration: <strong>{post.duration}</strong></span>
-                    <span>📍 {post.location}</span>
-                  </div>
-
-                  {/* Engagement Bar: Likes and Comments */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-4 text-slate-600">
-                      <span className="flex items-center gap-1.5 font-bold text-rose-600">
-                        <Heart className="w-4 h-4 fill-rose-600 text-rose-600" />
-                        <span>{post.likesCount} Customer Likes</span>
+                <div>
+                  {/* Photo Image */}
+                  <div className="relative h-56 bg-slate-100 overflow-hidden group">
+                    <img
+                      src={post.imageUrl}
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-sm text-white text-[11px] font-bold uppercase tracking-wider">
+                        {post.category}
                       </span>
+                      {post.approvalStatus === 'pending' ? (
+                        <span className="px-2.5 py-1 rounded-full bg-amber-500 text-white text-[11px] font-bold shadow-xs">
+                          ⏳ In Admin Review
+                        </span>
+                      ) : post.approvalStatus === 'approved' ? (
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-bold shadow-xs">
+                          ✅ Live on Market
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-1 rounded-full bg-rose-600 text-white text-[11px] font-bold shadow-xs">
+                          ❌ Action Required
+                        </span>
+                      )}
+                    </div>
+                    <div className="absolute top-3 right-3">
+                      <span className="px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-black font-mono shadow-md">
+                        {post.priceCharged} {post.currency}
+                      </span>
+                    </div>
+                  </div>
 
-                      <span className="flex items-center gap-1.5 font-medium text-slate-600">
-                        <MessageSquare className="w-4 h-4 text-slate-400" />
-                        <span>{post.comments.length} Comments</span>
+                  {/* Content */}
+                  <div className="p-5 space-y-3">
+                    <h3 className="font-extrabold text-base text-slate-900 line-clamp-2">
+                      {post.title}
+                    </h3>
+                    <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                      {post.description}
+                    </p>
+
+                    {post.adminFeedback && (
+                      <div className="p-2.5 bg-amber-50/80 rounded-xl border border-amber-200 text-[11px] text-amber-900">
+                        <strong className="text-amber-950">Admin Notice:</strong> {post.adminFeedback}
+                      </div>
+                    )}
+
+                    {/* Metadata: Price, duration, location */}
+                    <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-slate-500">
+                      <span>⏱️ Duration: <strong>{post.duration}</strong></span>
+                      <span>📍 {post.location}</span>
+                    </div>
+
+                    {/* Engagement Bar: Likes and Comments */}
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-4 text-slate-600">
+                        <span className="flex items-center gap-1.5 font-bold text-rose-600">
+                          <Heart className="w-4 h-4 fill-rose-600 text-rose-600" />
+                          <span>{post.likesCount} Customer Likes</span>
+                        </span>
+
+                        <span className="flex items-center gap-1.5 font-medium text-slate-600">
+                          <MessageSquare className="w-4 h-4 text-slate-400" />
+                          <span>{post.comments.length} Comments</span>
+                        </span>
+                      </div>
+
+                      <span className="text-[11px] font-semibold text-slate-500">
+                        {post.approvalStatus === 'approved' ? 'Public in Customer Hub' : 'Held in Admin Queue'}
                       </span>
                     </div>
 
-                    <span className="text-[11px] text-slate-400">
-                      Public in Customer Feed
-                    </span>
+                    {/* Existing Customer Comments */}
+                    {post.comments.length > 0 && (
+                      <div className="space-y-2 pt-2 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
+                        <span className="font-bold text-slate-700 block text-[11px]">Recent Customer Inquiries:</span>
+                        {post.comments.map((c) => (
+                          <div key={c.id} className="text-slate-600 border-l-2 border-amber-400 pl-2">
+                            <strong className="text-slate-900">{c.authorName}:</strong> "{c.comment}"
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                   </div>
-
-                  {/* Existing Customer Comments */}
-                  {post.comments.length > 0 && (
-                    <div className="space-y-2 pt-2 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
-                      <span className="font-bold text-slate-700 block text-[11px]">Recent Customer Inquiries:</span>
-                      {post.comments.map((c) => (
-                        <div key={c.id} className="text-slate-600 border-l-2 border-amber-400 pl-2">
-                          <strong className="text-slate-900">{c.authorName}:</strong> "{c.comment}"
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
                 </div>
 
               </Card>

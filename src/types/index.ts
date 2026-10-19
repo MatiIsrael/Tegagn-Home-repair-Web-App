@@ -140,6 +140,12 @@ export interface WorkerPost {
   isLiked?: boolean;
   comments: WorkerPostComment[];
   createdAt: string;
+  // Regulatory & Moderation fields:
+  approvalStatus?: 'pending' | 'approved' | 'rejected';
+  isPriceFlagged?: boolean;
+  benchmarkPrice?: number;
+  adminFeedback?: string;
+  approvedAt?: string;
 }
 
 export interface WorkerServiceItem {

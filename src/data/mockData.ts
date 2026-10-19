@@ -579,7 +579,9 @@ export const PLACEHOLDER_WORKER_POSTS: WorkerPost[] = [
         createdAt: '2026-10-15 17:05'
       }
     ],
-    createdAt: '2026-10-15T12:00:00Z'
+    createdAt: '2026-10-15T12:00:00Z',
+    approvalStatus: 'approved',
+    approvedAt: '2026-10-15T12:30:00Z'
   },
   {
     id: 'post-102',
@@ -615,7 +617,9 @@ export const PLACEHOLDER_WORKER_POSTS: WorkerPost[] = [
         createdAt: '2026-10-14 11:30'
       }
     ],
-    createdAt: '2026-10-14T09:30:00Z'
+    createdAt: '2026-10-14T09:30:00Z',
+    approvalStatus: 'approved',
+    approvedAt: '2026-10-14T10:00:00Z'
   },
   {
     id: 'post-103',
@@ -651,7 +655,9 @@ export const PLACEHOLDER_WORKER_POSTS: WorkerPost[] = [
         createdAt: '2026-10-13 18:45'
       }
     ],
-    createdAt: '2026-10-13T16:00:00Z'
+    createdAt: '2026-10-13T16:00:00Z',
+    approvalStatus: 'approved',
+    approvedAt: '2026-10-13T17:15:00Z'
   },
   {
     id: 'post-104',
@@ -678,6 +684,68 @@ export const PLACEHOLDER_WORKER_POSTS: WorkerPost[] = [
     likesCount: 29,
     isLiked: false,
     comments: [],
-    createdAt: '2026-10-12T10:15:00Z'
+    createdAt: '2026-10-12T10:15:00Z',
+    approvalStatus: 'approved',
+    approvedAt: '2026-10-12T11:00:00Z'
+  },
+  {
+    id: 'post-105',
+    workerId: 'worker-105',
+    workerName: 'Kaleb Getachew',
+    workerTrade: 'Plumbing Specialist',
+    workerAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400',
+    workerRating: 4.75,
+    workerHourlyRate: 350,
+    workerExperience: 7,
+    title: 'Emergency Main Drain Unclogging with High-Pressure Jetting',
+    description: 'Emergency clearing of completely blocked residential sewer main line in Bole Atlas. Demanded 2,900 ETB quoting hazardous waste emergency surcharge.',
+    category: 'plumbing',
+    imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=800',
+    priceCharged: 2900,
+    currency: 'ETB',
+    duration: '2.5 hours',
+    location: 'Bole Atlas, Addis Ababa',
+    gpsCoordinates: {
+      lat: 9.0120,
+      lng: 38.7845,
+      label: 'Bole Atlas'
+    },
+    likesCount: 0,
+    isLiked: false,
+    comments: [],
+    createdAt: '2026-10-19T19:30:00Z',
+    approvalStatus: 'pending',
+    isPriceFlagged: true,
+    benchmarkPrice: 750
+  },
+  {
+    id: 'post-106',
+    workerId: 'worker-106',
+    workerName: 'Elias Shiferaw',
+    workerTrade: 'Electrical Technician',
+    workerAvatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=400',
+    workerRating: 4.88,
+    workerHourlyRate: 380,
+    workerExperience: 6,
+    title: 'Surge Protection Device (SPD) Installation for Entire Villa',
+    description: 'Installed Type-2 surge protection device in distribution board to safeguard solar inverter and home appliances from grid lightning transients.',
+    category: 'electrician',
+    imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=800',
+    priceCharged: 950,
+    currency: 'ETB',
+    duration: '3 hours',
+    location: 'Ayat Zone 2, Addis Ababa',
+    gpsCoordinates: {
+      lat: 9.0310,
+      lng: 38.8680,
+      label: 'Ayat Zone 2'
+    },
+    likesCount: 0,
+    isLiked: false,
+    comments: [],
+    createdAt: '2026-10-19T20:10:00Z',
+    approvalStatus: 'pending',
+    isPriceFlagged: false,
+    benchmarkPrice: 850
   }
 ];

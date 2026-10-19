@@ -36,6 +36,7 @@ import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
 import { authService } from '../services/api';
+import { postService } from '../services/postService';
 
 export const CustomerDashboard: React.FC = () => {
   const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
@@ -56,8 +57,15 @@ export const CustomerDashboard: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>(PLACEHOLDER_CUSTOMER_BOOKINGS);
   const [selectedTab, setSelectedTab] = useState<'feed' | 'compare' | 'bookings'>('feed');
 
-  // Worker Posts & Reactions State (Like, Comment)
-  const [workerPosts, setWorkerPosts] = useState<WorkerPost[]>(PLACEHOLDER_WORKER_POSTS);
+  // Worker Posts Showcase State: ONLY show posts approved by the platform admin!
+  const [workerPosts, setWorkerPosts] = useState<WorkerPost[]>(() => postService.getApprovedPosts());
+
+  useEffect(() => {
+    const handlePostsChange = () => setWorkerPosts(postService.getApprovedPosts());
+    window.addEventListener('tegagn_posts_changed', handlePostsChange);
+    return () => window.removeEventListener('tegagn_posts_changed', handlePostsChange);
+  }, []);
+
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({
     'post-101': true,
@@ -95,15 +103,7 @@ export const CustomerDashboard: React.FC = () => {
 
   // Handle Like Reaction on Worker Post
   const handleToggleLike = (postId: string) => {
-    setWorkerPosts(prev => prev.map(p => {
-      if (p.id !== postId) return p;
-      const isCurrentlyLiked = p.isLiked || false;
-      return {
-        ...p,
-        isLiked: !isCurrentlyLiked,
-        likesCount: isCurrentlyLiked ? p.likesCount - 1 : p.likesCount + 1
-      };
-    }));
+    postService.toggleLike(postId);
   };
 
   // Handle Adding Comment on Worker Post
@@ -121,14 +121,7 @@ export const CustomerDashboard: React.FC = () => {
       createdAt: 'Just now'
     };
 
-    setWorkerPosts(prev => prev.map(p => {
-      if (p.id !== postId) return p;
-      return {
-        ...p,
-        comments: [...p.comments, newComment]
-      };
-    }));
-
+    postService.addComment(postId, newComment);
     setCommentInputs(prev => ({ ...prev, [postId]: '' }));
     setExpandedComments(prev => ({ ...prev, [postId]: true }));
   };
