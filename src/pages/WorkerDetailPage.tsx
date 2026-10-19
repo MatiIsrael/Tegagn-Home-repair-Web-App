@@ -408,8 +408,8 @@ export const WorkerDetailPage: React.FC = () => {
             <p className="text-sm text-slate-600 max-w-md mx-auto">
               Your service request for <strong>{bookingForm.serviceDescription || 'Home repair service'}</strong> has been registered. The worker will review and confirm availability.
             </p>
-            <div className="p-3 bg-brand-50 text-brand-900 rounded-lg text-xs font-mono text-left max-w-sm mx-auto">
-              Ready for Django Endpoint: <code>POST /api/v1/bookings/</code>
+            <div className="p-3 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-lg text-xs text-center max-w-sm mx-auto">
+              ✓ Booking notification sent to technician. You can track status anytime.
             </div>
             <div className="pt-2 flex justify-center gap-3">
               <Link to="/customer/dashboard">

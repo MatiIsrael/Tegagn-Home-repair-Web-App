@@ -313,17 +313,7 @@ export const ServiceManagementPage: React.FC = () => {
         </div>
       )}
 
-      {/* Backend Architecture Note */}
-      <div className="p-4 rounded-2xl bg-navy-50/70 border border-navy-200/60 text-xs text-navy-950 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-accent-600 shrink-0 mt-0.5" />
-        <div>
-          <h4 className="font-bold">Django REST API Service Catalog Integration</h4>
-          <p className="mt-0.5 text-slate-600">
-            This catalog is wired to communicate with Django REST Framework endpoints: 
-            <code>GET /api/v1/worker/services/</code>, <code>POST /api/v1/worker/services/</code>, and <code>PATCH /api/v1/worker/services/{'{id}'}/</code>.
-          </p>
-        </div>
-      </div>
+
 
       {/* Add New Service Modal */}
       <Modal

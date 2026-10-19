@@ -415,14 +415,14 @@ export const BookingDetailPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Backend Integration Note */}
+      {/* Service Guarantee Note */}
       <div className="p-4 rounded-xl bg-navy-950 text-slate-300 text-xs space-y-1 border border-navy-900">
         <div className="flex items-center gap-2 text-white font-bold">
           <ShieldCheck className="w-4 h-4 text-accent-500" />
-          <span>Django REST API Booking Endpoint</span>
+          <span>Tegagn Service Protection</span>
         </div>
         <p className="text-slate-400">
-          This view communicates with Django endpoint <code>GET /api/v1/bookings/{'{id}'}/</code> and applies state updates via <code>PATCH /api/v1/bookings/{'{id}'}/status/</code>.
+          All bookings are directly coordinated with verified local technicians. Pay directly to your technician upon satisfactory completion.
         </p>
       </div>
 

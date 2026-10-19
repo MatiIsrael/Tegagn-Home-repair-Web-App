@@ -52,8 +52,24 @@ export const Navbar: React.FC = () => {
     };
   }, [mobileMenuOpen]);
 
-  // Get current session user
-  const storedUser = authService.getStoredUser();
+  // Reactive session user state
+  const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
+
+  useEffect(() => {
+    const handleAuthChange = () => {
+      setStoredUser(authService.getStoredUser());
+    };
+    window.addEventListener('tegagn_auth_changed', handleAuthChange);
+    window.addEventListener('storage', handleAuthChange);
+    return () => {
+      window.removeEventListener('tegagn_auth_changed', handleAuthChange);
+      window.removeEventListener('storage', handleAuthChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    setStoredUser(authService.getStoredUser());
+  }, [location.pathname]);
 
   // Navigation links: Customer Hub & Worker Portal appear ONLY after login/register
   const navLinks = [
@@ -71,6 +87,7 @@ export const Navbar: React.FC = () => {
 
   const handleSignOut = () => {
     authService.logout();
+    setStoredUser(null);
     window.location.href = '/';
   };
 
@@ -144,18 +161,11 @@ export const Navbar: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <>
-                <Link to="/login">
-                  <Button variant="ghost" size="sm" icon={<LogIn className="w-4 h-4" />}>
-                    Log In
-                  </Button>
-                </Link>
-                <Link to="/register/worker">
-                  <Button variant="accent" size="sm" icon={<PlusCircle className="w-4 h-4" />}>
-                    Join as a Pro
-                  </Button>
-                </Link>
-              </>
+              <Link to="/login">
+                <Button variant="accent" size="sm" icon={<LogIn className="w-4 h-4" />}>
+                  Log In
+                </Button>
+              </Link>
             )}
           </div>
 
@@ -227,18 +237,11 @@ export const Navbar: React.FC = () => {
                 </Button>
               </div>
             ) : (
-              <>
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" size="md" className="w-full justify-center">
-                    Log In
-                  </Button>
-                </Link>
-                <Link to="/register/worker" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="accent" size="md" className="w-full justify-center font-bold">
-                    Join as a Pro
-                  </Button>
-                </Link>
-              </>
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="accent" size="md" className="w-full justify-center font-bold">
+                  Log In
+                </Button>
+              </Link>
             )}
           </div>
         </div>

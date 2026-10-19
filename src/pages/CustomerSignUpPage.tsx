@@ -236,7 +236,7 @@ export const CustomerSignUpPage: React.FC = () => {
               <FormInput
                 label="Email Address"
                 type="email"
-                placeholder="bethlehem@example.com"
+                placeholder="name@example.com"
                 required
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}

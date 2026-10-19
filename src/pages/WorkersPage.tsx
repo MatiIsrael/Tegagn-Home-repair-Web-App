@@ -330,14 +330,6 @@ export const WorkersPage: React.FC = () => {
             </div>
           )}
 
-          {/* Architecture info note */}
-          <div className="p-4 rounded-xl bg-navy-50/70 border border-navy-200/60 flex items-start gap-3 text-xs text-navy-950 mt-8">
-            <AlertCircle className="w-4 h-4 text-accent-600 shrink-0 mt-0.5" />
-            <p>
-              <strong>Client-Side Interaction Note:</strong> Real-time filtering, active chip clearing, and URL synchronization are handled using React state (<code>useState</code>, <code>useMemo</code>, <code>useCallback</code>) against sample mock records before Django REST API endpoints are plugged in.
-            </p>
-          </div>
-
         </div>
 
       </div>

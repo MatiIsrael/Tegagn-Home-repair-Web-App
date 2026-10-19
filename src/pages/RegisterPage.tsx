@@ -5,6 +5,7 @@ import { FormInput } from '../components/common/FormInput';
 import { Select } from '../components/common/Select';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
+import { authService } from '../services/api';
 
 export const RegisterPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -28,7 +29,16 @@ export const RegisterPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Django REST Framework Registration: POST /api/v1/auth/register/
+    const sessionUser = {
+      id: `${role}-${Date.now()}`,
+      email: formData.email.trim(),
+      firstName: formData.firstName.trim() || (role === 'worker' ? 'Pro' : 'Customer'),
+      lastName: formData.lastName.trim(),
+      role: role,
+      phoneNumber: formData.phone.trim() || '+251 91 123 4567',
+    };
+    authService.setSession(`mock_${role}_reg_access`, `mock_${role}_reg_refresh`, sessionUser);
+
     if (role === 'worker') {
       navigate('/worker/dashboard');
     } else {
@@ -232,17 +242,6 @@ export const RegisterPage: React.FC = () => {
               Complete Registration as {role === 'customer' ? 'Customer' : 'Service Professional'}
             </Button>
           </form>
-
-          {/* Architecture notice */}
-          <div className="mt-6 pt-5 border-t border-slate-100 bg-slate-50 p-3 rounded-xl text-xs text-slate-600 flex items-start gap-2.5">
-            <AlertCircle className="w-4 h-4 text-brand-600 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-slate-800">Django API Model Registration</p>
-              <p className="text-slate-500 mt-0.5">
-                Submissions map cleanly to Django custom User model + WorkerProfile model in PostgreSQL via <code>POST /api/v1/auth/register/</code>.
-              </p>
-            </div>
-          </div>
         </Card>
 
         {/* Footer */}

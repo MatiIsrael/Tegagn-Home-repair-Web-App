@@ -326,12 +326,6 @@ export const WorkerProfileEdit: React.FC = () => {
           </Button>
         </div>
 
-        {/* Django architecture hint */}
-        <div className="p-3 bg-slate-100 rounded-xl text-xs text-slate-500 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-slate-400" />
-          <span>Profile changes update the Django <code>WorkerProfile</code> model via <code>PATCH /api/v1/workers/me/</code>.</span>
-        </div>
-
       </form>
     </div>
   );

@@ -295,7 +295,7 @@ export const AdminLoginPage: React.FC = () => {
         {/* Footer info */}
         <div className="mt-8 text-center text-[11px] text-slate-600">
           <p>Tegagn Home-Repair Platform Regulatory Governance System</p>
-          <p className="mt-0.5">Secure DRF REST & PostgreSQL Gateway • Addis Ababa, Ethiopia</p>
+          <p className="mt-0.5">Consumer Protection & Fair Pricing Oversight • Addis Ababa, Ethiopia</p>
         </div>
 
       </div>

@@ -249,7 +249,7 @@ export const WorkerSignUpPage: React.FC = () => {
                 <FormInput
                   label="First Name"
                   type="text"
-                  placeholder="Abebe"
+                  placeholder="e.g. Abebe"
                   required
                   value={formData.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
@@ -259,7 +259,7 @@ export const WorkerSignUpPage: React.FC = () => {
                 <FormInput
                   label="Last Name"
                   type="text"
-                  placeholder="Tadesse"
+                  placeholder="e.g. Tadesse"
                   required
                   value={formData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
@@ -271,7 +271,7 @@ export const WorkerSignUpPage: React.FC = () => {
                 <FormInput
                   label="Email Address"
                   type="email"
-                  placeholder="abebe@example.com"
+                  placeholder="name@example.com"
                   required
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}

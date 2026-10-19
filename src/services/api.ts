@@ -88,12 +88,18 @@ export const authService = {
     localStorage.setItem('tegagn_access_token', access);
     localStorage.setItem('tegagn_refresh_token', refresh);
     localStorage.setItem('tegagn_user', JSON.stringify(user));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('tegagn_auth_changed'));
+    }
   },
 
   clearSession() {
     localStorage.removeItem('tegagn_access_token');
     localStorage.removeItem('tegagn_refresh_token');
     localStorage.removeItem('tegagn_user');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('tegagn_auth_changed'));
+    }
   },
 
   async login(email: string, password: string): Promise<{ access: string; refresh: string; user: User }> {

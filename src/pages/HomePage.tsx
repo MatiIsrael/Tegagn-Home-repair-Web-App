@@ -109,17 +109,17 @@ export const HomePage: React.FC = () => {
             {/* Category tag */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-navy-800/90 border border-navy-700 text-accent-400 text-xs font-semibold uppercase tracking-wider shadow-sm">
               <Shield className="w-4 h-4 text-accent-500" />
-              <span>Independent Home Repair Marketplace</span>
+              <span>Addis Ababa Home Repair Marketplace</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white">
-              Find Trusted Home Repair Professionals Near You
+              Trusted Home Repair Pros in Addis Ababa
             </h1>
 
             {/* Subheading */}
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto">
-              Connect directly with skilled local plumbers, electricians, builders, painters, carpenters, and cleaners. Compare transparent rates with zero middleman markups.
+              Find verified plumbers, electricians, painters, carpenters, and cleaners near your neighborhood. Direct technician contact, transparent hourly pricing, and zero middleman markups.
             </p>
 
             {/* Service & Location Search Form */}
@@ -309,14 +309,6 @@ export const HomePage: React.FC = () => {
               Browse Directory
             </Button>
           </Link>
-        </div>
-
-        {/* Disclaimer bar */}
-        <div className="p-3.5 mb-8 rounded-xl bg-accent-50/70 border border-accent-200/80 text-xs text-accent-900 flex items-center gap-2.5">
-          <AlertCircle className="w-4 h-4 text-accent-600 shrink-0" />
-          <span>
-            <strong>Note on Sample Listings:</strong> The profiles below use illustrative sample data for frontend review. No actual customer reviews or verified claims are simulated.
-          </span>
         </div>
 
         {/* Worker Cards Grid (6 core trades) */}

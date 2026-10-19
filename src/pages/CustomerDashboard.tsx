@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Calendar, 
@@ -38,13 +38,19 @@ import { Modal } from '../components/common/Modal';
 import { authService } from '../services/api';
 
 export const CustomerDashboard: React.FC = () => {
-  const storedUser = authService.getStoredUser();
+  const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
+
+  useEffect(() => {
+    const handleAuthChange = () => setStoredUser(authService.getStoredUser());
+    window.addEventListener('tegagn_auth_changed', handleAuthChange);
+    return () => window.removeEventListener('tegagn_auth_changed', handleAuthChange);
+  }, []);
 
   const customerDisplayName = storedUser?.firstName
     ? `${storedUser.firstName}${storedUser.lastName ? ` ${storedUser.lastName}` : ''}`.trim()
     : storedUser?.email
       ? storedUser.email.split('@')[0]
-      : 'Valued Customer';
+      : 'Customer';
 
   // Bookings State
   const [bookings, setBookings] = useState<Booking[]>(PLACEHOLDER_CUSTOMER_BOOKINGS);
@@ -227,13 +233,13 @@ export const CustomerDashboard: React.FC = () => {
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/20 text-brand-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Customer Hub & Community Showcase</span>
+            <span>Homeowner Dashboard</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             Hello, {customerDisplayName} 👋
           </h1>
           <p className="text-sm text-slate-300 max-w-xl">
-            Explore real repair work posts from trade professionals, react with likes and comments, compare transparent prices & ratings, and book with GPS coordinates.
+            Browse recent repair projects from local technicians, check real photos & prices, read community reviews, and book trusted help for your home.
           </p>
         </div>
 
@@ -244,7 +250,7 @@ export const CustomerDashboard: React.FC = () => {
           className="shadow-lg shadow-brand-500/20"
           onClick={() => setSelectedTab('compare')}
         >
-          Book Repair Professional
+          Find & Book a Pro
         </Button>
       </div>
 

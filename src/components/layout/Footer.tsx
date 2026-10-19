@@ -149,15 +149,15 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Architecture / Dev Info */}
+          {/* Trust & Guarantee */}
           <div>
             <h5 className="text-sm font-bold uppercase tracking-wider text-white mb-4">
-              Architecture
+              Our Promise
             </h5>
             <div className="p-3 bg-navy-900/90 rounded-xl border border-navy-800 text-xs space-y-1.5 text-slate-300">
-              <p className="font-bold text-accent-400">Django + PostgreSQL</p>
+              <p className="font-bold text-accent-400">Verified Local Experts</p>
               <p className="text-slate-400 leading-relaxed">
-                Frontend UI built with React & TypeScript, designed to pair with a custom Python Django REST API.
+                Connect directly with licensed trade specialists across Addis Ababa with transparent pricing and zero middleman markup.
               </p>
             </div>
           </div>

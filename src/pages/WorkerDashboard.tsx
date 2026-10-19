@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Briefcase, 
@@ -40,8 +40,20 @@ import { Button } from '../components/common/Button';
 import { authService } from '../services/api';
 
 export const WorkerDashboard: React.FC = () => {
-  const currentWorker = PLACEHOLDER_WORKERS[0]; // Abebe Tadesse - Master Plumber
-  const storedUser = authService.getStoredUser();
+  const currentWorker = PLACEHOLDER_WORKERS[0];
+  const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
+
+  useEffect(() => {
+    const handleAuthChange = () => setStoredUser(authService.getStoredUser());
+    window.addEventListener('tegagn_auth_changed', handleAuthChange);
+    return () => window.removeEventListener('tegagn_auth_changed', handleAuthChange);
+  }, []);
+
+  const workerDisplayName = storedUser?.firstName
+    ? `${storedUser.firstName}${storedUser.lastName ? ` ${storedUser.lastName}` : ''}`.trim()
+    : storedUser?.email
+      ? storedUser.email.split('@')[0]
+      : 'Trade Professional';
 
   // Requests state with GPS coordinates
   const [requests, setRequests] = useState<Booking[]>(PLACEHOLDER_WORKER_REQUESTS);
@@ -123,10 +135,10 @@ export const WorkerDashboard: React.FC = () => {
 
     const createdPost: WorkerPost = {
       id: `post-${Date.now()}`,
-      workerId: currentWorker.id,
-      workerName: `${currentWorker.user.firstName} ${currentWorker.user.lastName}`,
-      workerTrade: currentWorker.tradeTitle,
-      workerAvatar: currentWorker.user.avatarUrl || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?auto=format&fit=crop&q=80&w=400',
+      workerId: storedUser?.id || currentWorker.id,
+      workerName: workerDisplayName,
+      workerTrade: profileData.tradeTitle || currentWorker.tradeTitle,
+      workerAvatar: storedUser?.avatarUrl || currentWorker.user.avatarUrl || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?auto=format&fit=crop&q=80&w=400',
       workerRating: currentWorker.rating,
       workerHourlyRate: profileData.hourlyRate,
       workerExperience: profileData.experienceYears,
@@ -181,8 +193,8 @@ export const WorkerDashboard: React.FC = () => {
       <div className="bg-slate-900 rounded-3xl p-6 sm:p-10 text-white flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl border border-slate-800">
         <div className="flex items-center gap-5">
           <img
-            src={currentWorker.user.avatarUrl}
-            alt={currentWorker.user.firstName}
+            src={storedUser?.avatarUrl || currentWorker.user.avatarUrl}
+            alt={workerDisplayName}
             className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-2 ring-amber-500 shadow-md"
           />
           <div>
@@ -193,12 +205,12 @@ export const WorkerDashboard: React.FC = () => {
               {currentWorker.isVerified && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3" />
-                  Verified License
+                  Verified Pro
                 </span>
               )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1">
-              {storedUser?.firstName || currentWorker.user.firstName} {storedUser?.lastName || currentWorker.user.lastName}
+              Hello, {workerDisplayName} 👋
             </h1>
             <p className="text-xs sm:text-sm text-slate-400">
               {profileData.tradeTitle} • <span className="font-mono font-bold text-amber-400">{profileData.hourlyRate} ETB/hr</span> • {profileData.city}
