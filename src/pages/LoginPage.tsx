@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Wrench, Mail, Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { FormInput } from '../components/common/FormInput';
 import { Button } from '../components/common/Button';
@@ -8,6 +8,8 @@ import { authService } from '../services/api';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTarget = searchParams.get('redirect');
 
   // React State: Controlled inputs
   const [email, setEmail] = useState('');
@@ -61,7 +63,7 @@ export const LoginPage: React.FC = () => {
       } else if (res.user.role === 'admin') {
         navigate('/admin');
       } else {
-        navigate('/customer/dashboard');
+        navigate(redirectTarget || '/customer/dashboard');
       }
     } catch {
       // Local fallback: derive user name from previous session or entered email
@@ -95,7 +97,7 @@ export const LoginPage: React.FC = () => {
       } else if (roleHint === 'admin') {
         navigate('/admin');
       } else {
-        navigate('/customer/dashboard');
+        navigate(redirectTarget || '/customer/dashboard');
       }
     }
   };

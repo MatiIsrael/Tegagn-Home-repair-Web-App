@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   User, 
   Mail, 
@@ -18,6 +18,9 @@ import { Button } from '../components/common/Button';
 
 export const CustomerLoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTarget = searchParams.get('redirect') || '/customer/dashboard';
+  const isBookingRequired = searchParams.get('notice') === 'booking_required' || searchParams.has('redirect');
 
   const storedUser = authService.getStoredUser();
   const [email, setEmail] = useState(storedUser?.role === 'customer' ? storedUser.email : '');
@@ -46,7 +49,7 @@ export const CustomerLoginPage: React.FC = () => {
       const result = await authService.login(email.trim(), password);
       setLoginSuccess(true);
       setTimeout(() => {
-        navigate('/customer/dashboard');
+        navigate(redirectTarget);
       }, 600);
     } catch (err: any) {
       // Offline fallback mock session - dynamically resolve name from email or previous session
@@ -75,7 +78,7 @@ export const CustomerLoginPage: React.FC = () => {
       authService.setSession('mock_cust_access', 'mock_cust_refresh', mockCustomerUser);
       setLoginSuccess(true);
       setTimeout(() => {
-        navigate('/customer/dashboard');
+        navigate(redirectTarget);
       }, 600);
     } finally {
       setIsSubmitting(false);
@@ -108,6 +111,18 @@ export const CustomerLoginPage: React.FC = () => {
         {/* Card */}
         <Card className="p-8 shadow-xl border-slate-200 bg-white">
           
+          {isBookingRequired && (
+            <div className="mb-5 rounded-2xl bg-amber-50 border border-amber-200 p-4 text-xs text-amber-950 flex items-start gap-3 shadow-xs">
+              <Lock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-sm text-amber-950">Customer Sign-In Required for Booking</p>
+                <p className="text-amber-800 mt-1 leading-relaxed">
+                  Please log in with your customer account to request and book this professional. You will be redirected right back to complete your service request.
+                </p>
+              </div>
+            </div>
+          )}
+
           {errorMessage && (
             <div className="mb-5 rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
@@ -118,7 +133,7 @@ export const CustomerLoginPage: React.FC = () => {
           {loginSuccess && (
             <div className="mb-5 rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>Authenticated! Redirecting to Customer Hub...</span>
+              <span>Authenticated! Redirecting to booking...</span>
             </div>
           )}
 
@@ -191,7 +206,7 @@ export const CustomerLoginPage: React.FC = () => {
               New to Tegagn? Create your homeowner account.
             </p>
             <Link 
-              to="/customer/register" 
+              to={`/customer/register${redirectTarget !== '/customer/dashboard' ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''}`} 
               className="inline-block text-xs font-bold text-brand-600 hover:text-brand-700 underline"
             >
               Register Customer Account →

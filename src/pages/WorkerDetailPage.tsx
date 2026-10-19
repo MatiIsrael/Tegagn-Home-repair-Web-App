@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   CheckCircle, 
   MapPin, 
@@ -11,10 +11,13 @@ import {
   Mail, 
   ChevronLeft, 
   ShieldAlert,
-  Send
+  Send,
+  Lock,
+  LogIn,
+  UserPlus
 } from 'lucide-react';
 import { WorkerProfile } from '../types';
-import { workerService } from '../services/api';
+import { workerService, authService } from '../services/api';
 import { RatingStars } from '../components/common/RatingStars';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
@@ -25,9 +28,20 @@ import { WorkerReviews } from '../components/workers/WorkerReviews';
 
 export const WorkerDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [worker, setWorker] = useState<WorkerProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Auth state for customer booking gating
+  const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
+  const isCustomerLoggedIn = Boolean(storedUser && storedUser.role === 'customer');
+
+  useEffect(() => {
+    const handleAuthChange = () => setStoredUser(authService.getStoredUser());
+    window.addEventListener('tegagn_auth_changed', handleAuthChange);
+    return () => window.removeEventListener('tegagn_auth_changed', handleAuthChange);
+  }, []);
   
   // Booking modal state
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(searchParams.get('action') === 'book');
@@ -37,10 +51,20 @@ export const WorkerDetailPage: React.FC = () => {
     date: '',
     time: '10:00 AM',
     serviceDescription: '',
-    customerName: '',
-    customerPhone: '',
+    customerName: storedUser?.firstName ? `${storedUser.firstName}${storedUser.lastName ? ` ${storedUser.lastName}` : ''}`.trim() : '',
+    customerPhone: storedUser?.phoneNumber || '',
     customerAddress: '',
   });
+
+  const handleInitiateBooking = () => {
+    const currentStoredUser = authService.getStoredUser();
+    if (!currentStoredUser || currentStoredUser.role !== 'customer') {
+      const returnUrl = `/workers/${id}?action=book`;
+      navigate(`/customer/login?redirect=${encodeURIComponent(returnUrl)}&notice=booking_required`);
+      return;
+    }
+    setIsBookingModalOpen(true);
+  };
 
   useEffect(() => {
     if (id) {
@@ -91,13 +115,19 @@ export const WorkerDetailPage: React.FC = () => {
 
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const currentStoredUser = authService.getStoredUser();
+    if (!currentStoredUser || currentStoredUser.role !== 'customer') {
+      const returnUrl = `/workers/${id}?action=book`;
+      navigate(`/customer/login?redirect=${encodeURIComponent(returnUrl)}&notice=booking_required`);
+      return;
+    }
+
     const errs = validateBooking();
     if (Object.keys(errs).length > 0) {
       setBookingErrors(errs);
       return;
     }
 
-    // Frontend foundation: display confirmation banner ready for Django POST /api/v1/bookings/
     setBookingErrors({});
     setBookingSubmitted(true);
   };
@@ -349,7 +379,7 @@ export const WorkerDetailPage: React.FC = () => {
                 size="lg"
                 className="w-full justify-center shadow-lg shadow-brand-500/25"
                 icon={<Calendar className="w-4 h-4" />}
-                onClick={() => setIsBookingModalOpen(true)}
+                onClick={handleInitiateBooking}
               >
                 Schedule & Book Now
               </Button>
@@ -365,7 +395,7 @@ export const WorkerDetailPage: React.FC = () => {
                   size="sm"
                   className="w-full justify-center"
                   icon={<Mail className="w-3.5 h-3.5" />}
-                  onClick={() => setIsBookingModalOpen(true)}
+                  onClick={handleInitiateBooking}
                 >
                   Send Message
                 </Button>
@@ -399,7 +429,45 @@ export const WorkerDetailPage: React.FC = () => {
         title={`Book ${user.firstName} ${user.lastName}`}
         maxWidth="lg"
       >
-        {bookingSubmitted ? (
+        {!isCustomerLoggedIn ? (
+          <div className="py-6 px-2 text-center space-y-5">
+            <div className="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto shadow-sm">
+              <Lock className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-2 max-w-md mx-auto">
+              <h3 className="text-xl font-bold text-slate-900">
+                Customer Sign In Required
+              </h3>
+              <p className="text-sm text-slate-600">
+                You can freely browse and find all professionals. To submit a service request or book <strong>{user.firstName} {user.lastName}</strong>, please sign in with your customer account.
+              </p>
+            </div>
+
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 max-w-sm mx-auto">
+              🔒 Logging in protects your service address and connects you directly with the technician without middleman markups.
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <Link 
+                to={`/customer/login?redirect=${encodeURIComponent(`/workers/${worker.id}?action=book`)}&notice=booking_required`}
+                className="w-full sm:w-auto"
+              >
+                <Button variant="accent" size="md" icon={<LogIn className="w-4 h-4" />} className="w-full justify-center font-bold">
+                  Sign In to Customer Hub
+                </Button>
+              </Link>
+              <Link 
+                to={`/customer/register?redirect=${encodeURIComponent(`/workers/${worker.id}?action=book`)}`}
+                className="w-full sm:w-auto"
+              >
+                <Button variant="outline" size="md" icon={<UserPlus className="w-4 h-4" />} className="w-full justify-center font-semibold">
+                  Create Customer Account
+                </Button>
+              </Link>
+            </div>
+          </div>
+        ) : bookingSubmitted ? (
           <div className="text-center py-6 space-y-4">
             <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
               <CheckCircle className="w-8 h-8" />

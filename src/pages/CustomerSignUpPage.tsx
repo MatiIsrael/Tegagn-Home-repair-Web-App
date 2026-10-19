@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Mail, Lock, Phone, MapPin, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { FormInput } from '../components/common/FormInput';
 import { Button } from '../components/common/Button';
@@ -20,6 +20,8 @@ interface CustomerFormErrors {
 
 export const CustomerSignUpPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTarget = searchParams.get('redirect') || '/customer/dashboard';
 
   // React State: Controlled form inputs stored in a single state object
   const [formData, setFormData] = useState({
@@ -168,7 +170,7 @@ export const CustomerSignUpPage: React.FC = () => {
       authService.setSession('mock_cust_reg_access', 'mock_cust_reg_refresh', sessionUser);
     } finally {
       setIsSubmitting(false);
-      navigate('/customer/dashboard');
+      navigate(redirectTarget);
     }
   };
 
@@ -344,10 +346,12 @@ export const CustomerSignUpPage: React.FC = () => {
           </div>
         </Card>
 
-        {/* Existing account link */}
         <p className="text-center text-sm text-slate-600">
           Already have an account?{' '}
-          <Link to="/login" className="font-bold text-navy-950 hover:text-accent-600">
+          <Link 
+            to={`/customer/login${redirectTarget !== '/customer/dashboard' ? `?redirect=${encodeURIComponent(redirectTarget)}` : ''}`} 
+            className="font-bold text-navy-950 hover:text-accent-600"
+          >
             Log In
           </Link>
         </p>

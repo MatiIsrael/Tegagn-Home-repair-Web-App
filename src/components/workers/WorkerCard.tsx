@@ -12,14 +12,20 @@ import { Card } from '../common/Card';
 import { Badge } from '../common/Badge';
 import { RatingStars } from '../common/RatingStars';
 import { Button } from '../common/Button';
+import { authService } from '../../services/api';
 
 interface WorkerCardProps {
   worker: WorkerProfile;
   isSample?: boolean;
 }
 
-export const WorkerCard: React.FC<WorkerCardProps> = ({ worker, isSample = true }) => {
+export const WorkerCard: React.FC<WorkerCardProps> = ({ worker }) => {
   const { user } = worker;
+  const storedUser = authService.getStoredUser();
+  const isCustomer = Boolean(storedUser && storedUser.role === 'customer');
+  const bookUrl = isCustomer
+    ? `/workers/${worker.id}?action=book`
+    : `/customer/login?redirect=${encodeURIComponent(`/workers/${worker.id}?action=book`)}&notice=booking_required`;
 
   return (
     <Card 
@@ -28,16 +34,6 @@ export const WorkerCard: React.FC<WorkerCardProps> = ({ worker, isSample = true 
       className="overflow-hidden flex flex-col justify-between h-full border border-slate-200/90 group transition-all duration-200 hover:border-navy-300 hover:shadow-xl"
     >
       <div className="p-5 sm:p-6">
-        {/* Top Sample indicator bar */}
-        {isSample && (
-          <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 text-[11px]">
-            <span className="font-semibold px-2 py-0.5 rounded bg-accent-50 text-accent-700 border border-accent-200">
-              Sample Profile
-            </span>
-            <span className="text-slate-400">Demo Data</span>
-          </div>
-        )}
-
         {/* Header: Avatar, Name, Trade Badge */}
         <div className="flex items-start gap-4">
           <div className="relative shrink-0">
@@ -132,7 +128,7 @@ export const WorkerCard: React.FC<WorkerCardProps> = ({ worker, isSample = true 
               Profile
             </Button>
           </Link>
-          <Link to={`/workers/${worker.id}?action=book`}>
+          <Link to={bookUrl}>
             <Button variant="accent" size="sm" icon={<Calendar className="w-3.5 h-3.5" />}>
               Book
             </Button>
