@@ -55,12 +55,6 @@ export const WorkerLoginPage: React.FC = () => {
     }
   };
 
-  const fillSampleWorker = () => {
-    setEmail('abebe.plumber@gmail.com');
-    setPassword('worker123');
-    setErrorMessage(null);
-  };
-
   return (
     <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-900 text-slate-100">
       <div className="max-w-md w-full space-y-6">
@@ -73,50 +67,33 @@ export const WorkerLoginPage: React.FC = () => {
           
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/80 text-amber-300 text-xs font-bold uppercase tracking-wider mb-2 border border-amber-800/60">
             <BadgeCheck className="w-3.5 h-3.5 text-amber-400" />
-            <span>Tradesperson & Contractor Portal</span>
+            <span>Technician & Tradesperson Portal</span>
           </div>
 
           <h1 className="text-3xl font-extrabold text-white tracking-tight">
-            Tradesperson Sign In
+            Worker Sign In
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-2">
-            Access your job inquiries, post your completed work, set your service pricing, and navigate to client GPS locations.
+            Access your job requests, manage rates, and showcase your trade portfolio.
           </p>
         </div>
 
         {/* Card */}
-        <div className="p-8 rounded-2xl bg-slate-950 border border-slate-800 shadow-2xl space-y-5">
+        <Card className="p-8 shadow-2xl border-slate-800 bg-slate-950 text-slate-100">
           
           {errorMessage && (
-            <div className="rounded-lg bg-rose-950/80 border border-rose-500/40 p-3 text-xs text-rose-200 flex items-start gap-2">
+            <div className="mb-5 rounded-lg bg-rose-950/80 border border-rose-500/40 p-3 text-xs text-rose-200 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           {loginSuccess && (
-            <div className="rounded-lg bg-emerald-950/80 border border-emerald-500/40 p-3 text-xs text-emerald-200 flex items-center gap-2">
+            <div className="mb-5 rounded-lg bg-emerald-950/80 border border-emerald-500/40 p-3 text-xs text-emerald-200 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>Authenticated! Loading Worker Dashboard...</span>
             </div>
           )}
-
-          {/* Real Database Credentials Callout */}
-          <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
-            <div className="text-xs">
-              <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Verified Database Tradesperson:</span>
-              <span className="font-mono text-amber-400 font-bold">abebe.plumber@gmail.com</span>
-              <span className="text-slate-500 mx-1.5">•</span>
-              <span className="font-mono text-slate-300">worker123</span>
-            </div>
-            <button
-              type="button"
-              onClick={fillSampleWorker}
-              className="text-xs font-bold text-amber-400 hover:text-amber-300 bg-amber-950/60 hover:bg-amber-900/60 border border-amber-800/60 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
-            >
-              Fill Credentials
-            </button>
-          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             
@@ -151,57 +128,51 @@ export const WorkerLoginPage: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="••••••••••••"
                   className="w-full pl-9 pr-10 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all font-mono"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 via-orange-600 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-60"
-              >
-                <span>Enter Pro Worker Portal</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-
+            <Button
+              type="submit"
+              variant="accent"
+              size="lg"
+              isLoading={isSubmitting}
+              className="w-full justify-center font-bold shadow-lg shadow-amber-500/20 mt-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-slate-950 font-black"
+              icon={<ArrowRight className="w-4 h-4" />}
+              iconPosition="right"
+            >
+              Sign In to Worker Hub
+            </Button>
           </form>
 
-          {/* Registration Link */}
-          <div className="pt-4 border-t border-slate-800 text-center space-y-2">
+          <div className="mt-6 pt-5 border-t border-slate-800 text-center">
             <p className="text-xs text-slate-400">
-              Are you a skilled tradesperson looking for clients?
+              New tradesperson in Addis Ababa?{' '}
+              <Link to="/worker/register" className="font-bold text-amber-400 hover:text-amber-300 hover:underline">
+                Register as a Pro
+              </Link>
             </p>
-            <Link 
-              to="/worker/register" 
-              className="inline-block text-xs font-bold text-amber-400 hover:text-amber-300 underline"
-            >
-              Register as a Pro Tradesperson →
-            </Link>
           </div>
+        </Card>
 
-        </div>
-
-        {/* Alternate portal links */}
-        <div className="text-center text-xs text-slate-400 flex items-center justify-center gap-4">
-          <Link to="/customer/login" className="hover:text-white transition-colors">
-            🏠 Customer Portal Login
-          </Link>
-          <span className="text-slate-700">•</span>
-          <Link to="/admin/login" className="hover:text-sky-400 transition-colors">
-            🏛️ Government Regulatory Terminal
-          </Link>
+        {/* Customer Portal Link */}
+        <div className="text-center">
+          <p className="text-xs text-slate-500">
+            Looking for repairs instead?{' '}
+            <Link to="/customer/login" className="font-semibold text-slate-400 hover:text-amber-400 underline">
+              Sign in as Customer
+            </Link>
+          </p>
         </div>
 
       </div>

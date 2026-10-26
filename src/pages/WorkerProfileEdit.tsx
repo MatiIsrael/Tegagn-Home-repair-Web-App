@@ -41,8 +41,8 @@ export const WorkerProfileEdit: React.FC = () => {
       errs.tradeTitle = 'Headline must be at least 4 characters.';
     }
     const rate = parseFloat(formData.hourlyRate);
-    if (isNaN(rate) || rate < 10 || rate > 300) {
-      errs.hourlyRate = 'Rate must be between $10 and $300/hr.';
+    if (isNaN(rate) || rate < 5 || rate > 2000) {
+      errs.hourlyRate = 'Rate must be between 5 and 2,000/hr.';
     }
     const exp = parseInt(formData.experienceYears, 10);
     if (isNaN(exp) || exp < 1 || exp > 60) {

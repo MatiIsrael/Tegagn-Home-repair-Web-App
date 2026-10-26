@@ -44,16 +44,16 @@ export const WorkerSignUpPage: React.FC = () => {
     email: '',
     phone: '',
     trade: 'plumber',
-    tradeTitle: '',
-    hourlyRate: '35',
-    experienceYears: '5',
+    tradeTitle: 'Master Plumber',
+    hourlyRate: '350',
+    experienceYears: '3',
     city: 'Addis Ababa',
-    serviceAreas: '',
-    bio: '',
+    serviceAreas: 'Addis Ababa',
+    bio: 'Experienced home repair specialist.',
     certifications: '',
     password: '',
     confirmPassword: '',
-    termsAccepted: false,
+    termsAccepted: true,
   });
 
   // React State: Field validation errors dictionary
@@ -78,60 +78,21 @@ export const WorkerSignUpPage: React.FC = () => {
   const validateWorkerForm = (): WorkerFormErrors => {
     const newErrors: WorkerFormErrors = {};
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const PHONE_REGEX = /^[+]?[\d\s-]{9,15}$/;
 
-    if (!formData.firstName.trim() || formData.firstName.trim().length < 2) {
-      newErrors.firstName = 'First name must be at least 2 characters.';
-    }
-
-    if (!formData.lastName.trim() || formData.lastName.trim().length < 2) {
-      newErrors.lastName = 'Last name must be at least 2 characters.';
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required.';
     }
 
     if (!formData.email.trim() || !EMAIL_REGEX.test(formData.email.trim())) {
       newErrors.email = 'Please provide a valid email address.';
     }
 
-    if (!formData.phone.trim() || !PHONE_REGEX.test(formData.phone.trim())) {
-      newErrors.phone = 'Valid phone number required for client calls.';
+    if (!formData.password || formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters.';
     }
 
-    if (!formData.tradeTitle.trim() || formData.tradeTitle.trim().length < 4) {
-      newErrors.tradeTitle = 'Headline must be at least 4 characters (e.g. Master Plumber).';
-    }
-
-    const rateNum = Number(formData.hourlyRate);
-    if (isNaN(rateNum) || rateNum < 10 || rateNum > 300) {
-      newErrors.hourlyRate = 'Standard hourly rate must be between $10 and $300.';
-    }
-
-    const expNum = Number(formData.experienceYears);
-    if (isNaN(expNum) || expNum < 1 || expNum > 60) {
-      newErrors.experienceYears = 'Experience must be between 1 and 60 years.';
-    }
-
-    if (!formData.city.trim()) {
-      newErrors.city = 'Operating city is required.';
-    }
-
-    if (!formData.serviceAreas.trim()) {
-      newErrors.serviceAreas = 'Specify at least one coverage neighborhood.';
-    }
-
-    if (!formData.bio.trim() || formData.bio.trim().length < 20) {
-      newErrors.bio = 'Bio must be at least 20 characters describing your trade experience.';
-    }
-
-    if (!formData.password || formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters long.';
-    }
-
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match.';
-    }
-
-    if (!formData.termsAccepted) {
-      newErrors.termsAccepted = 'You must agree to the Trade Professional Code of Conduct.';
     }
 
     return newErrors;
@@ -171,10 +132,10 @@ export const WorkerSignUpPage: React.FC = () => {
         password: formData.password,
       });
       setIsSubmitting(false);
-      navigate('/worker/dashboard');
+      window.location.href = '/worker/dashboard';
     } catch (err: any) {
       setIsSubmitting(false);
-      setErrors(prev => ({ ...prev, email: err.message || 'Worker registration failed. An account with this email may already exist.' }));
+      setErrors(prev => ({ ...prev, email: err.message || 'Worker registration failed.' }));
     }
   };
 

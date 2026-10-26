@@ -44,6 +44,7 @@ export const BookingDetailPage: React.FC = () => {
 
   const handleUpdateStatus = (newStatus: BookingStatus) => {
     if (!booking) return;
+    bookingService.updateBookingStatus(booking.id, newStatus);
     setBooking({ ...booking, status: newStatus });
     setStatusMessage(`Booking status updated to ${newStatus.replace('_', ' ')}!`);
     setTimeout(() => setStatusMessage(''), 3000);

@@ -2,14 +2,22 @@
 node_modules/
 dist/
 dist-ssr/
+build/
+coverage/
 *.local
 .eslintcache
 *.tsbuildinfo
+*.log
 
-# Backend & Python
+# Environment
 .env
 .env.*
 !.env.example
+
+# AI Studio
+.aistudio/
+
+# Backend & Python
 *.sqlite3
 *.sqlite3-journal
 *.db

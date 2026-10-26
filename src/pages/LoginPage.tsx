@@ -1,30 +1,31 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Wrench, Mail, Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Wrench, Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 import { FormInput } from '../components/common/FormInput';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 import { authService } from '../services/api';
+import { useThemeLanguage } from '../context/ThemeLanguageContext';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectTarget = searchParams.get('redirect');
+  const { t } = useThemeLanguage();
 
-  // React State: Controlled inputs
+  // Controlled inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [roleHint, setRoleHint] = useState<'customer' | 'worker' | 'admin'>('customer');
   const [rememberMe, setRememberMe] = useState(false);
 
-  // React State: Validation errors & loading state
+  // Validation errors & loading state
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+  const [infoBanner, setInfoBanner] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Email format regular expression variable
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  // Validation function with conditions
   const validateLogin = () => {
     const errs: { email?: string; password?: string; general?: string } = {};
 
@@ -43,7 +44,6 @@ export const LoginPage: React.FC = () => {
     return errs;
   };
 
-  // Event handler for form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -80,23 +80,23 @@ export const LoginPage: React.FC = () => {
           <div className="w-12 h-12 rounded-2xl bg-navy-900 border border-navy-800 flex items-center justify-center text-accent-500 mx-auto shadow-lg mb-4">
             <Wrench className="w-6 h-6 text-accent-500" />
           </div>
-          <h1 className="text-3xl font-extrabold text-navy-950 tracking-tight">
-            Sign In to Tegagn
+          <h1 className="text-3xl font-extrabold text-navy-950 dark:text-white tracking-tight">
+            {t('signInTegagn')}
           </h1>
-          <p className="text-sm text-slate-500 mt-2">
-            Access your bookings, active job inquiries, or platform administration hub.
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            {t('heroSubtitle')}
           </p>
         </div>
 
         {/* Login Card */}
-        <Card className="p-8 shadow-xl border-slate-200">
+        <Card className="p-8 shadow-xl border-slate-200 dark:border-slate-800 dark:bg-slate-900">
           
           {/* Persona selector tabs */}
           <div className="mb-6">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-              Select Account Role
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+              {t('serviceCategory')}
             </label>
-            <div className="grid grid-cols-3 gap-1.5 bg-slate-100 p-1.5 rounded-xl text-xs font-bold" role="tablist">
+            <div className="grid grid-cols-3 gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl text-xs font-bold" role="tablist">
               {(['customer', 'worker'] as const).map((role) => (
                 <button
                   key={role}
@@ -107,10 +107,10 @@ export const LoginPage: React.FC = () => {
                   className={`py-2 rounded-lg transition-all capitalize cursor-pointer ${
                     roleHint === role
                       ? 'bg-navy-900 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-navy-950 hover:bg-white/50'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-navy-950 hover:bg-white/50'
                   }`}
                 >
-                  {role === 'customer' ? 'Customer' : 'Pro Worker'}
+                  {role === 'customer' ? t('customer') : t('proWorker')}
                 </button>
               ))}
               <Link
@@ -118,13 +118,13 @@ export const LoginPage: React.FC = () => {
                 className="py-2 rounded-lg transition-all text-center capitalize cursor-pointer bg-slate-900 hover:bg-sky-950 text-sky-400 border border-sky-800/40 hover:border-sky-500/60 font-black shadow-xs flex items-center justify-center gap-1"
                 title="Strictly for Platform Regulators & Administrators"
               >
-                <span>Admin 🏛️</span>
+                <span>{t('admin')} 🏛️</span>
               </Link>
             </div>
           </div>
 
           {errors.general && (
-            <div className="mb-4 rounded-xl bg-rose-50 border border-rose-200 p-3.5 text-xs text-rose-800 flex items-start gap-2">
+            <div className="mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 p-3.5 text-xs text-rose-800 dark:text-rose-300 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <span>{errors.general}</span>
             </div>
@@ -132,7 +132,7 @@ export const LoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <FormInput
-              label="Email Address"
+              label={t('emailAddress')}
               type="email"
               placeholder="you@example.com"
               required
@@ -146,7 +146,7 @@ export const LoginPage: React.FC = () => {
             />
 
             <FormInput
-              label="Password"
+              label={t('password')}
               type="password"
               placeholder="••••••••"
               required
@@ -160,24 +160,37 @@ export const LoginPage: React.FC = () => {
             />
 
             <div className="flex items-center justify-between text-xs pt-1">
-              <label className="flex items-center gap-2 text-slate-600 cursor-pointer">
+              <label className="flex items-center gap-2 text-slate-600 dark:text-slate-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="rounded text-accent-600 focus:ring-accent-500 border-slate-300 cursor-pointer"
                 />
-                <span>Remember me</span>
+                <span>{t('rememberMe')}</span>
               </label>
 
               <button
                 type="button"
-                onClick={() => alert("A password reset link will be sent to your registered email address.")}
-                className="font-semibold text-accent-600 hover:text-accent-700 cursor-pointer"
+                onClick={() => setInfoBanner("A password reset link will be sent to your registered email address.")}
+                className="font-semibold text-accent-600 dark:text-amber-400 hover:underline cursor-pointer"
               >
-                Forgot password?
+                {t('forgotPassword')}
               </button>
             </div>
+
+            {infoBanner && (
+              <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs rounded-xl flex items-center justify-between">
+                <span>{infoBanner}</span>
+                <button
+                  type="button"
+                  onClick={() => setInfoBanner(null)}
+                  className="font-bold ml-2 text-blue-600 hover:text-blue-800"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             <Button
               type="submit"
@@ -188,21 +201,21 @@ export const LoginPage: React.FC = () => {
               icon={<ArrowRight className="w-4 h-4" />}
               iconPosition="right"
             >
-              Sign In as {roleHint === 'customer' ? 'Customer' : roleHint === 'worker' ? 'Pro Worker' : 'Administrator'}
+              {t('login')} ({roleHint === 'customer' ? t('customer') : roleHint === 'worker' ? t('proWorker') : t('administrator')})
             </Button>
           </form>
         </Card>
 
         {/* Footer links */}
-        <div className="text-center text-sm text-slate-600 space-y-1">
-          <p>Don't have an account yet?</p>
-          <div className="flex items-center justify-center gap-3 font-bold text-xs text-accent-600">
-            <Link to="/register/customer" className="hover:text-accent-700 underline">
-              Customer Sign Up
+        <div className="text-center text-sm text-slate-600 dark:text-slate-400 space-y-1">
+          <p>{t('dontHaveAccount')}</p>
+          <div className="flex items-center justify-center gap-3 font-bold text-xs text-accent-600 dark:text-amber-400">
+            <Link to="/register/customer" className="hover:underline">
+              {t('customerHub')}
             </Link>
-            <span className="text-slate-300">•</span>
-            <Link to="/register/worker" className="hover:text-accent-700 underline">
-              Worker Sign Up
+            <span className="text-slate-300 dark:text-slate-700">•</span>
+            <Link to="/register/worker" className="hover:underline">
+              {t('workerPortal')}
             </Link>
           </div>
         </div>

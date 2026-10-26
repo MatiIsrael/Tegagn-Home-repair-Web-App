@@ -99,6 +99,7 @@ export interface Booking {
     lng: number;
     label?: string;
   };
+  images?: string[];
   status: BookingStatus;
   estimatedCost: number;
   createdAt: string;

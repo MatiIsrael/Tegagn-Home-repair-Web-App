@@ -23,7 +23,11 @@ import {
   Layers,
   Phone,
   ThumbsUp,
-  UserCheck
+  UserCheck,
+  Upload,
+  Image as ImageIcon,
+  Trash2,
+  X
 } from 'lucide-react';
 import { 
   PLACEHOLDER_CUSTOMER_BOOKINGS, 
@@ -35,10 +39,12 @@ import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
-import { authService } from '../services/api';
+import { authService, bookingService } from '../services/api';
 import { postService } from '../services/postService';
+import { useThemeLanguage } from '../context/ThemeLanguageContext';
 
 export const CustomerDashboard: React.FC = () => {
+  const { t } = useThemeLanguage();
   const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
 
   useEffect(() => {
@@ -56,6 +62,15 @@ export const CustomerDashboard: React.FC = () => {
   // Bookings State
   const [bookings, setBookings] = useState<Booking[]>(PLACEHOLDER_CUSTOMER_BOOKINGS);
   const [selectedTab, setSelectedTab] = useState<'feed' | 'compare' | 'bookings'>('feed');
+
+  useEffect(() => {
+    const loadBookings = () => {
+      bookingService.getCustomerBookings().then(setBookings);
+    };
+    loadBookings();
+    window.addEventListener('tegagn_bookings_changed', loadBookings);
+    return () => window.removeEventListener('tegagn_bookings_changed', loadBookings);
+  }, []);
 
   // Worker Posts Showcase State: ONLY show posts approved by the platform admin!
   const [workerPosts, setWorkerPosts] = useState<WorkerPost[]>(() => postService.getApprovedPosts());
@@ -78,19 +93,45 @@ export const CustomerDashboard: React.FC = () => {
   const [sortBy, setSortBy] = useState<'rating_desc' | 'price_asc' | 'experience_desc'>('rating_desc');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Booking Modal State (with GPS location detection)
+  // Booking Modal State (with GPS location detection & problem photo uploads)
   const [bookingModalWorker, setBookingModalWorker] = useState<WorkerProfile | null>(null);
   const [bookingFormData, setBookingFormData] = useState({
     serviceTitle: '',
     date: '2026-10-20',
     timeSlot: '10:00 AM - 12:00 PM',
     address: 'Bole Atlas, House #402, Addis Ababa',
-    notes: '',
     lat: 9.0084,
     lng: 38.7891,
-    gpsDetected: true
+    gpsDetected: true,
+    images: [] as string[]
   });
   const [bookingSuccessNotice, setBookingSuccessNotice] = useState(false);
+
+  // Photo Uploader Handler
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const result = loadEvent.target?.result as string;
+        if (result) {
+          setBookingFormData(prev => ({
+            ...prev,
+            images: [...prev.images, result]
+          }));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setBookingFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, idx) => idx !== indexToRemove)
+    }));
+  };
 
   // Review & Rating Modal State
   const [reviewModalBooking, setReviewModalBooking] = useState<Booking | null>(null);
@@ -151,7 +192,7 @@ export const CustomerDashboard: React.FC = () => {
     }
   };
 
-  // Submit New Booking with GPS location
+  // Submit New Booking with GPS location and problem photos
   const handleCreateBooking = (e: React.FormEvent) => {
     e.preventDefault();
     if (!bookingModalWorker) return;
@@ -173,13 +214,13 @@ export const CustomerDashboard: React.FC = () => {
         lng: bookingFormData.lng,
         label: bookingFormData.address
       },
+      images: bookingFormData.images,
       status: 'pending',
       estimatedCost: bookingModalWorker.hourlyRate * 2,
-      createdAt: new Date().toISOString(),
-      notes: bookingFormData.notes
+      createdAt: new Date().toISOString()
     };
 
-    setBookings([newBooking, ...bookings]);
+    bookingService.createBooking(newBooking);
     setBookingSuccessNotice(true);
     setTimeout(() => {
       setBookingSuccessNotice(false);
@@ -226,13 +267,13 @@ export const CustomerDashboard: React.FC = () => {
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/20 text-brand-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Homeowner Dashboard</span>
+            <span>{t('homeownerDashboard')}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Hello, {customerDisplayName} 👋
+            {t('hello')}, {customerDisplayName} 👋
           </h1>
           <p className="text-sm text-slate-300 max-w-xl">
-            Browse recent repair projects from local technicians, check real photos & prices, read community reviews, and book trusted help for your home.
+            {t('browseDirectory')} - {t('featuredProsSubtitle')}
           </p>
         </div>
 
@@ -243,85 +284,85 @@ export const CustomerDashboard: React.FC = () => {
           className="shadow-lg shadow-brand-500/20"
           onClick={() => setSelectedTab('compare')}
         >
-          Find & Book a Pro
+          {t('findBookPro')}
         </Button>
       </div>
 
       {/* KPI Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <Card className="p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+        <Card className="p-5 flex items-center gap-4 dark:bg-slate-900 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-slate-800 text-brand-600 dark:text-amber-400 flex items-center justify-center font-bold">
             <Calendar className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-extrabold text-slate-900">
+            <div className="text-2xl font-extrabold text-slate-900 dark:text-white">
               {bookings.filter(b => b.status !== 'completed' && b.status !== 'cancelled').length}
             </div>
-            <div className="text-xs font-medium text-slate-500">Active Repair Bookings</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('activeRepairBookings')}</div>
           </div>
         </Card>
 
-        <Card className="p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+        <Card className="p-5 flex items-center gap-4 dark:bg-slate-900 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-slate-800 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold">
             <Heart className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-extrabold text-slate-900">
+            <div className="text-2xl font-extrabold text-slate-900 dark:text-white">
               {workerPosts.reduce((acc, p) => acc + p.likesCount, 0)}
             </div>
-            <div className="text-xs font-medium text-slate-500">Community Post Reactions</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('communityPostReactions')}</div>
           </div>
         </Card>
 
-        <Card className="p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+        <Card className="p-5 flex items-center gap-4 dark:bg-slate-900 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
             <Star className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-extrabold text-slate-900">{workersList.length} Verified Pros</div>
-            <div className="text-xs font-medium text-slate-500">Ready to Book with GPS</div>
+            <div className="text-2xl font-extrabold text-slate-900 dark:text-white">{workersList.length} {t('verifiedProsOnly')}</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('readyToBookWithGps')}</div>
           </div>
         </Card>
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="border-b border-slate-200">
+      <div className="border-b border-slate-200 dark:border-slate-800">
         <nav className="flex space-x-6 sm:space-x-10 overflow-x-auto pb-1">
           
           <button
             onClick={() => setSelectedTab('feed')}
             className={`py-3 px-1 border-b-2 font-bold text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               selectedTab === 'feed'
-                ? 'border-brand-600 text-brand-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-brand-600 text-brand-600 dark:border-amber-400 dark:text-amber-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Camera className="w-4 h-4" />
-            <span>Worker Posts & Community Reactions ({workerPosts.length})</span>
+            <span>{t('feedTab')} ({workerPosts.length})</span>
           </button>
 
           <button
             onClick={() => setSelectedTab('compare')}
             className={`py-3 px-1 border-b-2 font-bold text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               selectedTab === 'compare'
-                ? 'border-brand-600 text-brand-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-brand-600 text-brand-600 dark:border-amber-400 dark:text-amber-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span>Compare & Hire Professionals ({filteredWorkers.length})</span>
+            <span>{t('compareTab')} ({filteredWorkers.length})</span>
           </button>
 
           <button
             onClick={() => setSelectedTab('bookings')}
             className={`py-3 px-1 border-b-2 font-bold text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               selectedTab === 'bookings'
-                ? 'border-brand-600 text-brand-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-brand-600 text-brand-600 dark:border-amber-400 dark:text-amber-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Clock className="w-4 h-4" />
-            <span>My Bookings & Rating ({bookings.length})</span>
+            <span>{t('myBookingsRating')} ({bookings.length})</span>
           </button>
 
         </nav>
@@ -739,6 +780,19 @@ export const CustomerDashboard: React.FC = () => {
                   </div>
                 </div>
 
+                {booking.images && booking.images.length > 0 && (
+                  <div className="pt-1 pb-1">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1.5">Attached Problem Photos:</span>
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                      {booking.images.map((img, i) => (
+                        <a key={i} href={img} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
+                          <img src={img} alt={`Problem ${i + 1}`} className="w-14 h-14 rounded-xl object-cover border border-slate-200 hover:ring-2 hover:ring-brand-500 shadow-sm" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Bottom Actions: Rate Them */}
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                   <span className="text-[11px] text-slate-400">
@@ -859,10 +913,10 @@ export const CustomerDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Service Address & GPS Coordinates */}
+              {/* Service Address & GPS Coordinates Integration */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Service Address & GPS Location Pin
+                  Home / Job Address
                 </label>
                 <input
                   type="text"
@@ -873,37 +927,93 @@ export const CustomerDashboard: React.FC = () => {
                   required
                 />
 
-                {/* GPS Coordinates & Auto-detection */}
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block">Current GPS Coordinates:</span>
-                    <span className="font-mono font-bold text-slate-800">
-                      📍 Lat: {bookingFormData.lat}° N, Lng: {bookingFormData.lng}° E
-                    </span>
+                {/* GPS Map Integration Strip */}
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <div>
+                      <span className="text-[10px] text-sky-800 font-bold uppercase tracking-wider block">
+                        Exact GPS Location Pin (Technician navigates directly here):
+                      </span>
+                      <span className="font-mono font-bold text-slate-900 flex items-center gap-1 mt-0.5">
+                        📍 Lat: {bookingFormData.lat}° N, Lng: {bookingFormData.lng}° E
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDetectGPS}
+                        className="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer shadow-sm"
+                      >
+                        <Navigation className="w-3 h-3" />
+                        <span>Auto-Detect GPS</span>
+                      </button>
+
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${bookingFormData.lat},${bookingFormData.lng}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 py-1.5 rounded-lg bg-white border border-sky-300 hover:bg-sky-50 text-sky-800 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer shadow-sm"
+                      >
+                        <ExternalLink className="w-3 h-3 text-sky-600" />
+                        <span>View on Maps</span>
+                      </a>
+                    </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleDetectGPS}
-                    className="px-2.5 py-1 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
-                  >
-                    <Navigation className="w-3 h-3 text-sky-600" />
-                    <span>Auto-Detect GPS</span>
-                  </button>
+                  <p className="text-[11px] text-sky-700">
+                    💡 The technician will follow this verified pin directly to your door without getting lost.
+                  </p>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Access Notes for Tradesperson
-                </label>
-                <textarea
-                  value={bookingFormData.notes}
-                  onChange={(e) => setBookingFormData({ ...bookingFormData, notes: e.target.value })}
-                  rows={2}
-                  placeholder="Gate code, landmark near building, parking info..."
-                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:bg-white"
-                />
+              {/* Upload Photos of the Problem */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Upload Photos of the Issue (Optional)
+                  </label>
+                  <span className="text-[11px] text-slate-500">Helps worker prepare exact tools</span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-dashed border-slate-300 text-xs font-bold text-slate-700 transition-colors">
+                    <Camera className="w-4 h-4 text-brand-600" />
+                    <span>Take or Choose Photos</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {bookingFormData.images.length > 0 && (
+                    <span className="text-xs font-semibold text-emerald-600">
+                      ✓ {bookingFormData.images.length} photo(s) selected
+                    </span>
+                  )}
+                </div>
+
+                {/* Image Previews */}
+                {bookingFormData.images.length > 0 && (
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 pt-1">
+                    {bookingFormData.images.map((imgUrl, idx) => (
+                      <div key={idx} className="relative group rounded-xl overflow-hidden aspect-square border border-slate-200 bg-slate-100 shadow-sm">
+                        <img src={imgUrl} alt={`Issue preview ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(idx)}
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs opacity-90 hover:opacity-100 transition-opacity cursor-pointer shadow"
+                          title="Remove photo"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="pt-2 flex items-center justify-end gap-3">

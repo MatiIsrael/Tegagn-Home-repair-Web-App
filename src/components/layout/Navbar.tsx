@@ -8,30 +8,28 @@ import {
   Briefcase, 
   ShieldCheck, 
   Search, 
-  PlusCircle, 
   LogIn,
   LogOut
 } from 'lucide-react';
 import { Button } from '../common/Button';
 import { authService } from '../../services/api';
+import { useThemeLanguage } from '../../context/ThemeLanguageContext';
+import { LanguageThemeControls } from '../common/LanguageThemeControls';
 
 export const Navbar: React.FC = () => {
-  // React State: Controls whether the mobile navigation drawer is visible
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { t } = useThemeLanguage();
 
-  // Condition & Function: Determines whether a given navigation link matches current route
   const isActive = (path: string) => {
     if (path === '/' && location.pathname !== '/') return false;
     return location.pathname.startsWith(path);
   };
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Event handler & Effect: Close mobile menu when user presses Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && mobileMenuOpen) {
@@ -52,7 +50,6 @@ export const Navbar: React.FC = () => {
     };
   }, [mobileMenuOpen]);
 
-  // Reactive session user state
   const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
 
   useEffect(() => {
@@ -71,17 +68,16 @@ export const Navbar: React.FC = () => {
     setStoredUser(authService.getStoredUser());
   }, [location.pathname]);
 
-  // Navigation links: Customer Hub & Worker Portal appear ONLY after login/register
   const navLinks = [
-    { name: 'Find Professionals', path: '/workers', icon: <Search className="w-4 h-4 text-accent-500" /> },
+    { name: t('findPros'), path: '/workers', icon: <Search className="w-4 h-4 text-accent-500" /> },
     ...(storedUser && storedUser.role === 'customer'
-      ? [{ name: 'Customer Hub', path: '/customer/dashboard', icon: <User className="w-4 h-4 text-brand-600" /> }]
+      ? [{ name: t('customerHub'), path: '/customer/dashboard', icon: <User className="w-4 h-4 text-brand-600" /> }]
       : []),
     ...(storedUser && storedUser.role === 'worker'
-      ? [{ name: 'Worker Portal', path: '/worker/dashboard', icon: <Briefcase className="w-4 h-4 text-amber-500" /> }]
+      ? [{ name: t('workerPortal'), path: '/worker/dashboard', icon: <Briefcase className="w-4 h-4 text-amber-500" /> }]
       : []),
     ...(storedUser && storedUser.role === 'admin'
-      ? [{ name: 'Admin Portal', path: '/admin', icon: <ShieldCheck className="w-4 h-4 text-sky-500" /> }]
+      ? [{ name: t('adminPortal'), path: '/admin', icon: <ShieldCheck className="w-4 h-4 text-sky-500" /> }]
       : []),
   ];
 
@@ -92,35 +88,35 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-accent-500 rounded-xl p-1">
-            <div className="w-10 h-10 rounded-xl bg-navy-900 flex items-center justify-center text-accent-500 shadow-md shadow-navy-900/20 group-hover:scale-105 transition-transform duration-200">
-              <Wrench className="w-5 h-5 text-accent-500" />
+            <div className="w-10 h-10 rounded-xl bg-navy-900 dark:bg-amber-500 flex items-center justify-center text-accent-500 dark:text-slate-950 shadow-md shadow-navy-900/20 group-hover:scale-105 transition-transform duration-200">
+              <Wrench className="w-5 h-5 text-accent-500 dark:text-slate-950" />
             </div>
             <div>
-              <span className="text-2xl font-black tracking-tight text-navy-950 group-hover:text-accent-600 transition-colors">
-                Tegagn
+              <span className="text-2xl font-black tracking-tight text-navy-950 dark:text-white group-hover:text-accent-600 dark:group-hover:text-amber-400 transition-colors">
+                {t('brandName')}
               </span>
-              <span className="hidden sm:inline-block ml-2 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-accent-50 text-accent-700 border border-accent-200">
-                Home Services
+              <span className="hidden sm:inline-block ml-2 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-accent-50 dark:bg-slate-800 text-accent-700 dark:text-amber-400 border border-accent-200 dark:border-slate-700">
+                {t('homeServices')}
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1" aria-label="Main Navigation">
+          <nav className="hidden lg:flex items-center gap-1" aria-label="Main Navigation">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
                   isActive(link.path)
-                    ? 'bg-navy-50 text-navy-900 font-bold border border-navy-100'
-                    : 'text-slate-600 hover:text-navy-900 hover:bg-slate-100/80'
+                    ? 'bg-navy-50 dark:bg-slate-800 text-navy-900 dark:text-white font-bold border border-navy-100 dark:border-slate-700'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-navy-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
                 }`}
               >
                 {link.icon}
@@ -129,8 +125,12 @@ export const Navbar: React.FC = () => {
             ))}
           </nav>
 
-          {/* Desktop Action Buttons */}
+          {/* Right Header Area: Language/Nightmode Controls + Supabase + Auth */}
           <div className="hidden md:flex items-center gap-3">
+            {/* The 3-Language (EN / አማ / ORO) & Night Mode Switcher */}
+            <LanguageThemeControls />
+
+            {/* Desktop Auth Buttons */}
             {storedUser ? (
               <div className="flex items-center gap-2">
                 <Link
@@ -141,39 +141,42 @@ export const Navbar: React.FC = () => {
                       ? '/worker/dashboard'
                       : '/admin'
                   }
-                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-900 border border-slate-200 transition-colors"
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 transition-colors"
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>
-                    Hello, {storedUser.firstName ? storedUser.firstName : storedUser.email.split('@')[0]}
+                    {storedUser.firstName ? storedUser.firstName : storedUser.email.split('@')[0]}
                   </span>
-                  <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-white text-slate-600 border border-slate-200">
-                    {storedUser.role}
+                  <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    {t(storedUser.role)}
                   </span>
                 </Link>
 
                 <button
                   onClick={handleSignOut}
-                  className="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer border border-transparent hover:border-rose-200"
-                  title="Sign Out"
+                  className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer border border-transparent hover:border-rose-200 dark:hover:border-rose-800"
+                  title={t('logout')}
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
             ) : (
-              <Link to="/login">
-                <Button variant="accent" size="sm" icon={<LogIn className="w-4 h-4" />}>
-                  Log In
-                </Button>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link to="/login">
+                  <Button variant="accent" size="sm" icon={<LogIn className="w-4 h-4" />}>
+                    {t('login')}
+                  </Button>
+                </Link>
+              </div>
             )}
           </div>
 
-          {/* Mobile Menu Button with Accessibility Attributes */}
+          {/* Mobile Right Controls */}
           <div className="flex md:hidden items-center gap-2">
+            <LanguageThemeControls />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-700 hover:text-navy-950 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-accent-500 cursor-pointer"
+              className="p-2 rounded-lg text-slate-700 dark:text-slate-200 hover:text-navy-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-accent-500 cursor-pointer"
               aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-navigation"
@@ -197,7 +200,7 @@ export const Navbar: React.FC = () => {
       {mobileMenuOpen && (
         <div 
           id="mobile-navigation"
-          className="relative z-50 md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-3 animate-in slide-in-from-top-2 duration-200 shadow-2xl"
+          className="relative z-50 md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pt-3 pb-6 space-y-3 animate-in slide-in-from-top-2 duration-200 shadow-2xl"
         >
           <div className="space-y-1">
             {navLinks.map((link) => (
@@ -207,8 +210,8 @@ export const Navbar: React.FC = () => {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-base font-medium transition-colors ${
                   isActive(link.path)
-                    ? 'bg-navy-50 text-navy-900 font-bold border border-navy-100'
-                    : 'text-slate-700 hover:bg-slate-50'
+                    ? 'bg-navy-50 dark:bg-slate-800 text-navy-900 dark:text-white font-bold border border-navy-100 dark:border-slate-700'
+                    : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
                 {link.icon}
@@ -217,29 +220,29 @@ export const Navbar: React.FC = () => {
             ))}
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
             {storedUser ? (
               <div className="space-y-2">
-                <div className="px-3 py-2 bg-slate-50 rounded-xl text-xs text-slate-700">
-                  Signed in as <strong>{storedUser.firstName || storedUser.email}</strong> ({storedUser.role})
+                <div className="px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs text-slate-700 dark:text-slate-300">
+                  {t('signedInAs')} <strong>{storedUser.firstName || storedUser.email}</strong> ({t(storedUser.role)})
                 </div>
                 <Button 
                   variant="outline" 
                   size="md" 
-                  className="w-full justify-center text-rose-600 hover:bg-rose-50 border-rose-200"
+                  className="w-full justify-center text-rose-600 hover:bg-rose-50 border-rose-200 dark:border-rose-900/50"
                   icon={<LogOut className="w-4 h-4" />}
                   onClick={() => {
                     setMobileMenuOpen(false);
                     handleSignOut();
                   }}
                 >
-                  Sign Out
+                  {t('logout')}
                 </Button>
               </div>
             ) : (
               <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="accent" size="md" className="w-full justify-center font-bold">
-                  Log In
+                  {t('login')}
                 </Button>
               </Link>
             )}

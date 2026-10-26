@@ -11,22 +11,20 @@ import {
   Sparkles, 
   ArrowRight, 
   CheckCircle2, 
-  Clock, 
   Shield, 
-  DollarSign, 
   UserCheck, 
   Briefcase, 
-  Calendar, 
-  AlertCircle,
   HelpCircle,
   Info
 } from 'lucide-react';
 import { PLACEHOLDER_WORKERS } from '../data/mockData';
 import { WorkerCard } from '../components/workers/WorkerCard';
 import { Button } from '../components/common/Button';
+import { useThemeLanguage } from '../context/ThemeLanguageContext';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useThemeLanguage();
   const [serviceCategory, setServiceCategory] = useState('');
   const [locationQuery, setLocationQuery] = useState('');
 
@@ -42,12 +40,12 @@ export const HomePage: React.FC = () => {
     navigate(`/workers?${params.toString()}`);
   };
 
-  // The 6 core home services specified in requirements
+  // The core home services with dynamic translations
   const coreServices = [
     {
       id: 'srv-plumbing',
       slug: 'plumber',
-      title: 'Plumbing',
+      title: t('plumbing'),
       description: 'Leak detection, pipe repairs, faucet installation, water heaters & drain snaking.',
       icon: <Wrench className="w-6 h-6 text-accent-500" />,
       popular: ['Leak Repair', 'Pipe Replacement', 'Water Heater', 'Toilet Installation'],
@@ -55,7 +53,7 @@ export const HomePage: React.FC = () => {
     {
       id: 'srv-electrical',
       slug: 'electrician',
-      title: 'Electrical Work',
+      title: t('electrical'),
       description: 'Breaker panels, wiring diagnostics, lighting fixtures & short-circuit resolution.',
       icon: <Zap className="w-6 h-6 text-accent-500" />,
       popular: ['Short Circuit Fix', 'Breaker Box', 'Lighting Setup', 'Wiring Inspection'],
@@ -63,7 +61,7 @@ export const HomePage: React.FC = () => {
     {
       id: 'srv-construction',
       slug: 'construction',
-      title: 'Construction',
+      title: t('construction'),
       description: 'Masonry repairs, structural plastering, tile installation, brickwork & home extensions.',
       icon: <HardHat className="w-6 h-6 text-accent-500" />,
       popular: ['Tile Setting', 'Wall Plaster', 'Masonry Repair', 'Concrete Patching'],
@@ -71,7 +69,7 @@ export const HomePage: React.FC = () => {
     {
       id: 'srv-painting',
       slug: 'painter',
-      title: 'Painting',
+      title: t('painting'),
       description: 'Interior & exterior wall painting, waterproof coatings, surface sanding & trim refinishing.',
       icon: <Paintbrush className="w-6 h-6 text-accent-500" />,
       popular: ['Interior Walls', 'Exterior Coating', 'Ceiling Paint', 'Waterproofing'],
@@ -79,7 +77,7 @@ export const HomePage: React.FC = () => {
     {
       id: 'srv-carpentry',
       slug: 'carpenter',
-      title: 'Carpentry',
+      title: t('carpentry'),
       description: 'Custom cabinetry, door & lock framing, furniture repair, shelving & woodwork.',
       icon: <Hammer className="w-6 h-6 text-accent-500" />,
       popular: ['Custom Cabinets', 'Door Framing', 'Hardwood Trim', 'Furniture Repair'],
@@ -87,7 +85,7 @@ export const HomePage: React.FC = () => {
     {
       id: 'srv-cleaning',
       slug: 'cleaning',
-      title: 'Cleaning',
+      title: t('cleaning'),
       description: 'Deep house cleaning, post-repair dust removal, window cleaning & sanitation.',
       icon: <Sparkles className="w-6 h-6 text-accent-500" />,
       popular: ['Post-Repair Cleanup', 'Deep Home Cleaning', 'Floor Scrubbing', 'Sanitization'],
@@ -114,60 +112,62 @@ export const HomePage: React.FC = () => {
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white">
-              Trusted Home Repair Pros in Addis Ababa
+              {t('heroTitle')}{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500">
+                {t('heroHighlight')}
+              </span>
             </h1>
 
             {/* Subheading */}
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto">
-              Find verified plumbers, electricians, painters, carpenters, and cleaners near your neighborhood. Direct technician contact, transparent hourly pricing, and zero middleman markups.
+              {t('heroSubtitle')}
             </p>
 
             {/* Service & Location Search Form */}
             <div className="pt-4">
               <form
                 onSubmit={handleSearchSubmit}
-                className="bg-white p-2.5 sm:p-3 rounded-2xl shadow-2xl border border-slate-200 text-slate-900 flex flex-col md:flex-row gap-2.5 max-w-2xl mx-auto"
+                className="bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 flex flex-col md:flex-row gap-2.5 max-w-2xl mx-auto"
                 aria-label="Service and location search form"
               >
                 {/* Service Dropdown */}
-                <div className="flex-1 flex items-center px-3.5 py-1.5 border-b md:border-b-0 md:border-r border-slate-200">
-                  <Search className="w-5 h-5 text-accent-600 shrink-0 mr-3" />
+                <div className="flex-1 flex items-center px-3.5 py-1.5 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800">
+                  <Search className="w-5 h-5 text-accent-600 dark:text-amber-400 shrink-0 mr-3" />
                   <div className="w-full text-left">
                     <label htmlFor="service-select" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      Service Needed
+                      {t('popularServices')}
                     </label>
                     <select
                       id="service-select"
                       value={serviceCategory}
                       onChange={(e) => setServiceCategory(e.target.value)}
-                      className="w-full text-sm font-semibold text-slate-800 bg-transparent focus:outline-none cursor-pointer"
+                      className="w-full text-sm font-semibold text-slate-800 dark:text-slate-100 bg-transparent focus:outline-none cursor-pointer"
                     >
-                      <option value="">Select a trade craft...</option>
-                      <option value="plumber">Plumbing</option>
-                      <option value="electrician">Electrical Work</option>
-                      <option value="construction">Construction</option>
-                      <option value="painter">Painting</option>
-                      <option value="carpenter">Carpentry</option>
-                      <option value="cleaning">Cleaning</option>
-                      <option value="all">All Services</option>
+                      <option value="" className="text-slate-900 dark:text-slate-100 dark:bg-slate-900">{t('allTrades')}...</option>
+                      <option value="plumber" className="text-slate-900 dark:text-slate-100 dark:bg-slate-900">{t('plumbing')}</option>
+                      <option value="electrician" className="text-slate-900 dark:text-slate-100 dark:bg-slate-900">{t('electrical')}</option>
+                      <option value="construction" className="text-slate-900 dark:text-slate-100 dark:bg-slate-900">{t('construction')}</option>
+                      <option value="painter" className="text-slate-900 dark:text-slate-100 dark:bg-slate-900">{t('painting')}</option>
+                      <option value="carpenter" className="text-slate-900 dark:text-slate-100 dark:bg-slate-900">{t('carpentry')}</option>
+                      <option value="cleaning" className="text-slate-900 dark:text-slate-100 dark:bg-slate-900">{t('cleaning')}</option>
                     </select>
                   </div>
                 </div>
 
                 {/* Location Input */}
-                <div className="flex-1 flex items-center px-3.5 py-1.5 border-b md:border-b-0 md:border-r border-slate-200">
-                  <MapPin className="w-5 h-5 text-accent-600 shrink-0 mr-3" />
+                <div className="flex-1 flex items-center px-3.5 py-1.5 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800">
+                  <MapPin className="w-5 h-5 text-accent-600 dark:text-amber-400 shrink-0 mr-3" />
                   <div className="w-full text-left">
                     <label htmlFor="location-input" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      Location / Neighborhood
+                      {t('locationLabel')}
                     </label>
                     <input
                       id="location-input"
                       type="text"
                       value={locationQuery}
                       onChange={(e) => setLocationQuery(e.target.value)}
-                      placeholder="E.g., Bole, Kazanchis, Downtown..."
-                      className="w-full text-sm font-semibold text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+                      placeholder={t('searchPlaceholder')}
+                      className="w-full text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 bg-transparent focus:outline-none"
                     />
                   </div>
                 </div>
@@ -179,21 +179,21 @@ export const HomePage: React.FC = () => {
                   size="lg"
                   className="shrink-0 font-bold px-7"
                 >
-                  Search Pros
+                  {t('findButton')}
                 </Button>
               </form>
             </div>
 
             {/* Quick search tags */}
             <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs text-slate-300">
-              <span className="text-slate-400 font-medium">Popular searches:</span>
+              <span className="text-slate-400 font-medium">Popular:</span>
               {[
-                { label: 'Water Leak Repair', cat: 'plumber' },
-                { label: 'Circuit Breaker', cat: 'electrician' },
-                { label: 'Cabinet Installation', cat: 'carpenter' },
-                { label: 'Tile Masonry', cat: 'construction' },
-                { label: 'Interior Painting', cat: 'painter' },
-                { label: 'Post-Repair Cleaning', cat: 'cleaning' },
+                { label: 'Plumbing / ቧንቧ', cat: 'plumber' },
+                { label: 'Electrician / ኤሌክትሪክ', cat: 'electrician' },
+                { label: 'Carpentry / አናፂ', cat: 'carpenter' },
+                { label: 'Tile & Masonry / ግንባታ', cat: 'construction' },
+                { label: 'Painting / ቀለም ቅብ', cat: 'painter' },
+                { label: 'Cleaning / ፅዳት', cat: 'cleaning' },
               ].map((item) => (
                 <button
                   key={item.label}
@@ -213,15 +213,15 @@ export const HomePage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8 border-t border-navy-800/70 text-xs text-slate-300 max-w-2xl mx-auto">
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-accent-500" />
-                <span>Direct Technician Contact</span>
+                <span>{t('verifiedBadge')}</span>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-accent-500" />
-                <span>Upfront Hourly Rates</span>
+                <span>{t('zeroBrokerage')}</span>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-accent-500" />
-                <span>No Booking Commission Fees</span>
+                <span>{t('rapidResponse')}</span>
               </div>
             </div>
 
@@ -232,13 +232,13 @@ export const HomePage: React.FC = () => {
       {/* 2. CORE SERVICES SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-50 text-accent-700 text-xs font-bold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-50 dark:bg-slate-800 text-accent-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
             <span>Specialized Crafts</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-navy-950 tracking-tight">
-            Home Repair & Maintenance Services
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-navy-950 dark:text-white tracking-tight">
+            {t('popularServices')}
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base mt-2">
+          <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base mt-2">
             Select a service category to discover local professionals equipped for both emergency repairs and routine installations.
           </p>
         </div>
@@ -249,27 +249,27 @@ export const HomePage: React.FC = () => {
             <Link
               key={service.id}
               to={`/workers?category=${service.slug}`}
-              className="group bg-white rounded-2xl p-6 border border-slate-200 hover:border-accent-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between"
+              className="group bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-accent-500 dark:hover:border-amber-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between"
             >
               <div>
-                <div className="w-12 h-12 rounded-xl bg-navy-50 border border-navy-100 flex items-center justify-center group-hover:bg-accent-500/10 group-hover:border-accent-500/30 transition-colors mb-5">
+                <div className="w-12 h-12 rounded-xl bg-navy-50 dark:bg-slate-800 border border-navy-100 dark:border-slate-700 flex items-center justify-center group-hover:bg-accent-500/10 group-hover:border-accent-500/30 transition-colors mb-5">
                   {service.icon}
                 </div>
 
-                <h3 className="text-xl font-bold text-navy-950 group-hover:text-accent-600 transition-colors">
+                <h3 className="text-xl font-bold text-navy-950 dark:text-white group-hover:text-accent-600 dark:group-hover:text-amber-400 transition-colors">
                   {service.title}
                 </h3>
 
-                <p className="text-xs sm:text-sm text-slate-600 mt-2 line-clamp-2 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 line-clamp-2 leading-relaxed">
                   {service.description}
                 </p>
 
                 {/* Popular service tags */}
-                <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-slate-100">
+                <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                   {service.popular.map((item, idx) => (
                     <span
                       key={idx}
-                      className="text-[11px] px-2 py-0.5 rounded-md bg-slate-50 text-slate-600 font-medium border border-slate-100"
+                      className="text-[11px] px-2 py-0.5 rounded-md bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium border border-slate-100 dark:border-slate-700"
                     >
                       {item}
                     </span>
@@ -277,9 +277,9 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-navy-900 group-hover:text-accent-600">
-                <span>View {service.title} Pros</span>
-                <span className="text-accent-500 group-hover:translate-x-1 transition-transform">
+              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-navy-900 dark:text-slate-200 group-hover:text-accent-600 dark:group-hover:text-amber-400">
+                <span>View {service.title}</span>
+                <span className="text-accent-500 dark:text-amber-400 group-hover:translate-x-1 transition-transform">
                   &rarr;
                 </span>
               </div>
@@ -288,33 +288,33 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 3. FEATURED WORKER CARDS (CLEARLY LABELED SAMPLE DATA) */}
+      {/* 3. FEATURED WORKER CARDS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-navy-100 text-navy-800 text-xs font-bold uppercase tracking-wider mb-2">
-              <Info className="w-3.5 h-3.5 text-accent-600" />
-              <span>Sample Demonstrator Profiles</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-navy-100 dark:bg-slate-800 text-navy-800 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+              <Info className="w-3.5 h-3.5 text-accent-600 dark:text-amber-400" />
+              <span>{t('verifiedLocalPros')}</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-navy-950 tracking-tight">
-              Featured Service Professionals
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-navy-950 dark:text-white tracking-tight">
+              {t('featuredProsTitle')}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-xl">
-              Representative technician profiles demonstrating profile structure, skill badges, and hourly rate presentation prior to live user onboarding.
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-xl">
+              {t('featuredProsSubtitle')}
             </p>
           </div>
 
           <Link to="/workers">
             <Button variant="outline" size="md" icon={<ArrowRight className="w-4 h-4" />} iconPosition="right">
-              Browse Directory
+              {t('findPros')}
             </Button>
           </Link>
         </div>
 
-        {/* Worker Cards Grid (6 core trades) */}
+        {/* Worker Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {PLACEHOLDER_WORKERS.slice(0, 6).map((worker) => (
-            <WorkerCard key={worker.id} worker={worker} isSample={true} />
+            <WorkerCard key={worker.id} worker={worker} />
           ))}
         </div>
       </section>
@@ -325,78 +325,74 @@ export const HomePage: React.FC = () => {
           <div className="text-center max-w-2xl mx-auto mb-16">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-navy-800 text-accent-400 text-xs font-bold uppercase tracking-wider mb-2">
               <HelpCircle className="w-3.5 h-3.5 text-accent-500" />
-              <span>Simple 4-Step Process</span>
+              <span>{t('simpleProcess')}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-              How Tegagn Works
+              {t('howItWorksTitle')}
             </h2>
             <p className="text-slate-400 text-sm sm:text-base mt-3">
-              A transparent, direct process from finding an issue to getting it fixed.
+              {t('howItWorksSubtitle')}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Step 1 */}
             <div className="bg-navy-900/80 p-6 rounded-2xl border border-navy-800 relative flex flex-col justify-between">
               <div>
                 <div className="w-10 h-10 rounded-xl bg-accent-500 text-white font-black text-lg flex items-center justify-center mb-5 shadow-md shadow-accent-500/20">
                   1
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Search Your Craft</h3>
+                <h3 className="text-lg font-bold text-white mb-2">{t('step1Title')}</h3>
                 <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  Choose plumbing, electrical work, construction, painting, carpentry, or cleaning and specify your local neighborhood.
+                  {t('step1Desc')}
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-navy-800/80 text-[11px] text-accent-400 font-semibold">
-                Filter by craft & area
+                {t('step1Badge')}
               </div>
             </div>
 
-            {/* Step 2 */}
             <div className="bg-navy-900/80 p-6 rounded-2xl border border-navy-800 relative flex flex-col justify-between">
               <div>
                 <div className="w-10 h-10 rounded-xl bg-accent-500 text-white font-black text-lg flex items-center justify-center mb-5 shadow-md shadow-accent-500/20">
                   2
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Review Rates & Skills</h3>
+                <h3 className="text-lg font-bold text-white mb-2">{t('step2Title')}</h3>
                 <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  Compare transparent hourly rates, trade specializations, past project photos, and years of hands-on experience.
+                  {t('step2Desc')}
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-navy-800/80 text-[11px] text-accent-400 font-semibold">
-                Full transparency
+                {t('step2Badge')}
               </div>
             </div>
 
-            {/* Step 3 */}
             <div className="bg-navy-900/80 p-6 rounded-2xl border border-navy-800 relative flex flex-col justify-between">
               <div>
                 <div className="w-10 h-10 rounded-xl bg-accent-500 text-white font-black text-lg flex items-center justify-center mb-5 shadow-md shadow-accent-500/20">
                   3
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Direct Booking</h3>
+                <h3 className="text-lg font-bold text-white mb-2">{t('step3Title')}</h3>
                 <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  Contact the tradesperson directly or submit an appointment request specifying the repair scope and preferred time.
+                  {t('step3Desc')}
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-navy-800/80 text-[11px] text-accent-400 font-semibold">
-                No middleman delays
+                {t('step3Badge')}
               </div>
             </div>
 
-            {/* Step 4 */}
             <div className="bg-navy-900/80 p-6 rounded-2xl border border-navy-800 relative flex flex-col justify-between">
               <div>
                 <div className="w-10 h-10 rounded-xl bg-accent-500 text-white font-black text-lg flex items-center justify-center mb-5 shadow-md shadow-accent-500/20">
                   4
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Job Done & Paid</h3>
+                <h3 className="text-lg font-bold text-white mb-2">{t('step4Title')}</h3>
                 <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  The professional arrives equipped to complete the repair. Settle payment directly based on agreed terms upon satisfaction.
+                  {t('step4Desc')}
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-navy-800/80 text-[11px] text-accent-400 font-semibold">
-                Direct settlement
+                {t('step4Badge')}
               </div>
             </div>
           </div>
@@ -406,29 +402,29 @@ export const HomePage: React.FC = () => {
       {/* 5. BENEFITS FOR CUSTOMERS AND WORKERS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-50 text-accent-700 text-xs font-bold uppercase tracking-wider mb-2">
-            <span>Marketplace Value</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-50 dark:bg-slate-800 text-accent-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <span>{t('marketplaceValue')}</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-navy-950 tracking-tight">
-            Designed for Both Homeowners & Service Professionals
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-navy-950 dark:text-white tracking-tight">
+            {t('designedForBoth')}
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base mt-2">
-            An open platform built on direct relationships, fair pricing, and mutual respect.
+          <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base mt-2">
+            {t('designedForBothSubtitle')}
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Card: Benefits for Customers */}
-          <div className="bg-white rounded-3xl p-8 sm:p-10 border-2 border-slate-200 shadow-sm flex flex-col justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-10 border-2 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-navy-50 text-navy-900 flex items-center justify-center">
-                  <UserCheck className="w-6 h-6 text-accent-600" />
+                <div className="w-12 h-12 rounded-2xl bg-navy-50 dark:bg-slate-800 text-navy-900 dark:text-white flex items-center justify-center">
+                  <UserCheck className="w-6 h-6 text-accent-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-navy-950">Benefits for Customers</h3>
-                  <p className="text-xs text-slate-500">For homeowners, tenants, and property managers</p>
+                  <h3 className="text-2xl font-bold text-navy-950 dark:text-white">{t('benefitsCustomers')}</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{t('benefitsCustomersSub')}</p>
                 </div>
               </div>
 
@@ -436,9 +432,9 @@ export const HomePage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-accent-500 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-sm text-navy-950">Direct Connection to Pros</h4>
-                    <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                      Talk directly with the actual specialist coming to your home — not an offshore support desk.
+                    <h4 className="font-bold text-sm text-navy-950 dark:text-white">{t('benefitCust1Title')}</h4>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                      {t('benefitCust1Desc')}
                     </p>
                   </div>
                 </div>
@@ -446,9 +442,9 @@ export const HomePage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-accent-500 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-sm text-navy-950">Transparent Upfront Pricing</h4>
-                    <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                      Review standard hourly rates and service scope ahead of time without hidden agency surcharges.
+                    <h4 className="font-bold text-sm text-navy-950 dark:text-white">{t('benefitCust2Title')}</h4>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                      {t('benefitCust2Desc')}
                     </p>
                   </div>
                 </div>
@@ -456,29 +452,19 @@ export const HomePage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-accent-500 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-sm text-navy-950">All Core Trades in One Place</h4>
-                    <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                      Find plumbers, electricians, builders, painters, carpenters, and cleaners on a single unified platform.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-accent-500 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-bold text-sm text-navy-950">Convenient Scheduling</h4>
-                    <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                      Propose appointment times that accommodate your household routine and manage bookings in one hub.
+                    <h4 className="font-bold text-sm text-navy-950 dark:text-white">{t('benefitCust3Title')}</h4>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                      {t('benefitCust3Desc')}
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-slate-100">
+            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
               <Link to="/workers">
                 <Button variant="navy" size="md" className="w-full justify-center">
-                  Explore All Available Pros
+                  {t('findPros')}
                 </Button>
               </Link>
             </div>
@@ -492,8 +478,8 @@ export const HomePage: React.FC = () => {
                   <Briefcase className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">Benefits for Service Pros</h3>
-                  <p className="text-xs text-slate-400">For plumbers, electricians, masons, painters & carpenters</p>
+                  <h3 className="text-2xl font-bold text-white">{t('benefitsWorkers')}</h3>
+                  <p className="text-xs text-slate-400">{t('benefitsWorkersSub')}</p>
                 </div>
               </div>
 
@@ -501,9 +487,9 @@ export const HomePage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-accent-400 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-sm text-white">Grow Your Trade Business</h4>
+                    <h4 className="font-bold text-sm text-white">{t('benefitWork1Title')}</h4>
                     <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
-                      Get discovered by property owners looking for your exact trade skills in your designated service area.
+                      {t('benefitWork1Desc')}
                     </p>
                   </div>
                 </div>
@@ -511,9 +497,9 @@ export const HomePage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-4 text-accent-400 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-sm text-white">Keep What You Earn</h4>
+                    <h4 className="font-bold text-sm text-white">{t('benefitWork2Title')}</h4>
                     <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
-                      No predatory booking cuts or middleman deductions on your hard-earned labor fees.
+                      {t('benefitWork2Desc')}
                     </p>
                   </div>
                 </div>
@@ -521,19 +507,9 @@ export const HomePage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-accent-400 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-sm text-white">Set Your Own Rates & Coverage</h4>
+                    <h4 className="font-bold text-sm text-white">{t('benefitWork3Title')}</h4>
                     <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
-                      You decide your hourly rate, availability hours, and the neighborhoods you prefer to work in.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-accent-400 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-bold text-sm text-white">Direct Client Requests</h4>
-                    <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
-                      Receive detailed job inquiries straight to your dashboard or phone with clear scopes of work.
+                      {t('benefitWork3Desc')}
                     </p>
                   </div>
                 </div>
@@ -543,7 +519,7 @@ export const HomePage: React.FC = () => {
             <div className="mt-8 pt-6 border-t border-navy-800">
               <Link to="/register?role=worker">
                 <Button variant="accent" size="md" className="w-full justify-center">
-                  Create Your Pro Profile
+                  {t('register')}
                 </Button>
               </Link>
             </div>
@@ -556,30 +532,29 @@ export const HomePage: React.FC = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 rounded-3xl p-8 sm:p-14 text-white flex flex-col lg:flex-row items-center justify-between gap-8 shadow-2xl border border-navy-800 relative overflow-hidden">
           
-          {/* Subtle accent glow */}
           <div className="absolute right-0 top-0 w-80 h-80 bg-accent-500/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="space-y-3 max-w-xl text-center lg:text-left relative z-10">
             <span className="text-xs font-bold uppercase tracking-wider text-accent-400">
-              Get Started Today
+              {t('getStartedToday')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-              Ready to find a professional or offer your repair skills?
+              {t('ctaTitle')}
             </h2>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Join Tegagn today. Search verified trade categories or sign up as a certified independent service worker.
+              {t('ctaSubtitle')}
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 shrink-0 relative z-10 w-full sm:w-auto">
             <Link to="/workers" className="w-full sm:w-auto">
               <Button variant="accent" size="lg" className="w-full justify-center font-bold">
-                Find a Professional
+                {t('findPros')}
               </Button>
             </Link>
             <Link to="/register?role=worker" className="w-full sm:w-auto">
               <Button variant="outline" size="lg" className="w-full justify-center border-slate-600 text-white hover:bg-white/10 font-bold">
-                Join as a Service Pro
+                {t('register')}
               </Button>
             </Link>
           </div>

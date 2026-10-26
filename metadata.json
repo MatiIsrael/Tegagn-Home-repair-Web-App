@@ -1,0 +1,6 @@
+{
+  "name": "Tegagn - Home Repair & Maintenance Marketplace",
+  "description": "Connect with trusted local plumbers, electricians, builders, painters, and carpenters on Tegagn.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

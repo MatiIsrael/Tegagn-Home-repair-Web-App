@@ -37,10 +37,12 @@ import { Booking, BookingStatus, WorkerPost } from '../types';
 import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
-import { authService } from '../services/api';
+import { authService, bookingService } from '../services/api';
 import { postService } from '../services/postService';
+import { useThemeLanguage } from '../context/ThemeLanguageContext';
 
 export const WorkerDashboard: React.FC = () => {
+  const { t } = useThemeLanguage();
   const currentWorker = PLACEHOLDER_WORKERS[0];
   const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
 
@@ -61,6 +63,15 @@ export const WorkerDashboard: React.FC = () => {
   // Requests state with GPS coordinates
   const [requests, setRequests] = useState<Booking[]>(PLACEHOLDER_WORKER_REQUESTS);
   const [isAvailable, setIsAvailable] = useState(currentWorker.isAvailable);
+
+  useEffect(() => {
+    const loadRequests = () => {
+      bookingService.getWorkerRequests(workerId).then(setRequests);
+    };
+    loadRequests();
+    window.addEventListener('tegagn_bookings_changed', loadRequests);
+    return () => window.removeEventListener('tegagn_bookings_changed', loadRequests);
+  }, [workerId]);
 
   // Tab state: 'requests' | 'posts' | 'profile' | 'notifications'
   const [activeTab, setActiveTab] = useState<'requests' | 'posts' | 'profile' | 'notifications'>('requests');
@@ -108,8 +119,8 @@ export const WorkerDashboard: React.FC = () => {
     lng: 38.7891
   });
 
-  // Notifications Stream State
-  const [notifications, setNotifications] = useState([
+  // Initial default notifications
+  const DEFAULT_NOTIFICATIONS = [
     {
       id: 'notif-1',
       title: 'New Booking Request with GPS Location',
@@ -134,10 +145,39 @@ export const WorkerDashboard: React.FC = () => {
       type: 'comment',
       unread: false
     }
-  ]);
+  ];
+
+  const getStoredNotifications = () => {
+    try {
+      const raw = localStorage.getItem('tegagn_worker_notifications');
+      if (raw) {
+        const stored = JSON.parse(raw);
+        return [...stored, ...DEFAULT_NOTIFICATIONS];
+      }
+    } catch {
+      // fallback
+    }
+    return DEFAULT_NOTIFICATIONS;
+  };
+
+  // Notifications Stream State
+  const [notifications, setNotifications] = useState(getStoredNotifications);
+
+  useEffect(() => {
+    const handleNotifsChange = () => {
+      setNotifications(getStoredNotifications());
+    };
+    window.addEventListener('tegagn_worker_notifications_changed', handleNotifsChange);
+    window.addEventListener('tegagn_bookings_changed', handleNotifsChange);
+    return () => {
+      window.removeEventListener('tegagn_worker_notifications_changed', handleNotifsChange);
+      window.removeEventListener('tegagn_bookings_changed', handleNotifsChange);
+    };
+  }, []);
 
   // Request status change handler
   const handleUpdateStatus = (bookingId: string, newStatus: BookingStatus) => {
+    bookingService.updateBookingStatus(bookingId, newStatus);
     setRequests(prev =>
       prev.map(r => (r.id === bookingId ? { ...r, status: newStatus } : r))
     );
@@ -218,7 +258,7 @@ export const WorkerDashboard: React.FC = () => {
               )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1">
-              Hello, {workerDisplayName} 👋
+              {t('hello')}, {workerDisplayName} 👋
             </h1>
             <p className="text-xs sm:text-sm text-slate-400">
               {profileData.tradeTitle} • <span className="font-mono font-bold text-amber-400">{profileData.hourlyRate} ETB/hr</span> • {profileData.city}
@@ -237,7 +277,7 @@ export const WorkerDashboard: React.FC = () => {
             }`}
           >
             <span className={`w-2 h-2 rounded-full ${isAvailable ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
-            {isAvailable ? 'Status: Accepting Jobs' : 'Status: Paused / Busy'}
+            {isAvailable ? t('statusAccepting') : t('statusPaused')}
           </button>
 
           <Button 
@@ -247,7 +287,7 @@ export const WorkerDashboard: React.FC = () => {
             onClick={() => setIsPostModalOpen(true)}
           >
             <PlusCircle className="w-4 h-4" />
-            <span>Post My Work</span>
+            <span>{t('postMyWork')}</span>
           </Button>
 
           <button
@@ -265,96 +305,96 @@ export const WorkerDashboard: React.FC = () => {
 
       {/* KPI Cards Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+        <Card className="p-5 flex items-center gap-4 dark:bg-slate-900 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
             <DollarSign className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-extrabold text-slate-900">18,400 ETB</div>
-            <div className="text-xs font-medium text-slate-500">Estimated Earnings (Month)</div>
+            <div className="text-2xl font-extrabold text-slate-900 dark:text-white">18,400 ETB</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Estimated Earnings (Month)</div>
           </div>
         </Card>
 
-        <Card className="p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+        <Card className="p-5 flex items-center gap-4 dark:bg-slate-900 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
             <Briefcase className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-extrabold text-slate-900">{currentWorker.completedJobs + 2}</div>
-            <div className="text-xs font-medium text-slate-500">Completed Repairs</div>
+            <div className="text-2xl font-extrabold text-slate-900 dark:text-white">{currentWorker.completedJobs + 2}</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('completedRepairs')}</div>
           </div>
         </Card>
 
-        <Card className="p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+        <Card className="p-5 flex items-center gap-4 dark:bg-slate-900 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-slate-800 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold">
             <Star className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-extrabold text-slate-900">4.95 / 5.0</div>
-            <div className="text-xs font-medium text-slate-500">From 84 Verified Reviews</div>
+            <div className="text-2xl font-extrabold text-slate-900 dark:text-white">4.95 / 5.0</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('verifiedClientReviews')}</div>
           </div>
         </Card>
 
-        <Card className="p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+        <Card className="p-5 flex items-center gap-4 dark:bg-slate-900 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
             <Calendar className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-extrabold text-slate-900">{requests.length} Requests</div>
-            <div className="text-xs font-medium text-slate-500">Incoming with GPS Pin</div>
+            <div className="text-2xl font-extrabold text-slate-900 dark:text-white">{requests.length} Requests</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('incomingCustomerJobRequests')}</div>
           </div>
         </Card>
       </div>
 
       {/* Navigation Tabs Bar */}
-      <div className="border-b border-slate-200">
+      <div className="border-b border-slate-200 dark:border-slate-800">
         <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto pb-1">
           <button
             onClick={() => setActiveTab('requests')}
             className={`py-3 px-1 border-b-2 font-bold text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'requests'
-                ? 'border-amber-500 text-amber-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Compass className="w-4 h-4" />
-            <span>Customer Requests & GPS ({requests.length})</span>
+            <span>{t('requestsTab')} ({requests.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('posts')}
             className={`py-3 px-1 border-b-2 font-bold text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'posts'
-                ? 'border-amber-500 text-amber-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Camera className="w-4 h-4" />
-            <span>My Work Posts & Showcase ({posts.length})</span>
+            <span>{t('myPostsTab')} ({posts.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('profile')}
             className={`py-3 px-1 border-b-2 font-bold text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'profile'
-                ? 'border-amber-500 text-amber-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Sliders className="w-4 h-4" />
-            <span>Profile & Pricing Controls</span>
+            <span>{t('profileTab')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('notifications')}
             className={`py-3 px-1 border-b-2 font-bold text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'notifications'
-                ? 'border-amber-500 text-amber-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Bell className="w-4 h-4" />
-            <span>Customer Activity Alerts ({notifications.filter(n => n.unread).length})</span>
+            <span>{t('notificationsTab')} ({notifications.filter(n => n.unread).length})</span>
           </button>
         </nav>
       </div>
@@ -424,6 +464,28 @@ export const WorkerDashboard: React.FC = () => {
                       </span>
                     </div>
 
+                    {req.images && req.images.length > 0 && (
+                      <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                        <span className="text-[11px] font-bold text-slate-800 flex items-center gap-1.5">
+                          📸 Attached Problem Photos from Client ({req.images.length}):
+                        </span>
+                        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                          {req.images.map((img, i) => (
+                            <a
+                              key={i}
+                              href={img}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="group relative rounded-xl overflow-hidden border border-slate-200 aspect-square w-16 h-16 shrink-0 shadow-sm hover:ring-2 hover:ring-amber-500 cursor-pointer"
+                              title="Click to view full photo"
+                            >
+                              <img src={img} alt={`Problem photo ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {req.notes && (
                       <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-200 text-xs text-amber-900">
                         <strong>Client Instructions:</strong> {req.notes}
@@ -439,8 +501,8 @@ export const WorkerDashboard: React.FC = () => {
                         <MapPin className="w-4 h-4 text-rose-500" />
                         <span>Client Service Location & GPS</span>
                       </span>
-                      <span className="text-[10px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
-                        Verified Pin
+                      <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-bold">
+                        Live Map Pin
                       </span>
                     </div>
 
@@ -453,18 +515,18 @@ export const WorkerDashboard: React.FC = () => {
                       <div className="text-[11px] font-mono text-slate-600">
                         <span className="text-slate-400 block text-[9px] uppercase tracking-wider font-bold">GPS Coordinates:</span>
                         <span className="font-bold text-slate-900">
-                          Lat: {req.gpsCoordinates?.lat || 9.0185}° N, Lng: {req.gpsCoordinates?.lng || 38.7698}° E
+                          Lat: {req.gpsCoordinates?.lat || 9.0084}° N, Lng: {req.gpsCoordinates?.lng || 38.7891}° E
                         </span>
                       </div>
 
                       <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${req.gpsCoordinates?.lat || 9.0185},${req.gpsCoordinates?.lng || 38.7698}`}
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${req.gpsCoordinates?.lat || 9.0084},${req.gpsCoordinates?.lng || 38.7891}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-sm transition-colors cursor-pointer"
                       >
                         <Navigation className="w-3.5 h-3.5" />
-                        <span>Open Maps</span>
+                        <span>Navigate (GPS)</span>
                         <ExternalLink className="w-3 h-3 opacity-70" />
                       </a>
                     </div>
@@ -479,7 +541,7 @@ export const WorkerDashboard: React.FC = () => {
                             icon={<Check className="w-4 h-4" />}
                             onClick={() => handleUpdateStatus(req.id, 'accepted')}
                           >
-                            Accept Job
+                            {t('acceptJob')}
                           </Button>
                           <Button
                             variant="outline"
@@ -488,7 +550,7 @@ export const WorkerDashboard: React.FC = () => {
                             icon={<X className="w-4 h-4" />}
                             onClick={() => handleUpdateStatus(req.id, 'cancelled')}
                           >
-                            Decline
+                            {t('declineJob')}
                           </Button>
                         </>
                       ) : req.status === 'accepted' ? (
@@ -499,18 +561,18 @@ export const WorkerDashboard: React.FC = () => {
                             icon={<Check className="w-4 h-4 text-emerald-400" />}
                             onClick={() => handleUpdateStatus(req.id, 'completed')}
                           >
-                            Mark Job Completed
+                            {t('markJobCompleted')}
                           </Button>
                           <a href={`tel:${req.customerPhone}`}>
                             <Button variant="outline" size="sm" icon={<Phone className="w-3.5 h-3.5" />}>
-                              Call Client
+                              {t('callClient')}
                             </Button>
                           </a>
                         </>
                       ) : (
                         <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                           <CheckCircle2 className="w-4 h-4" />
-                          Job Completed & Billed
+                          {t('statusCompleted')}
                         </span>
                       )}
                     </div>

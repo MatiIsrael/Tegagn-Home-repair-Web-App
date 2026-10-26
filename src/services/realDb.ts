@@ -27,8 +27,8 @@ export interface DbWorkerProfile {
   licenseNumber?: string;
 }
 
-const USERS_STORAGE_KEY = 'tegagn_real_db_users_v2';
-const WORKERS_STORAGE_KEY = 'tegagn_real_db_workers_v2';
+const USERS_STORAGE_KEY = 'tegagn_real_db_users_v3';
+const WORKERS_STORAGE_KEY = 'tegagn_real_db_workers_v3';
 
 // Cryptographic password hashing using Web Crypto SHA-256
 export async function hashPassword(password: string): Promise<string> {
@@ -102,11 +102,35 @@ class RealDatabase {
         isActive: true,
         createdAt: '2026-01-01T00:00:00Z',
       },
+      {
+        id: 'usr-admin-tegagn',
+        email: 'admin@tegagn.com',
+        passwordHash: adminHash,
+        firstName: 'System',
+        lastName: 'Administrator',
+        role: 'admin',
+        phoneNumber: '+251 91 100 0000',
+        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00Z',
+      },
 
       // 2. Verified Real Customers
       {
         id: 'usr-cust-101',
         email: 'bethlehem@gmail.com',
+        passwordHash: customerHash,
+        firstName: 'Bethlehem',
+        lastName: 'Assefa',
+        role: 'customer',
+        phoneNumber: '+251 91 123 4567',
+        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=300',
+        isActive: true,
+        createdAt: '2026-08-15T10:00:00Z',
+      },
+      {
+        id: 'usr-cust-tegagn',
+        email: 'customer@tegagn.com',
         passwordHash: customerHash,
         firstName: 'Bethlehem',
         lastName: 'Assefa',
@@ -133,6 +157,18 @@ class RealDatabase {
       {
         id: 'usr-work-201',
         email: 'abebe.plumber@gmail.com',
+        passwordHash: workerHash,
+        firstName: 'Abebe',
+        lastName: 'Tadesse',
+        role: 'worker',
+        phoneNumber: '+251 91 144 5566',
+        avatarUrl: 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?auto=format&fit=crop&q=80&w=300',
+        isActive: true,
+        createdAt: '2026-07-20T08:30:00Z',
+      },
+      {
+        id: 'usr-work-tegagn',
+        email: 'worker@tegagn.com',
         passwordHash: workerHash,
         firstName: 'Abebe',
         lastName: 'Tadesse',
@@ -295,22 +331,36 @@ class RealDatabase {
     await this.ensureInitialized();
 
     const normalizedEmail = payload.email.trim().toLowerCase();
+    const passwordHash = await hashPassword(payload.password);
     
-    // Check if email already exists
-    const existing = this.users.find(u => u.email.toLowerCase() === normalizedEmail);
-    if (existing) {
-      throw new Error(`Registration Failed: An account with the email "${payload.email}" is already registered. Please sign in instead.`);
+    // If account with this email already exists, update and sign in
+    const existingIndex = this.users.findIndex(u => u.email.toLowerCase() === normalizedEmail);
+    if (existingIndex >= 0) {
+      this.users[existingIndex].passwordHash = passwordHash;
+      if (payload.firstName) this.users[existingIndex].firstName = payload.firstName.trim();
+      if (payload.lastName) this.users[existingIndex].lastName = payload.lastName.trim();
+      if (payload.phoneNumber) this.users[existingIndex].phoneNumber = payload.phoneNumber.trim();
+      this.persist();
+      const u = this.users[existingIndex];
+      return {
+        id: u.id,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        role: u.role,
+        phoneNumber: u.phoneNumber,
+        avatarUrl: u.avatarUrl,
+      };
     }
 
-    const passwordHash = await hashPassword(payload.password);
     const newUser: DbUser = {
       id: `usr-cust-${Date.now()}`,
       email: normalizedEmail,
       passwordHash,
-      firstName: payload.firstName.trim(),
+      firstName: payload.firstName.trim() || 'Customer',
       lastName: payload.lastName.trim(),
       role: 'customer',
-      phoneNumber: payload.phoneNumber.trim(),
+      phoneNumber: payload.phoneNumber.trim() || '+251911234567',
       avatarUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(payload.firstName + ' ' + payload.lastName)}`,
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -351,23 +401,60 @@ class RealDatabase {
     await this.ensureInitialized();
 
     const normalizedEmail = payload.email.trim().toLowerCase();
+    const passwordHash = await hashPassword(payload.password);
 
-    // Check if email already exists
-    const existing = this.users.find(u => u.email.toLowerCase() === normalizedEmail);
-    if (existing) {
-      throw new Error(`Registration Failed: An account with the email "${payload.email}" is already registered. Please sign in instead.`);
+    // If account with this email already exists, update credentials and worker profile
+    const existingIndex = this.users.findIndex(u => u.email.toLowerCase() === normalizedEmail);
+    if (existingIndex >= 0) {
+      this.users[existingIndex].passwordHash = passwordHash;
+      if (payload.firstName) this.users[existingIndex].firstName = payload.firstName.trim();
+      if (payload.lastName) this.users[existingIndex].lastName = payload.lastName.trim();
+      if (payload.phoneNumber) this.users[existingIndex].phoneNumber = payload.phoneNumber.trim();
+      this.users[existingIndex].role = 'worker';
+
+      const existingWorker = this.workers.find(w => w.userId === this.users[existingIndex].id);
+      if (existingWorker) {
+        existingWorker.trade = payload.trade;
+        existingWorker.tradeTitle = payload.tradeTitle || existingWorker.tradeTitle;
+        existingWorker.hourlyRate = Number(payload.hourlyRate) || existingWorker.hourlyRate;
+        existingWorker.city = payload.city || existingWorker.city;
+      } else {
+        this.workers.push({
+          id: `prof-${Date.now()}`,
+          userId: this.users[existingIndex].id,
+          trade: payload.trade,
+          tradeTitle: payload.tradeTitle || `${payload.trade.toUpperCase()} Specialist`,
+          hourlyRate: Number(payload.hourlyRate) || 350,
+          experienceYears: Number(payload.experienceYears) || 3,
+          bio: payload.bio || `Professional ${payload.trade} specialist.`,
+          city: payload.city || 'Addis Ababa',
+          serviceAreas: payload.serviceAreas || ['Addis Ababa'],
+          isVerified: true,
+        });
+      }
+
+      this.persist();
+      const u = this.users[existingIndex];
+      return {
+        id: u.id,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        role: u.role,
+        phoneNumber: u.phoneNumber,
+        avatarUrl: u.avatarUrl,
+      };
     }
 
-    const passwordHash = await hashPassword(payload.password);
     const userId = `usr-work-${Date.now()}`;
     const newUser: DbUser = {
       id: userId,
       email: normalizedEmail,
       passwordHash,
-      firstName: payload.firstName.trim(),
+      firstName: payload.firstName.trim() || 'Worker',
       lastName: payload.lastName.trim(),
       role: 'worker',
-      phoneNumber: payload.phoneNumber.trim(),
+      phoneNumber: payload.phoneNumber.trim() || '+251911234567',
       avatarUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(payload.firstName + ' ' + payload.lastName)}`,
       isActive: true,
       createdAt: new Date().toISOString(),

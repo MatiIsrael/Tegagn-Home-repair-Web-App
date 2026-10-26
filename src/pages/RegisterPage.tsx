@@ -57,7 +57,7 @@ export const RegisterPage: React.FC = () => {
           experienceYears: Number(formData.experienceYears) || 3,
           password: formData.password,
         });
-        navigate('/worker/dashboard');
+        window.location.href = '/worker/dashboard';
       } else {
         await authService.registerCustomer({
           email: formData.email.trim(),
@@ -66,10 +66,10 @@ export const RegisterPage: React.FC = () => {
           phoneNumber: formData.phone.trim() || '+251 91 123 4567',
           password: formData.password,
         });
-        navigate('/customer/dashboard');
+        window.location.href = '/customer/dashboard';
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Registration failed. An account with this email may already exist.');
+      setErrorMessage(err.message || 'Registration failed.');
     } finally {
       setIsSubmitting(false);
     }

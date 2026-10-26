@@ -3,21 +3,19 @@ import { useSearchParams } from 'react-router-dom';
 import { 
   Users, 
   SlidersHorizontal, 
-  AlertCircle, 
-  X, 
-  RotateCcw, 
-  Search,
-  CheckCircle2
+  X
 } from 'lucide-react';
-import { WorkerProfile, WorkerFilterParams, TradeCategory } from '../types';
+import { WorkerProfile, WorkerFilterParams } from '../types';
 import { workerService } from '../services/api';
 import { WorkerCard } from '../components/workers/WorkerCard';
 import { WorkerFilter } from '../components/workers/WorkerFilter';
 import { EmptyState } from '../components/common/EmptyState';
 import { Button } from '../components/common/Button';
+import { useThemeLanguage } from '../context/ThemeLanguageContext';
 
 export const WorkersPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useThemeLanguage();
   
   // React State: Raw list of workers fetched from mock dataset
   const [workers, setWorkers] = useState<WorkerProfile[]>([]);
@@ -78,7 +76,7 @@ export const WorkersPage: React.FC = () => {
     updateFilters(resetValues);
   }, [updateFilters]);
 
-  // Effect: Fetch/Filter workers with a subtle simulated async transition for loading state demonstration
+  // Effect: Fetch/Filter workers
   useEffect(() => {
     let isCancelled = false;
     setLoading(true);
@@ -95,7 +93,7 @@ export const WorkersPage: React.FC = () => {
             setLoading(false);
           }
         });
-    }, 150); // 150ms simulated client-side query latency
+    }, 150);
 
     return () => {
       isCancelled = true;
@@ -104,17 +102,17 @@ export const WorkersPage: React.FC = () => {
   }, [filters]);
 
   // Array of quick category filter pills
-  const quickCategories: { label: string; slug: string }[] = [
-    { label: 'All Trades', slug: 'all' },
-    { label: 'Plumbing', slug: 'plumber' },
-    { label: 'Electrical', slug: 'electrician' },
-    { label: 'Construction', slug: 'construction' },
-    { label: 'Painting', slug: 'painter' },
-    { label: 'Carpentry', slug: 'carpenter' },
-    { label: 'Cleaning', slug: 'cleaning' },
+  const quickCategories = [
+    { label: t('allTrades'), slug: 'all' },
+    { label: t('plumbing'), slug: 'plumber' },
+    { label: t('electrical'), slug: 'electrician' },
+    { label: t('construction'), slug: 'construction' },
+    { label: t('painting'), slug: 'painter' },
+    { label: t('carpentry'), slug: 'carpenter' },
+    { label: t('cleaning'), slug: 'cleaning' },
   ];
 
-  // Variables & Conditions: Active filter chips for easy one-click removal
+  // Active filter chips for easy one-click removal
   const activeChips = useMemo(() => {
     const chips: { key: string; label: string; onRemove: () => void }[] = [];
 
@@ -130,7 +128,7 @@ export const WorkersPage: React.FC = () => {
       const match = quickCategories.find(c => c.slug === filters.category);
       chips.push({
         key: 'category',
-        label: `Trade: ${match ? match.label : filters.category}`,
+        label: `${t('serviceCategory')}: ${match ? match.label : filters.category}`,
         onRemove: () => updateFilters({ ...filters, category: 'all' }),
       });
     }
@@ -146,7 +144,7 @@ export const WorkersPage: React.FC = () => {
     if (filters.maxHourlyRate && filters.maxHourlyRate < 100) {
       chips.push({
         key: 'price',
-        label: `≤ $${filters.maxHourlyRate}/hr`,
+        label: `≤ ${filters.maxHourlyRate} ETB/hr`,
         onRemove: () => updateFilters({ ...filters, maxHourlyRate: undefined }),
       });
     }
@@ -154,7 +152,7 @@ export const WorkersPage: React.FC = () => {
     if (filters.isAvailable) {
       chips.push({
         key: 'available',
-        label: 'Available Now',
+        label: t('availableNow'),
         onRemove: () => updateFilters({ ...filters, isAvailable: undefined }),
       });
     }
@@ -162,39 +160,39 @@ export const WorkersPage: React.FC = () => {
     if (filters.isVerified) {
       chips.push({
         key: 'verified',
-        label: 'Verified Only',
+        label: t('verifiedOnly'),
         onRemove: () => updateFilters({ ...filters, isVerified: undefined }),
       });
     }
 
     return chips;
-  }, [filters, updateFilters]);
+  }, [filters, updateFilters, quickCategories, t]);
 
-  // Derived variable for category title
+  // Derived title for active category
   const activeCategoryTitle = useMemo(() => {
-    if (!filters.category || filters.category === 'all') return 'All Service Professionals';
+    if (!filters.category || filters.category === 'all') return t('directoryTitle');
     const match = quickCategories.find(c => c.slug === filters.category);
-    return match ? `${match.label} Professionals` : 'Specialized Professionals';
-  }, [filters.category]);
+    return match ? `${match.label} - ${t('brandName')}` : t('directoryTitle');
+  }, [filters.category, quickCategories, t]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
       
       {/* Header bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-navy-950 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-navy-950 dark:text-white tracking-tight">
             {activeCategoryTitle}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Compare local plumbers, electricians, builders, painters, carpenters, and cleaners with transparent hourly pricing.
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            {t('directorySubtitle')}
           </p>
         </div>
 
         {/* Count and Mobile Filter Toggle */}
         <div className="flex items-center justify-between md:justify-end gap-3">
-          <span className="text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-            Showing <strong className="text-navy-950">{workers.length}</strong> available pros
+          <span className="text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">
+            {t('showing')} <strong className="text-navy-950 dark:text-white">{workers.length}</strong> {t('availablePros')}
           </span>
 
           <Button
@@ -204,7 +202,7 @@ export const WorkersPage: React.FC = () => {
             className="md:hidden"
             icon={<SlidersHorizontal className="w-4 h-4 text-accent-500" />}
           >
-            Filters {activeChips.length > 0 && `(${activeChips.length})`}
+            {t('filters')} {activeChips.length > 0 && `(${activeChips.length})`}
           </Button>
         </div>
       </div>
@@ -222,8 +220,8 @@ export const WorkersPage: React.FC = () => {
               onClick={() => updateFilters({ ...filters, category: c.slug })}
               className={`px-3.5 py-1.5 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer ${
                 isSelected
-                  ? 'bg-navy-900 text-white shadow-sm ring-2 ring-navy-900/20'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  ? 'bg-navy-900 dark:bg-amber-500 text-white dark:text-slate-950 shadow-sm ring-2 ring-navy-900/20 dark:ring-amber-500/20'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               {c.label}
@@ -234,12 +232,12 @@ export const WorkersPage: React.FC = () => {
 
       {/* Active Filter Chips Bar */}
       {activeChips.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-100/80 rounded-xl border border-slate-200 text-xs">
-          <span className="font-bold text-slate-600">Active Filters:</span>
+        <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-100/80 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+          <span className="font-bold text-slate-600 dark:text-slate-300">{t('activeFilters')}</span>
           {activeChips.map((chip) => (
             <span
               key={chip.key}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-navy-950 font-semibold shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-navy-950 dark:text-white font-semibold shadow-2xs"
             >
               <span>{chip.label}</span>
               <button
@@ -256,9 +254,9 @@ export const WorkersPage: React.FC = () => {
           <button
             type="button"
             onClick={handleResetFilters}
-            className="ml-auto text-xs font-bold text-accent-600 hover:text-accent-700 underline cursor-pointer"
+            className="ml-auto text-xs font-bold text-accent-600 dark:text-amber-400 hover:underline cursor-pointer"
           >
-            Clear All
+            {t('clearAll')}
           </button>
         </div>
       )}
@@ -299,16 +297,16 @@ export const WorkersPage: React.FC = () => {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" aria-busy="true" aria-label="Loading workers">
               {[1, 2, 3, 4, 5, 6].map((n) => (
-                <div key={n} className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 animate-pulse">
+                <div key={n} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 animate-pulse">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-slate-200 rounded-2xl" />
+                    <div className="w-14 h-14 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
                     <div className="space-y-2 flex-1">
-                      <div className="h-4 bg-slate-200 rounded w-2/3" />
-                      <div className="h-3 bg-slate-100 rounded w-1/2" />
+                      <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-2/3" />
+                      <div className="h-3 bg-slate-100 dark:bg-slate-800/60 rounded w-1/2" />
                     </div>
                   </div>
-                  <div className="h-12 bg-slate-50 rounded-xl" />
-                  <div className="h-10 bg-slate-100 rounded" />
+                  <div className="h-12 bg-slate-50 dark:bg-slate-800 rounded-xl" />
+                  <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded" />
                 </div>
               ))}
             </div>
@@ -316,16 +314,16 @@ export const WorkersPage: React.FC = () => {
             /* Empty State */
             <EmptyState
               icon={<Users className="w-10 h-10 text-slate-400" />}
-              title="No service professionals match your criteria"
-              description="Try broadening your price range, searching for another trade craft, or clearing current filters."
-              actionLabel="Reset All Filters"
+              title={t('noWorkersFound')}
+              description={t('noWorkersDesc')}
+              actionLabel={t('resetAllFilters')}
               onAction={handleResetFilters}
             />
           ) : (
             /* Results Grid */
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {workers.map((worker) => (
-                <WorkerCard key={worker.id} worker={worker} isSample={true} />
+                <WorkerCard key={worker.id} worker={worker} />
               ))}
             </div>
           )}

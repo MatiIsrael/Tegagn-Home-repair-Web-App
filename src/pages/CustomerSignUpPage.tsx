@@ -30,10 +30,10 @@ export const CustomerSignUpPage: React.FC = () => {
     email: '',
     phone: '',
     city: 'Addis Ababa',
-    neighborhood: '',
+    neighborhood: 'Bole',
     password: '',
     confirmPassword: '',
-    termsAccepted: false,
+    termsAccepted: true,
   });
 
   // React State: Specific field-level error messages
@@ -44,68 +44,33 @@ export const CustomerSignUpPage: React.FC = () => {
 
   // Regular expression variable for standard email validation
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  // Regular expression variable for phone numbers (at least 9 digits)
-  const PHONE_REGEX = /^[+]?[\d\s-]{9,15}$/;
 
   // Function: Validates all form fields and returns an errors object
   const validateForm = (): CustomerFormErrors => {
     const newErrors: CustomerFormErrors = {};
 
-    // Condition 1: First Name validation
+    // First Name validation
     if (!formData.firstName.trim()) {
       newErrors.firstName = 'First name is required.';
-    } else if (formData.firstName.trim().length < 2) {
-      newErrors.firstName = 'First name must be at least 2 characters.';
     }
 
-    // Condition 2: Last Name validation
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required.';
-    } else if (formData.lastName.trim().length < 2) {
-      newErrors.lastName = 'Last name must be at least 2 characters.';
-    }
-
-    // Condition 3: Email format validation
+    // Email format validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email address is required.';
     } else if (!EMAIL_REGEX.test(formData.email.trim())) {
-      newErrors.email = 'Please enter a valid email address (e.g. name@domain.com).';
+      newErrors.email = 'Please enter a valid email address.';
     }
 
-    // Condition 4: Phone validation
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Mobile phone number is required.';
-    } else if (!PHONE_REGEX.test(formData.phone.trim())) {
-      newErrors.phone = 'Please enter a valid phone number (e.g. +251 91 123 4567).';
-    }
-
-    // Condition 5: City & Neighborhood
-    if (!formData.city.trim()) {
-      newErrors.city = 'City is required.';
-    }
-    if (!formData.neighborhood.trim()) {
-      newErrors.neighborhood = 'Neighborhood / Subcity is required.';
-    }
-
-    // Condition 6: Password security requirements
+    // Password requirements (simple & clear: minimum 6 characters)
     if (!formData.password) {
       newErrors.password = 'Password is required.';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters long.';
-    } else if (!/[A-Za-z]/.test(formData.password) || !/\d/.test(formData.password)) {
-      newErrors.password = 'Password must contain at least one letter and one number.';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters.';
     }
 
-    // Condition 7: Password matching check
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password.';
-    } else if (formData.password !== formData.confirmPassword) {
+    // Password matching check
+    if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match.';
-    }
-
-    // Condition 8: Terms acceptance
-    if (!formData.termsAccepted) {
-      newErrors.termsAccepted = 'You must accept the terms of service to create an account.';
     }
 
     return newErrors;
@@ -145,10 +110,10 @@ export const CustomerSignUpPage: React.FC = () => {
         neighborhood: formData.neighborhood,
       });
       setIsSubmitting(false);
-      navigate(redirectTarget);
+      window.location.href = redirectTarget;
     } catch (err: any) {
       setIsSubmitting(false);
-      setErrors(prev => ({ ...prev, email: err.message || 'Registration failed. An account with this email may already exist.' }));
+      setErrors(prev => ({ ...prev, email: err.message || 'Registration failed.' }));
     }
   };
 

@@ -32,11 +32,14 @@ const ScrollToTop: React.FC = () => {
   return null;
 };
 
+import { ThemeLanguageProvider } from './context/ThemeLanguageContext';
+
 export const App: React.FC = () => {
   return (
-    <Router>
-      <ScrollToTop />
-      <Routes>
+    <ThemeLanguageProvider>
+      <Router>
+        <ScrollToTop />
+        <Routes>
         <Route path="/" element={<Layout />}>
           {/* 1. Home */}
           <Route index element={<HomePage />} />
@@ -90,6 +93,7 @@ export const App: React.FC = () => {
         </Route>
       </Routes>
     </Router>
+  </ThemeLanguageProvider>
   );
 };
 

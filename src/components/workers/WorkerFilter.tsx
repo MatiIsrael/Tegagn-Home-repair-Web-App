@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, Filter, RotateCcw, X } from 'lucide-react';
 import { WorkerFilterParams } from '../../types';
+import { useThemeLanguage } from '../../context/ThemeLanguageContext';
 
 interface WorkerFilterProps {
   filters: WorkerFilterParams;
@@ -13,21 +14,23 @@ export const WorkerFilter: React.FC<WorkerFilterProps> = ({
   onChange,
   onReset,
 }) => {
-  // Array of trade categories including all 6 core marketplace trades
+  const { t } = useThemeLanguage();
+
+  // Array of trade categories including all core marketplace trades
   const categories = [
-    { value: 'all', label: 'All Trade Crafts' },
-    { value: 'plumber', label: 'Plumbing' },
-    { value: 'electrician', label: 'Electrical Work' },
-    { value: 'construction', label: 'Construction & Masonry' },
-    { value: 'painter', label: 'Painting' },
-    { value: 'carpenter', label: 'Carpentry' },
-    { value: 'cleaning', label: 'Cleaning & Sanitation' },
-    { value: 'hvac', label: 'HVAC Specialists' },
-    { value: 'locksmith', label: 'Locksmiths' },
-    { value: 'roofer', label: 'Roofing Repairs' },
+    { value: 'all', label: t('allTradeCrafts') },
+    { value: 'plumber', label: t('plumbing') },
+    { value: 'electrician', label: t('electrical') },
+    { value: 'construction', label: t('construction') },
+    { value: 'painter', label: t('painting') },
+    { value: 'carpenter', label: t('carpentry') },
+    { value: 'cleaning', label: t('cleaning') },
+    { value: 'hvac', label: t('hvac') },
+    { value: 'locksmith', label: t('locksmith') },
+    { value: 'roofer', label: t('roofer') },
   ];
 
-  // Variables & Conditions: calculate how many filters are currently active
+  // Calculate how many filters are currently active
   const activeFilterCount = [
     filters.search ? 1 : 0,
     filters.category && filters.category !== 'all' ? 1 : 0,
@@ -38,15 +41,15 @@ export const WorkerFilter: React.FC<WorkerFilterProps> = ({
   ].reduce((acc, curr) => acc + curr, 0);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-5">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs space-y-5">
       
       {/* Header bar */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-        <div className="flex items-center gap-2 text-navy-950 font-bold">
-          <Filter className="w-4 h-4 text-accent-600" />
-          <span>Filters</span>
+      <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-2 text-navy-950 dark:text-white font-bold">
+          <Filter className="w-4 h-4 text-accent-600 dark:text-amber-400" />
+          <span>{t('filters')}</span>
           {activeFilterCount > 0 && (
-            <span className="ml-1 px-2 py-0.5 rounded-full bg-accent-50 text-accent-700 text-xs font-bold border border-accent-200">
+            <span className="ml-1 px-2 py-0.5 rounded-full bg-accent-50 dark:bg-slate-800 text-accent-700 dark:text-amber-400 text-xs font-bold border border-accent-200 dark:border-slate-700">
               {activeFilterCount}
             </span>
           )}
@@ -56,10 +59,10 @@ export const WorkerFilter: React.FC<WorkerFilterProps> = ({
           <button
             type="button"
             onClick={onReset}
-            className="text-xs text-slate-500 hover:text-accent-600 flex items-center gap-1 transition-colors cursor-pointer"
+            className="text-xs text-slate-500 dark:text-slate-400 hover:text-accent-600 dark:hover:text-amber-400 flex items-center gap-1 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3 h-3" />
-            <span>Reset</span>
+            <span>{t('reset')}</span>
           </button>
         )}
       </div>
@@ -68,24 +71,24 @@ export const WorkerFilter: React.FC<WorkerFilterProps> = ({
         
         {/* Controlled Keyword Search Input */}
         <div>
-          <label htmlFor="filter-keywords" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Search Keywords
+          <label htmlFor="filter-keywords" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            {t('searchKeywords')}
           </label>
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
               id="filter-keywords"
               type="text"
-              placeholder="Name, skill, or location..."
+              placeholder={t('searchKeywordsPlaceholder')}
               value={filters.search || ''}
               onChange={(e) => onChange({ ...filters, search: e.target.value })}
-              className="w-full text-sm pl-9 pr-8 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+              className="w-full text-sm pl-9 pr-8 py-2 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100"
             />
             {filters.search && (
               <button
                 type="button"
                 onClick={() => onChange({ ...filters, search: '' })}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded cursor-pointer"
                 aria-label="Clear search query"
               >
                 <X className="w-3.5 h-3.5" />
@@ -96,17 +99,17 @@ export const WorkerFilter: React.FC<WorkerFilterProps> = ({
 
         {/* Controlled Category Dropdown */}
         <div>
-          <label htmlFor="filter-category" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Service Category
+          <label htmlFor="filter-category" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            {t('serviceCategory')}
           </label>
           <select
             id="filter-category"
             value={filters.category || 'all'}
             onChange={(e) => onChange({ ...filters, category: e.target.value })}
-            className="w-full text-sm px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 bg-white cursor-pointer font-medium text-slate-800"
+            className="w-full text-sm px-3 py-2 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 bg-white dark:bg-slate-800 cursor-pointer font-medium text-slate-800 dark:text-slate-100"
           >
             {categories.map((c) => (
-              <option key={c.value} value={c.value}>
+              <option key={c.value} value={c.value} className="dark:bg-slate-900">
                 {c.label}
               </option>
             ))}
@@ -116,11 +119,11 @@ export const WorkerFilter: React.FC<WorkerFilterProps> = ({
         {/* Max Hourly Rate Range Slider */}
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <label htmlFor="filter-price" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Max Hourly Rate
+            <label htmlFor="filter-price" className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              {t('maximumHourlyRate')}
             </label>
-            <span className="text-xs font-bold text-accent-600 bg-accent-50 px-2 py-0.5 rounded border border-accent-200">
-              ${filters.maxHourlyRate || 100}/hr
+            <span className="text-xs font-bold text-accent-600 dark:text-amber-400 bg-accent-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-accent-200 dark:border-slate-700">
+              {filters.maxHourlyRate || 100} ETB/hr
             </span>
           </div>
           <input
@@ -134,16 +137,16 @@ export const WorkerFilter: React.FC<WorkerFilterProps> = ({
             className="w-full accent-accent-500 cursor-pointer"
           />
           <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-            <span>$20</span>
-            <span>$60</span>
-            <span>$100/hr</span>
+            <span>20 ETB</span>
+            <span>60 ETB</span>
+            <span>100 ETB/hr</span>
           </div>
         </div>
 
         {/* Minimum Rating Selector Buttons */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Minimum Rating
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            {t('minimumRating')}
           </label>
           <div className="grid grid-cols-4 gap-1.5">
             {[4.0, 4.5, 4.8, 4.9].map((val) => {
@@ -161,7 +164,7 @@ export const WorkerFilter: React.FC<WorkerFilterProps> = ({
                   className={`text-xs py-1.5 px-2 rounded-lg border font-bold transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-accent-500 border-accent-500 text-white shadow-xs'
-                      : 'border-slate-200 text-slate-700 hover:border-slate-300 bg-white'
+                      : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 bg-white dark:bg-slate-800'
                   }`}
                   aria-pressed={isSelected}
                 >
@@ -173,8 +176,8 @@ export const WorkerFilter: React.FC<WorkerFilterProps> = ({
         </div>
 
         {/* Availability & Verification Toggles */}
-        <div className="pt-2 border-t border-slate-100 space-y-2.5">
-          <label className="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer select-none">
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
+          <label className="flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-300 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={filters.isAvailable || false}
@@ -186,10 +189,10 @@ export const WorkerFilter: React.FC<WorkerFilterProps> = ({
               }
               className="w-4 h-4 rounded text-accent-600 focus:ring-accent-500 border-slate-300 cursor-pointer"
             />
-            <span className="text-xs font-semibold text-slate-800">Available for Work Now</span>
+            <span className="text-xs font-semibold">{t('availableWorkNow')}</span>
           </label>
 
-          <label className="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer select-none">
+          <label className="flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-300 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={filters.isVerified || false}
@@ -201,25 +204,25 @@ export const WorkerFilter: React.FC<WorkerFilterProps> = ({
               }
               className="w-4 h-4 rounded text-accent-600 focus:ring-accent-500 border-slate-300 cursor-pointer"
             />
-            <span className="text-xs font-semibold text-slate-800">Verified Professionals Only</span>
+            <span className="text-xs font-semibold">{t('verifiedProsOnly')}</span>
           </label>
         </div>
 
         {/* Sort By Dropdown */}
-        <div className="pt-2 border-t border-slate-100">
-          <label htmlFor="filter-sort" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Sort Results By
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+          <label htmlFor="filter-sort" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            {t('sortBy')}
           </label>
           <select
             id="filter-sort"
             value={filters.sortBy || 'rating_desc'}
             onChange={(e) => onChange({ ...filters, sortBy: e.target.value as any })}
-            className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 bg-white font-medium text-slate-800 cursor-pointer"
+            className="w-full text-xs px-3 py-2 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 bg-white dark:bg-slate-800 font-medium text-slate-800 dark:text-slate-100 cursor-pointer"
           >
-            <option value="rating_desc">Highest Rated First</option>
-            <option value="price_asc">Price: Low to High</option>
-            <option value="price_desc">Price: High to Low</option>
-            <option value="experience_desc">Most Experienced First</option>
+            <option value="rating_desc" className="dark:bg-slate-900">{t('highestRating')}</option>
+            <option value="price_asc" className="dark:bg-slate-900">{t('lowestPrice')}</option>
+            <option value="price_desc" className="dark:bg-slate-900">{t('highestPrice')}</option>
+            <option value="experience_desc" className="dark:bg-slate-900">{t('mostExperienced')}</option>
           </select>
         </div>
 
