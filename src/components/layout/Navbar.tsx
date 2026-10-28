@@ -9,10 +9,15 @@ import {
   ShieldCheck, 
   Search, 
   LogIn,
-  LogOut
+  LogOut,
+  ShoppingCart,
+  Calendar,
+  Star,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '../common/Button';
 import { authService } from '../../services/api';
+import { cartService } from '../../services/cartService';
 import { useThemeLanguage } from '../../context/ThemeLanguageContext';
 import { LanguageThemeControls } from '../common/LanguageThemeControls';
 
@@ -52,6 +57,13 @@ export const Navbar: React.FC = () => {
   }, [mobileMenuOpen]);
 
   const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
+  const [cartCount, setCartCount] = useState(() => cartService.getCount());
+
+  useEffect(() => {
+    const handleCart = () => setCartCount(cartService.getCount());
+    window.addEventListener('tegagn_cart_changed', handleCart);
+    return () => window.removeEventListener('tegagn_cart_changed', handleCart);
+  }, []);
 
   useEffect(() => {
     const handleAuthChange = () => {
@@ -73,10 +85,22 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     ...(!isHomePage
-      ? [{ name: t('findPros'), path: '/workers', icon: <Search className="w-4 h-4 text-amber-500" /> }]
+      ? [
+          { name: 'Marketplace', path: '/marketplace', icon: <Search className="w-4 h-4 text-amber-500" /> },
+          { 
+            name: 'Cart', 
+            path: '/cart', 
+            icon: <ShoppingCart className="w-4 h-4 text-amber-500" />,
+            badge: cartCount > 0 ? cartCount : undefined 
+          }
+        ]
       : []),
     ...(storedUser && storedUser.role === 'customer'
-      ? [{ name: t('customerHub'), path: '/customer/dashboard', icon: <User className="w-4 h-4 text-brand-600" /> }]
+      ? [
+          { name: 'My Orders', path: '/customer/dashboard', icon: <Calendar className="w-4 h-4 text-amber-500" /> },
+          { name: 'Rate Pros', path: '/customer/dashboard?tab=rate', icon: <Star className="w-4 h-4 text-amber-500" /> },
+          { name: 'AI Features', path: '/customer/dashboard?tab=ai', icon: <Sparkles className="w-4 h-4 text-amber-500" /> }
+        ]
       : []),
     ...(storedUser && storedUser.role === 'worker'
       ? [{ name: t('workerPortal'), path: '/worker/dashboard', icon: <Briefcase className="w-4 h-4 text-amber-500" /> }]
@@ -118,14 +142,19 @@ export const Navbar: React.FC = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-150 ${
                   isActive(link.path)
-                    ? 'bg-navy-50 dark:bg-slate-800 text-navy-900 dark:text-white font-bold border border-navy-100 dark:border-slate-700'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-navy-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
+                    ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-800'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
                 }`}
               >
                 {link.icon}
-                {link.name}
+                <span>{link.name}</span>
+                {link.badge !== undefined && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-slate-950 shadow-2xs">
+                    {link.badge}
+                  </span>
+                )}
               </Link>
             ))}
           </nav>
@@ -220,14 +249,21 @@ export const Navbar: React.FC = () => {
                 key={link.path}
                 to={link.path}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-base font-medium transition-colors ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-base font-medium transition-colors ${
                   isActive(link.path)
-                    ? 'bg-navy-50 dark:bg-slate-800 text-navy-900 dark:text-white font-bold border border-navy-100 dark:border-slate-700'
+                    ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-800'
                     : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
-                {link.icon}
-                {link.name}
+                <div className="flex items-center gap-3">
+                  {link.icon}
+                  <span>{link.name}</span>
+                </div>
+                {link.badge !== undefined && (
+                  <span className="px-2 py-0.5 rounded-full text-xs font-black bg-amber-500 text-slate-950">
+                    {link.badge}
+                  </span>
+                )}
               </Link>
             ))}
           </div>
