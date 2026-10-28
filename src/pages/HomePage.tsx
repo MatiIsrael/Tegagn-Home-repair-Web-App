@@ -3,10 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   Search, 
   CheckCircle2, 
-  Shield, 
-  ArrowRight
+  ShieldCheck, 
+  Sparkles
 } from 'lucide-react';
-import { Button } from '../components/common/Button';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
 
 export const HomePage: React.FC = () => {
@@ -24,100 +23,90 @@ export const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="pb-16 sm:pb-24">
+    <div className="relative min-h-[calc(100vh-5rem)] flex flex-col justify-center items-center overflow-hidden bg-gradient-to-b from-emerald-50/40 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
       
-      {/* HERO SECTION */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-navy-950 via-navy-900 to-navy-950 text-white pt-16 pb-24 lg:pt-28 lg:pb-36 border-b border-navy-800">
+      {/* Soft decorative background glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-full max-w-4xl h-80 bg-emerald-500/10 blur-3xl pointer-events-none rounded-full" />
+
+      <div className="relative max-w-4xl mx-auto text-center space-y-8 z-10">
         
-        {/* Subtle decorative background glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-accent-500/10 blur-3xl pointer-events-none rounded-full" />
+        {/* Subtle category badge */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100/70 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider shadow-xs">
+          <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span>Addis Ababa Home Repair Marketplace</span>
+        </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center space-y-8">
-            
-            {/* Category tag */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-navy-800/90 border border-navy-700 text-accent-400 text-xs font-semibold uppercase tracking-wider shadow-sm">
-              <Shield className="w-4 h-4 text-accent-500" />
-              <span>Addis Ababa Home Repair Marketplace</span>
-            </div>
+        {/* Main Headline styled like EthioAgriConnect */}
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.15]">
+          {t('heroTitle')}{' '}
+          <span className="text-emerald-600 dark:text-emerald-400 block sm:inline">
+            {t('heroHighlight')}
+          </span>
+        </h1>
 
-            {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white">
-              {t('heroTitle')}{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500">
-                {t('heroHighlight')}
-              </span>
-            </h1>
+        {/* Subtitle */}
+        <p className="text-base sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto font-normal">
+          {t('heroSubtitle')}
+        </p>
 
-            {/* Subheading */}
-            <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto">
-              {t('heroSubtitle')}
-            </p>
+        {/* Action Buttons matching screenshot */}
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link
+            to="/workers"
+            className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-md hover:shadow-lg transition-all duration-200 text-center cursor-pointer"
+          >
+            {t('exploreMarketplace')}
+          </Link>
 
-            {/* Clean Unified Search Bar */}
-            <div className="pt-2">
-              <form
-                onSubmit={handleSearchSubmit}
-                className="bg-white dark:bg-slate-900 p-2 sm:p-2.5 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 flex flex-col sm:flex-row gap-2 max-w-xl mx-auto"
-                aria-label="Search professionals"
-              >
-                <div className="flex-1 flex items-center px-4 py-2">
-                  <Search className="w-5 h-5 text-accent-600 dark:text-amber-400 shrink-0 mr-3" />
-                  <input
-                    id="search-input"
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t('searchPlaceholder')}
-                    className="w-full text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 bg-transparent focus:outline-none"
-                  />
-                </div>
+          <Link
+            to="/register"
+            className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 border-2 border-emerald-600 dark:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-slate-800 font-bold text-base transition-all duration-200 text-center cursor-pointer"
+          >
+            {t('getStarted')}
+          </Link>
+        </div>
 
-                <Button
-                  type="submit"
-                  variant="accent"
-                  size="lg"
-                  className="shrink-0 font-bold px-8 shadow-md"
-                >
-                  {t('findButton')}
-                </Button>
-              </form>
-            </div>
+        {/* Sleek Minimal Search Bar */}
+        <div className="pt-4 max-w-xl mx-auto w-full">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="bg-white dark:bg-slate-900 p-2 sm:p-2.5 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 flex items-center gap-2"
+          >
+            <Search className="w-5 h-5 text-emerald-600 dark:text-emerald-400 ml-3 shrink-0" />
+            <input
+              id="search-input"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('searchPlaceholder')}
+              className="w-full text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 bg-transparent focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-all shrink-0 cursor-pointer shadow-xs"
+            >
+              {t('findButton')}
+            </button>
+          </form>
+        </div>
 
-            {/* Direct Action Link */}
-            <div className="pt-2">
-              <Link to="/workers">
-                <Button 
-                  variant="outline" 
-                  size="md" 
-                  icon={<ArrowRight className="w-4 h-4" />} 
-                  iconPosition="right"
-                  className="border-navy-700 hover:bg-navy-800 text-slate-200 hover:text-white"
-                >
-                  {t('findPros')}
-                </Button>
-              </Link>
-            </div>
-
-            {/* Trust Points */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-10 border-t border-navy-800/70 text-xs text-slate-300 max-w-2xl mx-auto">
-              <div className="flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-accent-500" />
-                <span>{t('verifiedBadge')}</span>
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-accent-500" />
-                <span>{t('zeroBrokerage')}</span>
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-accent-500" />
-                <span>{t('rapidResponse')}</span>
-              </div>
-            </div>
-
+        {/* Trust Points */}
+        <div className="pt-8 border-t border-slate-200/60 dark:border-slate-800 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>{t('verifiedBadge')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>{t('zeroBrokerage')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>{t('rapidResponse')}</span>
           </div>
         </div>
-      </section>
+
+      </div>
 
     </div>
   );

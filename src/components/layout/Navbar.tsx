@@ -93,15 +93,15 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16 sm:h-20">
           
           {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-accent-500 rounded-xl p-1">
-            <div className="w-10 h-10 rounded-xl bg-navy-900 dark:bg-amber-500 flex items-center justify-center text-accent-500 dark:text-slate-950 shadow-md shadow-navy-900/20 group-hover:scale-105 transition-transform duration-200">
-              <Wrench className="w-5 h-5 text-accent-500 dark:text-slate-950" />
+          <Link to="/" className="flex items-center gap-2.5 group focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-xl p-1">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 dark:bg-emerald-500 flex items-center justify-center text-white shadow-md shadow-emerald-600/20 group-hover:scale-105 transition-transform duration-200">
+              <Wrench className="w-5 h-5 text-white" />
             </div>
             <div>
-              <span className="text-2xl font-black tracking-tight text-navy-950 dark:text-white group-hover:text-accent-600 dark:group-hover:text-amber-400 transition-colors">
+              <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                 {t('brandName')}
               </span>
-              <span className="hidden sm:inline-block ml-2 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-accent-50 dark:bg-slate-800 text-accent-700 dark:text-amber-400 border border-accent-200 dark:border-slate-700">
+              <span className="hidden sm:inline-block ml-2 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                 {t('homeServices')}
               </span>
             </div>
@@ -161,11 +161,18 @@ export const Navbar: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <Link to="/login">
-                  <Button variant="accent" size="sm" icon={<LogIn className="w-4 h-4" />}>
-                    {t('login')}
-                  </Button>
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/login"
+                  className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors px-2 py-1"
+                >
+                  {t('login')}
+                </Link>
+                <Link
+                  to="/register"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-2 rounded-xl shadow-xs transition-all cursor-pointer"
+                >
+                  {t('register')}
                 </Link>
               </div>
             )}

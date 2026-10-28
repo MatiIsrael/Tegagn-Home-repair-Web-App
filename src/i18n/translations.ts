@@ -28,9 +28,11 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
 
     // Hero Section
     'heroBadge': 'Addis Ababa Home Repair Marketplace',
-    'heroTitle': 'Direct Access to Trusted Local',
-    'heroHighlight': 'Repair Specialists',
-    'heroSubtitle': 'Connect directly with certified plumbers, electricians, builders, painters, and carpenters across Addis Ababa without commission fees or broker markups.',
+    'heroTitle': 'Connecting Homeowners and',
+    'heroHighlight': 'Service Professionals Directly',
+    'heroSubtitle': 'Quality home repairs from trusted local technicians delivered straight to your door. Enjoy verified workmanship, direct contact, and fair prices across Addis Ababa.',
+    'exploreMarketplace': 'Explore Marketplace',
+    'getStarted': 'Get Started',
     'searchPlaceholder': 'Search by trade, skill, or neighborhood (e.g. Bole, Plumbing)...',
     'allTrades': 'All Trades',
     'allTradeCrafts': 'All Trade Crafts',
@@ -329,9 +331,11 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
 
     // Hero Section
     'heroBadge': 'የአዲስ አበባ የቤት ጥገና መድረክ',
-    'heroTitle': 'ከታመኑ የአካባቢው የቤት ጥገና',
-    'heroHighlight': 'ባለሙያዎች ጋር በቀጥታ ይገናኙ',
-    'heroSubtitle': 'ያለ ደላላ እና ተጨማሪ ክፍያ በአዲስ አበባ ውስጥ ከቧንቧ፣ ከኤሌክትሪክ፣ ከግንባታ፣ ከቀለም እና ከእንጨት ባለሙያዎች ጋር በቀጥታ ይገናኙ።',
+    'heroTitle': 'የቤት ባለቤቶችን እና የጥገና',
+    'heroHighlight': 'ባለሙያዎችን በቀጥታ እናገናኛለን',
+    'heroSubtitle': 'ጥራት ያለው የቤት ውስጥ ጥገና አገልግሎት በቀጥታ ወደ ቤትዎ። ፍትሃዊ ዋጋ፣ ቀጥተኛ ግንኙነት እና ታማኝ የአካባቢ ባለሙያዎች በአዲስ አበባ።',
+    'exploreMarketplace': 'ገበያውን ያስሱ',
+    'getStarted': 'ይጀምሩ',
     'searchPlaceholder': 'በባለሙያ ስራ፣ ክህሎት ወይም አካባቢ ይፈልጉ (ምሳሌ ቦሌ፣ ቧንቧ)...',
     'allTrades': 'ሁሉም ሙያዎች',
     'allTradeCrafts': 'ሁሉም የሙያ ዘርፎች',
@@ -630,9 +634,11 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
 
     // Hero Section
     'heroBadge': 'Gabaa Suphaa Manaa Finfinnee',
-    'heroTitle': 'Ogeeyyii Suphaa Naannoo Amanamoo',
-    'heroHighlight': 'Waliin Kallattiin Walqunnamaa',
-    'heroSubtitle': 'Kaffaltii dilaalaa fi dabalata malee Finfinnee keessatti ogeeyyii ujummoo bishaanii, elektirikii, ijaarsa, halluu fi soofaa waliin kallattiin walqunnamaa.',
+    'heroTitle': 'Abbootii Manaa fi Ogeeyyii',
+    'heroHighlight': 'Kallattiin Walqunnamsiisa',
+    'heroSubtitle': 'Tajaajila suphaa mana qulqullina qabu Finfinnee keessatti kallattiin gara mana keessaniitti. Gatii madaalawaa, qunnamtii kallattii fi ogeeyyii naannoo amanamoo.',
+    'exploreMarketplace': 'Gabaa Daawwadhaa',
+    'getStarted': 'Jalqabaa',
     'searchPlaceholder': 'Gosa ogummaa, dandeettii ykn naannoon barbaadaa (fk. Boolee, Ujummoo)...',
     'allTrades': 'Ogummaa Hunda',
     'allTradeCrafts': 'Gosa Ogummaa Hunda',
