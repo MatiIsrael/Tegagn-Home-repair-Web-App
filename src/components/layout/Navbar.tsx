@@ -68,8 +68,12 @@ export const Navbar: React.FC = () => {
     setStoredUser(authService.getStoredUser());
   }, [location.pathname]);
 
+  const isHomePage = location.pathname === '/' || location.pathname === '';
+
   const navLinks = [
-    { name: t('findPros'), path: '/workers', icon: <Search className="w-4 h-4 text-accent-500" /> },
+    ...(!isHomePage
+      ? [{ name: t('findPros'), path: '/workers', icon: <Search className="w-4 h-4 text-amber-500" /> }]
+      : []),
     ...(storedUser && storedUser.role === 'customer'
       ? [{ name: t('customerHub'), path: '/customer/dashboard', icon: <User className="w-4 h-4 text-brand-600" /> }]
       : []),

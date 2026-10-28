@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { 
-  Search, 
   CheckCircle2, 
   ShieldCheck, 
   Sparkles,
@@ -10,18 +9,7 @@ import {
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
 
 export const HomePage: React.FC = () => {
-  const navigate = useNavigate();
   const { t } = useThemeLanguage();
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (searchQuery.trim()) {
-      params.set('search', searchQuery.trim());
-    }
-    navigate(`/workers?${params.toString()}`);
-  };
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-b from-amber-50/30 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors">
@@ -68,30 +56,6 @@ export const HomePage: React.FC = () => {
             >
               {t('getStarted')}
             </Link>
-          </div>
-
-          {/* Sleek Minimal Search Bar */}
-          <div className="pt-4 max-w-xl mx-auto w-full">
-            <form
-              onSubmit={handleSearchSubmit}
-              className="bg-white dark:bg-slate-900 p-2 sm:p-2.5 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 flex items-center gap-2"
-            >
-              <Search className="w-5 h-5 text-amber-500 dark:text-amber-400 ml-3 shrink-0" />
-              <input
-                id="search-input"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('searchPlaceholder')}
-                className="w-full text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 bg-transparent focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm px-6 py-2.5 rounded-xl transition-all shrink-0 cursor-pointer shadow-xs"
-              >
-                {t('findButton')}
-              </button>
-            </form>
           </div>
 
         </div>
