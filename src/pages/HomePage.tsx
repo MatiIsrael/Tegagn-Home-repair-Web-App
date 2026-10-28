@@ -37,7 +37,7 @@ export const HomePage: React.FC = () => {
           {/* Category badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100/80 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-300 text-xs font-bold uppercase tracking-wider shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-            <span>Addis Ababa Home Repair Marketplace</span>
+            <span>{t('heroBadge')}</span>
           </div>
 
           {/* Main Headline */}
