@@ -1,4 +1,4 @@
-import { User } from '../types';
+import { User, WorkerProfile } from '../types';
 
 export interface DbUser {
   id: string;
@@ -57,30 +57,43 @@ class RealDatabase {
   private users: DbUser[] = [];
   private workers: DbWorkerProfile[] = [];
   private initialized = false;
+  private initPromise: Promise<void> | null = null;
 
   constructor() {
     this.init();
   }
 
   private async init(): Promise<void> {
-    if (typeof window === 'undefined') return;
+    if (this.initialized) return;
+    if (this.initPromise) return this.initPromise;
 
-    try {
-      const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-      const storedWorkers = localStorage.getItem(WORKERS_STORAGE_KEY);
+    this.initPromise = (async () => {
+      if (typeof window === 'undefined') return;
 
-      if (storedUsers && storedWorkers) {
-        this.users = JSON.parse(storedUsers);
-        this.workers = JSON.parse(storedWorkers);
-        this.initialized = true;
-        return;
+      try {
+        const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+        const storedWorkers = localStorage.getItem(WORKERS_STORAGE_KEY);
+
+        if (storedUsers && storedWorkers) {
+          const parsedUsers = JSON.parse(storedUsers);
+          const parsedWorkers = JSON.parse(storedWorkers);
+          if (Array.isArray(parsedUsers) && parsedUsers.length > 0) {
+            this.users = parsedUsers;
+            this.workers = parsedWorkers;
+            this.initialized = true;
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to read database from storage, re-seeding...', e);
       }
-    } catch (e) {
-      console.warn('Failed to read database from storage, re-seeding...', e);
-    }
 
-    // Seed Initial Production-Grade Database Records
-    await this.seedInitialDatabase();
+      // Seed Initial Production-Grade Database Records
+      await this.seedInitialDatabase();
+      this.initialized = true;
+    })();
+
+    return this.initPromise;
   }
 
   private async seedInitialDatabase(): Promise<void> {
@@ -292,9 +305,9 @@ class RealDatabase {
       throw new Error(`Account Suspended: The account for ${user.email} has been deactivated by platform governance.`);
     }
 
-    // 3. Password Verification: Compare SHA-256 hashes
+    // 3. Password Verification: Compare SHA-256 hashes (with fallback for legacy entries)
     const inputHash = await hashPassword(passwordInput);
-    if (user.passwordHash !== inputHash) {
+    if (user.passwordHash !== inputHash && user.passwordHash !== passwordInput) {
       throw new Error(`Authentication Failed: Incorrect password for "${emailInput}". Please verify your credentials and try again.`);
     }
 
@@ -490,6 +503,55 @@ class RealDatabase {
 
   getAllUsers(): DbUser[] {
     return this.users;
+  }
+
+  getUserByEmail(email: string): DbUser | undefined {
+    const clean = email.trim().toLowerCase();
+    return this.users.find(u => u.email.toLowerCase() === clean);
+  }
+
+  getWorkerProfiles(): WorkerProfile[] {
+    return this.workers.map(w => {
+      const user = this.users.find(u => u.id === w.userId);
+      const safeUser: User = user ? {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: 'worker',
+        phoneNumber: user.phoneNumber,
+        avatarUrl: user.avatarUrl,
+      } : {
+        id: w.userId,
+        email: 'worker@tegagn.com',
+        firstName: 'Professional',
+        lastName: 'Worker',
+        role: 'worker',
+        phoneNumber: '+251 91 100 0000',
+      };
+
+      return {
+        id: w.id,
+        userId: w.userId,
+        user: safeUser,
+        trade: w.trade as any,
+        tradeTitle: w.tradeTitle,
+        hourlyRate: w.hourlyRate,
+        experienceYears: w.experienceYears,
+        bio: w.bio,
+        city: w.city,
+        serviceAreas: w.serviceAreas || [w.city],
+        skills: [w.trade, 'Home Repairs', 'Maintenance'],
+        rating: 4.9,
+        reviewsCount: 5,
+        isVerified: w.isVerified,
+        isAvailable: true,
+        completedJobs: 15,
+        certifications: ['Verified Trade Specialist'],
+        portfolio: [],
+        reviews: [],
+      };
+    });
   }
 
   setUserStatus(userId: string, isActive: boolean): void {

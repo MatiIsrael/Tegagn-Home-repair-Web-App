@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Wrench, 
   Menu, 
@@ -19,6 +19,7 @@ import { LanguageThemeControls } from '../common/LanguageThemeControls';
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useThemeLanguage();
 
   const isActive = (path: string) => {
@@ -88,7 +89,7 @@ export const Navbar: React.FC = () => {
   const handleSignOut = () => {
     authService.logout();
     setStoredUser(null);
-    window.location.href = '/';
+    navigate('/');
   };
 
   return (

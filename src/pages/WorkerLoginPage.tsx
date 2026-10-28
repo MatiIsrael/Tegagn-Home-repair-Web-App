@@ -20,7 +20,14 @@ export const WorkerLoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const storedUser = authService.getStoredUser();
-  const [email, setEmail] = useState(storedUser?.role === 'worker' ? storedUser.email : '');
+
+  React.useEffect(() => {
+    if (storedUser && storedUser.role === 'worker') {
+      navigate('/worker/dashboard', { replace: true });
+    }
+  }, [storedUser, navigate]);
+
+  const [email, setEmail] = useState(storedUser?.role === 'worker' ? storedUser.email : (localStorage.getItem('tegagn_remembered_email') || ''));
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

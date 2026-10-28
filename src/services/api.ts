@@ -93,10 +93,13 @@ export const authService = {
     }
   },
 
-  setSession(access: string, refresh: string, user: User) {
+  setSession(access: string, refresh: string, user: User, rememberEmail: boolean = true) {
     localStorage.setItem('tegagn_access_token', access);
     localStorage.setItem('tegagn_refresh_token', refresh);
     localStorage.setItem('tegagn_user', JSON.stringify(user));
+    if (rememberEmail && user.email) {
+      localStorage.setItem('tegagn_remembered_email', user.email);
+    }
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('tegagn_auth_changed'));
     }
@@ -106,6 +109,7 @@ export const authService = {
     localStorage.removeItem('tegagn_access_token');
     localStorage.removeItem('tegagn_refresh_token');
     localStorage.removeItem('tegagn_user');
+    // Keep tegagn_remembered_email so returning users are always remembered!
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('tegagn_auth_changed'));
     }
@@ -377,8 +381,10 @@ export const workerService = {
       // Fall through to mock foundation
     }
 
-    // Frontend fallback with placeholder mock data
-    let result = [...PLACEHOLDER_WORKERS];
+    // 2. Fetch and merge real database registered workers with mock foundation
+    const dbWorkers = realDb.getWorkerProfiles();
+    const existingIds = new Set(dbWorkers.map(w => w.id));
+    let result = [...dbWorkers, ...PLACEHOLDER_WORKERS.filter(p => !existingIds.has(p.id))];
     if (filters) {
       if (filters.search) {
         const query = filters.search.toLowerCase();
@@ -472,7 +478,12 @@ export const workerService = {
       // Fallback
     }
 
-    const worker = PLACEHOLDER_WORKERS.find(w => w.id === id);
+    // Fallback to real database workers + placeholder workers
+    const dbWorkers = realDb.getWorkerProfiles();
+    const foundInDb = dbWorkers.find(w => w.id === id || w.userId === id);
+    if (foundInDb) return foundInDb;
+
+    const worker = PLACEHOLDER_WORKERS.find(w => w.id === id || w.userId === id);
     if (!worker) return null;
     const reviews = PLACEHOLDER_REVIEWS.filter(r => r.workerId === id);
     return { ...worker, reviews };

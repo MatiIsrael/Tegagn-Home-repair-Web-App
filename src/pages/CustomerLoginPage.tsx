@@ -22,7 +22,7 @@ export const CustomerLoginPage: React.FC = () => {
   const isBookingRequired = searchParams.get('notice') === 'booking_required' || searchParams.has('redirect');
 
   const storedUser = authService.getStoredUser();
-  const [email, setEmail] = useState(storedUser?.role === 'customer' ? storedUser.email : '');
+  const [email, setEmail] = useState(storedUser?.role === 'customer' ? storedUser.email : (localStorage.getItem('tegagn_remembered_email') || ''));
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

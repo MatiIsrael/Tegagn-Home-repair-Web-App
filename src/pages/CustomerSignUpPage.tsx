@@ -110,7 +110,7 @@ export const CustomerSignUpPage: React.FC = () => {
         neighborhood: formData.neighborhood,
       });
       setIsSubmitting(false);
-      window.location.href = redirectTarget;
+      navigate(redirectTarget);
     } catch (err: any) {
       setIsSubmitting(false);
       setErrors(prev => ({ ...prev, email: err.message || 'Registration failed.' }));

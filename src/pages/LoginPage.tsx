@@ -13,11 +13,21 @@ export const LoginPage: React.FC = () => {
   const redirectTarget = searchParams.get('redirect');
   const { t } = useThemeLanguage();
 
-  // Controlled inputs
-  const [email, setEmail] = useState('');
+  // Auto-redirect if already logged in (always remember)
+  React.useEffect(() => {
+    const user = authService.getStoredUser();
+    if (user) {
+      if (user.role === 'worker') navigate('/worker/dashboard', { replace: true });
+      else if (user.role === 'admin') navigate('/admin', { replace: true });
+      else navigate(redirectTarget || '/customer/dashboard', { replace: true });
+    }
+  }, [navigate, redirectTarget]);
+
+  // Controlled inputs: prefill remembered email if saved
+  const [email, setEmail] = useState(() => localStorage.getItem('tegagn_remembered_email') || '');
   const [password, setPassword] = useState('');
   const [roleHint, setRoleHint] = useState<'customer' | 'worker' | 'admin'>('customer');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   // Validation errors & loading state
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});

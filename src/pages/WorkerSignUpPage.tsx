@@ -132,7 +132,7 @@ export const WorkerSignUpPage: React.FC = () => {
         password: formData.password,
       });
       setIsSubmitting(false);
-      window.location.href = '/worker/dashboard';
+      navigate('/worker/dashboard');
     } catch (err: any) {
       setIsSubmitting(false);
       setErrors(prev => ({ ...prev, email: err.message || 'Worker registration failed.' }));

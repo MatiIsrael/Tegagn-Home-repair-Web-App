@@ -57,7 +57,7 @@ export const RegisterPage: React.FC = () => {
           experienceYears: Number(formData.experienceYears) || 3,
           password: formData.password,
         });
-        window.location.href = '/worker/dashboard';
+        navigate('/worker/dashboard');
       } else {
         await authService.registerCustomer({
           email: formData.email.trim(),
@@ -66,7 +66,7 @@ export const RegisterPage: React.FC = () => {
           phoneNumber: formData.phone.trim() || '+251 91 123 4567',
           password: formData.password,
         });
-        window.location.href = '/customer/dashboard';
+        navigate('/customer/dashboard');
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'Registration failed.');

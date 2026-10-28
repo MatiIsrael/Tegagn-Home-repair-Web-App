@@ -19,8 +19,16 @@ import { Button } from '../components/common/Button';
 export const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
 
+  const storedUser = authService.getStoredUser();
+
+  React.useEffect(() => {
+    if (storedUser && storedUser.role === 'admin') {
+      navigate('/admin', { replace: true });
+    }
+  }, [storedUser, navigate]);
+
   // Controlled form state
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(storedUser?.role === 'admin' ? storedUser.email : (localStorage.getItem('tegagn_remembered_email') || ''));
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberSession, setRememberSession] = useState(true);
