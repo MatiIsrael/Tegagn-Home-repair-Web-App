@@ -1,7 +1,7 @@
 {
-  "name": "react-example",
+  "name": "tegagn-home-repair",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "tsx server.ts",
-    "clean": "rm -rf dist server.js",
+    "clean": "node -e \"const fs=require('fs'); fs.rmSync('dist', { recursive: true, force: true });\"",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
