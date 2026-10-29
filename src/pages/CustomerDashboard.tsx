@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { 
   Calendar, 
   MapPin, 
@@ -33,10 +33,12 @@ import { Button } from '../components/common/Button';
 import { authService, bookingService, workerService } from '../services/api';
 import { postService } from '../services/postService';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
+import { CustomerAiAgent } from '../components/customer/CustomerAiAgent';
 
 export const CustomerDashboard: React.FC = () => {
   const { t } = useThemeLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
 
   const handleSignOut = () => {
@@ -58,7 +60,24 @@ export const CustomerDashboard: React.FC = () => {
       : 'Customer';
 
   // Navigation Tabs: Default to 'marketplace' matching reference
-  const [selectedTab, setSelectedTab] = useState<'marketplace' | 'bookings' | 'feed'>('marketplace');
+  const location = useLocation();
+  const tabQuery = searchParams.get('tab');
+  const isAiPath = location.pathname.endsWith('/ai');
+  const getInitialTab = (): 'marketplace' | 'bookings' | 'feed' | 'ai' => {
+    if (tabQuery === 'ai' || isAiPath) return 'ai';
+    if (tabQuery === 'feed') return 'feed';
+    if (tabQuery === 'rate' || tabQuery === 'bookings' || tabQuery === 'cart') return 'bookings';
+    return 'marketplace';
+  };
+  const [selectedTab, setSelectedTab] = useState<'marketplace' | 'bookings' | 'feed' | 'ai'>(getInitialTab);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'ai' || location.pathname.endsWith('/ai')) setSelectedTab('ai');
+    else if (tab === 'feed') setSelectedTab('feed');
+    else if (tab === 'rate' || tab === 'bookings' || tab === 'cart') setSelectedTab('bookings');
+    else if (tab === 'marketplace') setSelectedTab('marketplace');
+  }, [searchParams, location.pathname]);
 
   // Bookings State
   const [bookings, setBookings] = useState<Booking[]>(PLACEHOLDER_CUSTOMER_BOOKINGS);
@@ -302,7 +321,7 @@ export const CustomerDashboard: React.FC = () => {
         <div className="flex items-center gap-1 sm:gap-3 overflow-x-auto">
           <button
             type="button"
-            onClick={() => setSelectedTab('marketplace')}
+            onClick={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
               selectedTab === 'marketplace'
                 ? 'bg-amber-500 text-slate-950 shadow-sm'
@@ -315,7 +334,7 @@ export const CustomerDashboard: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setSelectedTab('bookings')}
+            onClick={() => { setSelectedTab('bookings'); setSearchParams({ tab: 'bookings' }); }}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
               selectedTab === 'bookings'
                 ? 'bg-amber-500 text-slate-950 shadow-sm'
@@ -335,7 +354,7 @@ export const CustomerDashboard: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setSelectedTab('feed')}
+            onClick={() => { setSelectedTab('feed'); setSearchParams({ tab: 'feed' }); }}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
               selectedTab === 'feed'
                 ? 'bg-amber-500 text-slate-950 shadow-sm'
@@ -344,6 +363,29 @@ export const CustomerDashboard: React.FC = () => {
           >
             <Camera className="w-4 h-4" />
             <span>Showcase Feed</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTab('ai');
+              setSearchParams({ tab: 'ai' });
+            }}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
+              selectedTab === 'ai'
+                ? 'bg-amber-500 text-slate-950 shadow-sm'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>AI Features</span>
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-black ${
+              selectedTab === 'ai'
+                ? 'bg-slate-950 text-amber-400'
+                : 'bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
+            }`}>
+              Gemini
+            </span>
           </button>
         </div>
 
@@ -556,7 +598,7 @@ export const CustomerDashboard: React.FC = () => {
                   <Button
                     variant="accent"
                     size="md"
-                    onClick={() => setSelectedTab('marketplace')}
+                    onClick={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
                   >
                     Browse Marketplace
                   </Button>
@@ -658,7 +700,7 @@ export const CustomerDashboard: React.FC = () => {
                 <div className="space-y-2.5 pt-2">
                   <button
                     type="button"
-                    onClick={() => setSelectedTab('marketplace')}
+                    onClick={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
                     className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm shadow-md shadow-amber-500/20 text-center transition-all cursor-pointer"
                   >
                     Proceed to Book More Trades
@@ -666,7 +708,7 @@ export const CustomerDashboard: React.FC = () => {
 
                   <button
                     type="button"
-                    onClick={() => setSelectedTab('marketplace')}
+                    onClick={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
                     className="w-full py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs text-center transition-colors cursor-pointer"
                   >
                     Continue Browsing
@@ -757,6 +799,17 @@ export const CustomerDashboard: React.FC = () => {
             ))}
           </div>
         </div>
+      )}
+
+      {/* 4. TAB 4: AI FEATURES (Powered by Google Gemini API) */}
+      {selectedTab === 'ai' && (
+        <CustomerAiAgent
+          customerName={customerDisplayName}
+          onNavigateTab={(tab) => {
+            setSelectedTab(tab);
+            setSearchParams({ tab });
+          }}
+        />
       )}
 
       {/* 5. MODAL: BOOK TECHNICIAN (With Warm Amber Accents) */}

@@ -29,7 +29,14 @@ export const Navbar: React.FC = () => {
 
   const isActive = (path: string) => {
     if (path === '/' && location.pathname !== '/') return false;
-    return location.pathname.startsWith(path);
+    if (path.includes('?')) {
+      const [basePath, query] = path.split('?');
+      return location.pathname === basePath && location.search.includes(query);
+    }
+    if (path === '/customer/dashboard' && (location.search.includes('tab=ai') || location.search.includes('tab=rate'))) {
+      return false;
+    }
+    return location.pathname === path;
   };
 
   useEffect(() => {

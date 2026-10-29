@@ -72,6 +72,8 @@ export const App: React.FC = () => {
 
           {/* 7. Customer Dashboard */}
           <Route path="customer/dashboard" element={<CustomerDashboard />} />
+          <Route path="customer/ai" element={<CustomerDashboard />} />
+          <Route path="ai" element={<CustomerDashboard />} />
 
           {/* 8. Worker Dashboard */}
           <Route path="worker/dashboard" element={<WorkerDashboard />} />
