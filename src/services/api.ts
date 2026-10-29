@@ -61,7 +61,9 @@ export class ApiError extends Error {
 }
 
 function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('tegagn_access_token');
+  const token = typeof window !== 'undefined'
+    ? (sessionStorage.getItem('tegagn_access_token') || localStorage.getItem('tegagn_access_token'))
+    : null;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -74,17 +76,31 @@ function getAuthHeaders(): HeadersInit {
 // ---------------------------------------------------------------------------
 // 1. Authentication & User Profile Service
 // ---------------------------------------------------------------------------
+// Clear any stale persistent user session from localStorage so entering fresh never auto-logins
+if (typeof window !== 'undefined') {
+  try {
+    localStorage.removeItem('tegagn_user');
+    localStorage.removeItem('tegagn_access_token');
+    localStorage.removeItem('tegagn_refresh_token');
+  } catch {
+    // ignore
+  }
+}
+
 export const authService = {
   getToken(): string | null {
-    return localStorage.getItem('tegagn_access_token');
+    if (typeof window === 'undefined') return null;
+    return sessionStorage.getItem('tegagn_access_token');
   },
 
   getRefreshToken(): string | null {
-    return localStorage.getItem('tegagn_refresh_token');
+    if (typeof window === 'undefined') return null;
+    return sessionStorage.getItem('tegagn_refresh_token');
   },
 
   getStoredUser(): User | null {
-    const raw = localStorage.getItem('tegagn_user');
+    if (typeof window === 'undefined') return null;
+    const raw = sessionStorage.getItem('tegagn_user');
     if (!raw) return null;
     try {
       return JSON.parse(raw);
@@ -94,9 +110,12 @@ export const authService = {
   },
 
   setSession(access: string, refresh: string, user: User, rememberEmail: boolean = true) {
-    localStorage.setItem('tegagn_access_token', access);
-    localStorage.setItem('tegagn_refresh_token', refresh);
-    localStorage.setItem('tegagn_user', JSON.stringify(user));
+    sessionStorage.setItem('tegagn_access_token', access);
+    sessionStorage.setItem('tegagn_refresh_token', refresh);
+    sessionStorage.setItem('tegagn_user', JSON.stringify(user));
+    localStorage.removeItem('tegagn_user');
+    localStorage.removeItem('tegagn_access_token');
+    localStorage.removeItem('tegagn_refresh_token');
     if (rememberEmail && user.email) {
       localStorage.setItem('tegagn_remembered_email', user.email);
     }
@@ -106,6 +125,9 @@ export const authService = {
   },
 
   clearSession() {
+    sessionStorage.removeItem('tegagn_access_token');
+    sessionStorage.removeItem('tegagn_refresh_token');
+    sessionStorage.removeItem('tegagn_user');
     localStorage.removeItem('tegagn_access_token');
     localStorage.removeItem('tegagn_refresh_token');
     localStorage.removeItem('tegagn_user');

@@ -12,7 +12,7 @@ import {
   LogOut,
   ShoppingCart,
   Calendar,
-  Star,
+
   Sparkles
 } from 'lucide-react';
 import { Button } from '../common/Button';
@@ -102,17 +102,17 @@ export const Navbar: React.FC = () => {
           }
         ]
       : []),
-    ...(storedUser && storedUser.role === 'customer'
+    ...(!isHomePage && storedUser && storedUser.role === 'customer'
       ? [
           { name: 'My Orders', path: '/customer/dashboard', icon: <Calendar className="w-4 h-4 text-amber-500" /> },
-          { name: 'Rate Pros', path: '/customer/dashboard?tab=rate', icon: <Star className="w-4 h-4 text-amber-500" /> },
+          
           { name: 'AI Features', path: '/customer/dashboard?tab=ai', icon: <Sparkles className="w-4 h-4 text-amber-500" /> }
         ]
       : []),
-    ...(storedUser && storedUser.role === 'worker'
+    ...(!isHomePage && storedUser && storedUser.role === 'worker'
       ? [{ name: t('workerPortal'), path: '/worker/dashboard', icon: <Briefcase className="w-4 h-4 text-amber-500" /> }]
       : []),
-    ...(storedUser && storedUser.role === 'admin'
+    ...(!isHomePage && storedUser && storedUser.role === 'admin'
       ? [{ name: t('adminPortal'), path: '/admin', icon: <ShieldCheck className="w-4 h-4 text-sky-500" /> }]
       : []),
   ];
