@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Mail, 
@@ -22,7 +22,57 @@ export const CustomerLoginPage: React.FC = () => {
   const isBookingRequired = searchParams.get('notice') === 'booking_required' || searchParams.has('redirect');
 
   const storedUser = authService.getStoredUser();
-  const [email, setEmail] = useState(storedUser?.role === 'customer' ? storedUser.email : (localStorage.getItem('tegagn_remembered_email') || ''));
+
+  useEffect(() => {
+    if (storedUser) {
+      if (storedUser.role === 'customer') {
+        navigate(redirectTarget, { replace: true });
+      } else if (storedUser.role === 'worker') {
+        navigate('/worker/dashboard', { replace: true });
+      } else {
+        navigate('/admin', { replace: true });
+      }
+    }
+  }, [storedUser, navigate, redirectTarget]);
+
+  if (storedUser) {
+    return (
+      <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <Card className="max-w-md w-full p-8 text-center space-y-6 shadow-xl border-amber-200 dark:border-amber-800 dark:bg-slate-900">
+          <div className="w-16 h-16 rounded-3xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center border border-amber-500/20 shadow-xs">
+            <Lock className="w-8 h-8" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Already Signed In</h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
+              You are currently logged in as <strong className="text-slate-900 dark:text-white">{storedUser.firstName ? `${storedUser.firstName} ${storedUser.lastName || ''}`.trim() : storedUser.email}</strong>.
+            </p>
+          </div>
+          <div className="space-y-3 pt-2">
+            <Button
+              variant="accent"
+              size="lg"
+              className="w-full justify-center font-bold"
+              onClick={() => navigate(redirectTarget)}
+            >
+              Continue to Dashboard
+            </Button>
+            <button
+              type="button"
+              onClick={() => {
+                authService.logout();
+                window.location.reload();
+              }}
+              className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-bold transition-all cursor-pointer"
+            >
+              Sign Out to Switch Accounts
+            </button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+  const [email, setEmail] = useState(() => localStorage.getItem('tegagn_remembered_email') || '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

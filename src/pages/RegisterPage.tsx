@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Wrench, User, Briefcase, Mail, Lock, Phone, MapPin, AlertCircle } from 'lucide-react';
+import { Wrench, User, Briefcase, Mail, Lock, Phone, MapPin, AlertCircle, LogOut, ArrowRight } from 'lucide-react';
 import { FormInput } from '../components/common/FormInput';
 import { Select } from '../components/common/Select';
 import { Button } from '../components/common/Button';
@@ -10,6 +10,20 @@ import { authService } from '../services/api';
 export const RegisterPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const storedUser = authService.getStoredUser();
+
+  const dashboardUrl = storedUser?.role === 'worker'
+    ? '/worker/dashboard'
+    : storedUser?.role === 'admin'
+    ? '/admin'
+    : '/customer/dashboard';
+
+  // Automatically route logged-in users directly to their dashboard
+  useEffect(() => {
+    if (storedUser) {
+      navigate(dashboardUrl, { replace: true });
+    }
+  }, [storedUser, navigate, dashboardUrl]);
 
   const [role, setRole] = useState<'customer' | 'worker'>(
     searchParams.get('role') === 'worker' ? 'worker' : 'customer'
@@ -85,6 +99,46 @@ export const RegisterPage: React.FC = () => {
     { value: 'locksmith', label: 'Locksmith' },
     { value: 'roofer', label: 'Roofer' },
   ];
+
+  if (storedUser) {
+    return (
+      <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <Card className="max-w-md w-full p-8 text-center space-y-6 shadow-xl border-amber-200 dark:border-amber-800 dark:bg-slate-900">
+          <div className="w-16 h-16 rounded-3xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center border border-amber-500/20 shadow-xs">
+            <User className="w-8 h-8" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Already Signed In</h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
+              You are currently logged in as <strong className="text-slate-900 dark:text-white">{storedUser.firstName ? `${storedUser.firstName} ${storedUser.lastName || ''}`.trim() : storedUser.email}</strong> (<span className="capitalize">{storedUser.role}</span>).
+            </p>
+          </div>
+          <div className="space-y-3 pt-2">
+            <Button
+              variant="accent"
+              size="lg"
+              className="w-full justify-center font-bold"
+              icon={<ArrowRight className="w-4 h-4" />}
+              onClick={() => navigate(dashboardUrl)}
+            >
+              Continue to Dashboard
+            </Button>
+            <button
+              type="button"
+              onClick={() => {
+                authService.logout();
+                window.location.reload();
+              }}
+              className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign Out to Register Another Account</span>
+            </button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   CheckCircle2, 
@@ -7,9 +7,23 @@ import {
   Users
 } from 'lucide-react';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
+import { authService } from '../services/api';
 
 export const HomePage: React.FC = () => {
   const { t } = useThemeLanguage();
+  const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
+
+  useEffect(() => {
+    const handleAuthChange = () => setStoredUser(authService.getStoredUser());
+    window.addEventListener('tegagn_auth_changed', handleAuthChange);
+    return () => window.removeEventListener('tegagn_auth_changed', handleAuthChange);
+  }, []);
+
+  const dashboardPath = storedUser?.role === 'worker'
+    ? '/worker/dashboard'
+    : storedUser?.role === 'admin'
+    ? '/admin'
+    : '/customer/dashboard';
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-b from-amber-50/30 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors">
@@ -50,12 +64,21 @@ export const HomePage: React.FC = () => {
               {t('exploreMarketplace')}
             </Link>
 
-            <Link
-              to="/register"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 border-2 border-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 font-bold text-base transition-all duration-200 text-center cursor-pointer"
-            >
-              {t('getStarted')}
-            </Link>
+            {storedUser ? (
+              <Link
+                to={dashboardPath}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 border-2 border-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 font-bold text-base transition-all duration-200 text-center cursor-pointer shadow-xs"
+              >
+                Go to Dashboard →
+              </Link>
+            ) : (
+              <Link
+                to="/register"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 border-2 border-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 font-bold text-base transition-all duration-200 text-center cursor-pointer"
+              >
+                {t('getStarted')}
+              </Link>
+            )}
           </div>
 
         </div>
