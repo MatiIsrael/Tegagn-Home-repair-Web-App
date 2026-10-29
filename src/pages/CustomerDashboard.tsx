@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Calendar, 
   MapPin, 
@@ -19,7 +19,8 @@ import {
   Eye, 
   ShoppingBag, 
   Layers,
-  ArrowRight
+  ArrowRight,
+  LogOut
 } from 'lucide-react';
 import { 
   PLACEHOLDER_CUSTOMER_BOOKINGS, 
@@ -35,7 +36,14 @@ import { useThemeLanguage } from '../context/ThemeLanguageContext';
 
 export const CustomerDashboard: React.FC = () => {
   const { t } = useThemeLanguage();
+  const navigate = useNavigate();
   const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
+
+  const handleSignOut = () => {
+    authService.logout();
+    setStoredUser(null);
+    navigate('/');
+  };
 
   useEffect(() => {
     const handleAuthChange = () => setStoredUser(authService.getStoredUser());
@@ -339,12 +347,21 @@ export const CustomerDashboard: React.FC = () => {
           </button>
         </div>
 
-        {/* User Pill Badge on Right (matching '👤 Mati Israel') */}
+        {/* User Pill Badge on Right (matching '👤 Mati Israel') + Sign Out */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-300 text-xs font-bold shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             <span>👤 {customerDisplayName}</span>
           </div>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-rose-600 hover:border-rose-300 dark:hover:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all cursor-pointer"
+            title="Sign Out"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out</span>
+          </button>
         </div>
 
       </div>
