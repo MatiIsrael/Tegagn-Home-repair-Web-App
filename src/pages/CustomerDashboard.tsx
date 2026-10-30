@@ -4,16 +4,14 @@ import {
   Calendar, 
   MapPin, 
   Plus, 
-  Star, 
-  Heart, 
+  Star,  
   Send, 
   ShieldCheck, 
   Briefcase, 
   Clock, 
   Sparkles, 
   Search, 
-  CheckCircle2, 
-  Camera, 
+  CheckCircle2,  
   Phone, 
   Trash2, 
   Eye, 
@@ -24,14 +22,12 @@ import {
 } from 'lucide-react';
 import { 
   PLACEHOLDER_CUSTOMER_BOOKINGS, 
-  PLACEHOLDER_WORKERS, 
-  PLACEHOLDER_WORKER_POSTS 
+  PLACEHOLDER_WORKERS 
 } from '../data/mockData';
-import { Booking, WorkerPost, WorkerProfile } from '../types';
+import { Booking, WorkerProfile } from '../types';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { authService, bookingService, workerService } from '../services/api';
-import { postService } from '../services/postService';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
 import { CustomerAiAgent } from '../components/customer/CustomerAiAgent';
 import { OrdersView } from '../components/customer/OrdersView';
@@ -64,18 +60,16 @@ export const CustomerDashboard: React.FC = () => {
   const location = useLocation();
   const tabQuery = searchParams.get('tab');
   const isAiPath = location.pathname.endsWith('/ai');
-  const getInitialTab = (): 'marketplace' | 'bookings' | 'feed' | 'ai' => {
+  const getInitialTab = (): 'marketplace' | 'bookings' | 'ai' => {
     if (tabQuery === 'ai' || isAiPath) return 'ai';
-    if (tabQuery === 'feed') return 'feed';
     if (tabQuery === 'orders' || tabQuery === 'rate' || tabQuery === 'bookings' || tabQuery === 'cart') return 'bookings';
     return 'marketplace';
   };
-  const [selectedTab, setSelectedTab] = useState<'marketplace' | 'bookings' | 'feed' | 'ai'>(getInitialTab);
+  const [selectedTab, setSelectedTab] = useState<'marketplace' | 'bookings' | 'ai'>(getInitialTab);
 
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab === 'ai' || location.pathname.endsWith('/ai')) setSelectedTab('ai');
-    else if (tab === 'feed') setSelectedTab('feed');
     else if (tab === 'orders' || tab === 'rate' || tab === 'bookings' || tab === 'cart') setSelectedTab('bookings');
     else if (tab === 'marketplace') setSelectedTab('marketplace');
   }, [searchParams, location.pathname]);
@@ -92,21 +86,6 @@ export const CustomerDashboard: React.FC = () => {
     window.addEventListener('tegagn_bookings_changed', loadBookings);
     return () => window.removeEventListener('tegagn_bookings_changed', loadBookings);
   }, []);
-
-  // Worker Posts Showcase State
-  const [workerPosts, setWorkerPosts] = useState<WorkerPost[]>(() => postService.getApprovedPosts());
-
-  useEffect(() => {
-    const handlePostsChange = () => setWorkerPosts(postService.getApprovedPosts());
-    window.addEventListener('tegagn_posts_changed', handlePostsChange);
-    return () => window.removeEventListener('tegagn_posts_changed', handlePostsChange);
-  }, []);
-
-  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
-  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({
-    'post-101': true,
-    'post-102': true
-  });
 
   // Marketplace State
   const [workersList, setWorkersList] = useState<WorkerProfile[]>(PLACEHOLDER_WORKERS);
@@ -168,31 +147,6 @@ export const CustomerDashboard: React.FC = () => {
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
-
-  // Handle Like Reaction on Worker Post
-  const handleLikePost = (postId: string) => {
-    postService.toggleLike(postId);
-  };
-
-  // Handle Adding Comment on Worker Post
-  const handleAddComment = (postId: string, e: React.FormEvent) => {
-    e.preventDefault();
-    const commentText = commentInputs[postId]?.trim();
-    if (!commentText) return;
-
-    const newComment = {
-      id: `c-${Date.now()}`,
-      postId,
-      authorName: customerDisplayName,
-      authorAvatar: storedUser?.avatarUrl || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
-      comment: commentText,
-      createdAt: 'Just now'
-    };
-
-    postService.addComment(postId, newComment);
-    setCommentInputs(prev => ({ ...prev, [postId]: '' }));
-    setExpandedComments(prev => ({ ...prev, [postId]: true }));
-  };
 
   // Detect GPS Location
   const handleDetectGPS = () => {
@@ -362,19 +316,6 @@ export const CustomerDashboard: React.FC = () => {
                 {activeBookings.length}
               </span>
             )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setSelectedTab('feed'); setSearchParams({ tab: 'feed' }); }}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
-              selectedTab === 'feed'
-                ? 'bg-amber-500 text-slate-950 shadow-sm'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Camera className="w-4 h-4" />
-            <span>Showcase Feed</span>
           </button>
 
           <button
@@ -592,86 +533,7 @@ export const CustomerDashboard: React.FC = () => {
           onBrowseMarketplace={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
         />
       )}
-
-      {/* 4. TAB 3: SHOWCASE FEED */}
-      {selectedTab === 'feed' && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              Work Showcase Feed
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Explore recent home repair transformations and project photos verified by Tegagn administrators.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {workerPosts.map((post) => (
-              <Card key={post.id} className="overflow-hidden p-0 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition-all dark:bg-slate-900">
-                <div className="p-4 bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={post.workerAvatar}
-                      alt={post.workerName}
-                      className="w-11 h-11 rounded-full object-cover ring-2 ring-amber-500"
-                    />
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-slate-900 dark:text-white text-sm">{post.workerName}</span>
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{post.workerTrade}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
-                      {post.workerHourlyRate || 350} ETB/hr
-                    </span>
-                  </div>
-                </div>
-
-                <div className="relative h-64 bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <img
-                    src={post.imageUrl}
-                    alt={post.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-sm text-white text-[11px] font-bold uppercase tracking-wider">
-                      {post.category}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-5 space-y-4">
-                  <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                    {post.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    {post.description}
-                  </p>
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-amber-500" />
-                      {post.location}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleLikePost(post.id)}
-                      className="flex items-center gap-1.5 text-rose-500 font-bold hover:scale-105 transition-transform cursor-pointer"
-                    >
-                      <Heart className="w-4 h-4 fill-rose-500" />
-                      <span>{post.likesCount}</span>
-                    </button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 4. TAB 4: AI FEATURES (Powered by Google Gemini API) */}
+      {/* 3. TAB 3: AI FEATURES (Powered by Google Gemini API) */}
       {selectedTab === 'ai' && (
         <CustomerAiAgent
           customerName={customerDisplayName}
