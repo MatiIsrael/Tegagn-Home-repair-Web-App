@@ -95,6 +95,7 @@ class PostService {
     currency: string;
     duration: string;
     location: string;
+    workerPhone?: string;
     lat: number;
     lng: number;
   }): WorkerPost {
@@ -118,6 +119,7 @@ class PostService {
       currency: payload.currency || 'ETB',
       duration: payload.duration,
       location: payload.location,
+      workerPhone: payload.workerPhone,
       gpsCoordinates: {
         lat: payload.lat,
         lng: payload.lng,

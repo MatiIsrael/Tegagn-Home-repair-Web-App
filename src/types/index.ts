@@ -94,6 +94,7 @@ export interface Booking {
   scheduledDate: string;
   scheduledTime: string;
   location: string;
+  workerPhone?: string;
   gpsCoordinates?: {
     lat: number;
     lng: number;
@@ -139,6 +140,7 @@ export interface WorkerPostComment {
 }
 
 export interface WorkerPost {
+  workerPhone?: string;
   id: string;
   workerId: string;
   workerName: string;
