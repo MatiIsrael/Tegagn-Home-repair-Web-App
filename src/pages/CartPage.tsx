@@ -7,7 +7,8 @@ import {
   ShoppingBag, 
   ArrowRight, 
   Calendar, 
-  MapPin, 
+  MapPin,
+  Phone, 
   CheckCircle2, 
   Clock, 
   ShieldCheck 
@@ -70,6 +71,7 @@ export const CartPage: React.FC = () => {
           scheduledDate: checkoutData.date,
           scheduledTime: checkoutData.time,
           location: checkoutData.location,
+          customerPhone: checkoutData.phone || '+251 91 123 4567',
         });
       }
       cartService.clearCart();
@@ -309,6 +311,24 @@ export const CartPage: React.FC = () => {
                   required
                   value={checkoutData.location}
                   onChange={(e) => setCheckoutData({ ...checkoutData, location: e.target.value })}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1 flex items-center justify-between">
+                <span>Contact Phone Number *</span>
+                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold normal-case">For technician call</span>
+              </label>
+              <div className="relative">
+                <Phone className="w-4 h-4 text-amber-500 absolute left-3.5 top-3" />
+                <input
+                  type="tel"
+                  required
+                  value={checkoutData.phone}
+                  onChange={(e) => setCheckoutData({ ...checkoutData, phone: e.target.value })}
+                  placeholder="+251 91 123 4567"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium"
                 />
               </div>

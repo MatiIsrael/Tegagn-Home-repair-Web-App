@@ -124,6 +124,7 @@ export const CustomerDashboard: React.FC = () => {
   const [bookingModalWorker, setBookingModalWorker] = useState<WorkerProfile | null>(null);
   const [bookingFormData, setBookingFormData] = useState({
     serviceTitle: '',
+    customerPhone: '',
     date: '2026-10-30',
     timeSlot: '10:00 AM - 12:00 PM',
     address: 'Bole Atlas, Addis Ababa',
@@ -224,7 +225,7 @@ export const CustomerDashboard: React.FC = () => {
       id: `bk-${Date.now().toString().slice(-4)}`,
       customerId: storedUser?.id || 'cust-1',
       customerName: customerDisplayName,
-      customerPhone: storedUser?.phoneNumber || '+251 91 123 4567',
+      customerPhone: (bookingFormData.customerPhone || '').trim() || storedUser?.phoneNumber || '+251 91 123 4567',
       workerId: bookingModalWorker.id,
       workerName: `${bookingModalWorker.user.firstName} ${bookingModalWorker.user.lastName}`,
       workerTrade: bookingModalWorker.tradeTitle,
@@ -552,7 +553,8 @@ export const CustomerDashboard: React.FC = () => {
                           setBookingModalWorker(worker);
                           setBookingFormData(prev => ({
                             ...prev,
-                            serviceTitle: `Standard Service Call with ${worker.user.firstName}`
+                            serviceTitle: `Standard Service Call with ${worker.user.firstName}`,
+                            customerPhone: prev.customerPhone || storedUser?.phoneNumber || (typeof window !== 'undefined' ? localStorage.getItem('tegagn_customer_phone') || '' : '')
                           }));
                         }}
                         className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
@@ -868,6 +870,28 @@ export const CustomerDashboard: React.FC = () => {
                   className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-amber-500 focus:bg-white dark:focus:bg-slate-900"
                   required
                 />
+              </div>
+
+              {/* Client Contact Phone Field */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <span>Your Phone Number (For Technician to Call) *</span>
+                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold normal-case">Required</span>
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-amber-500 absolute left-3 top-2.5" />
+                  <input
+                    type="tel"
+                    required
+                    value={bookingFormData.customerPhone}
+                    onChange={(e) => setBookingFormData({ ...bookingFormData, customerPhone: e.target.value })}
+                    placeholder="+251 91 123 4567"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:bg-white dark:focus:bg-slate-900"
+                  />
+                </div>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                  The technician will call you on this number to confirm arrival and repair details.
+                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
