@@ -393,12 +393,31 @@ export const PLACEHOLDER_CUSTOMER_BOOKINGS: Booking[] = [
     workerName: 'Abebe Tadesse',
     workerTrade: 'Plumbing',
     serviceDescription: 'Repair dripping sink faucet and inspect low pressure in main bath',
-    scheduledDate: '2026-10-18',
+    scheduledDate: '2026-10-29',
     scheduledTime: '10:00 AM',
     location: 'Bole Atlas, House #402, Addis Ababa',
     status: 'accepted',
-    estimatedCost: 70,
-    createdAt: '2026-10-14'
+    estimatedCost: 242,
+    createdAt: '2026-10-29',
+    paymentMethod: 'Mobile Money',
+    paymentStatus: 'Completed',
+    paymentDetails: {
+      methodTitle: 'Mobile Money (Telebirr)',
+      mobileProvider: 'Telebirr',
+      phoneOrAccount: '+251 91 123 4567',
+      subtotal: 242,
+      deliveryFee: 10,
+      platformFee: 16.94,
+      totalAmount: 252,
+      transactionId: 'TX-984210',
+      paidAt: '2026-10-29T10:05:00.000Z'
+    },
+    rebackGuarantee: {
+      deadlineMinutes: 45,
+      acceptedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+      arrivalDeadline: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+      isOverdue: false
+    }
   },
   {
     id: 'bk-202',
@@ -408,12 +427,20 @@ export const PLACEHOLDER_CUSTOMER_BOOKINGS: Booking[] = [
     workerName: 'Marta Bekele',
     workerTrade: 'Electrical',
     serviceDescription: 'Install 6 new recessed ceiling downlights and dual dimmer switch',
-    scheduledDate: '2026-10-22',
+    scheduledDate: '2026-10-30',
     scheduledTime: '02:00 PM',
     location: 'Bole Atlas, House #402, Addis Ababa',
     status: 'pending',
     estimatedCost: 120,
-    createdAt: '2026-10-15'
+    createdAt: '2026-10-30',
+    paymentMethod: 'Mobile Money',
+    paymentStatus: 'Pending Payment',
+    paymentDetails: {
+      subtotal: 120,
+      deliveryFee: 10,
+      platformFee: 8.40,
+      totalAmount: 130
+    }
   },
   {
     id: 'bk-203',
@@ -423,12 +450,22 @@ export const PLACEHOLDER_CUSTOMER_BOOKINGS: Booking[] = [
     workerName: 'Helen Girma',
     workerTrade: 'Painting',
     serviceDescription: 'Living room and hallway interior coat repainting',
-    scheduledDate: '2026-09-10',
+    scheduledDate: '2026-10-25',
     scheduledTime: '09:00 AM',
     location: 'Bole Atlas, House #402, Addis Ababa',
     status: 'completed',
     estimatedCost: 180,
-    createdAt: '2026-09-05'
+    createdAt: '2026-10-25',
+    paymentMethod: 'Cash on Delivery',
+    paymentStatus: 'Completed',
+    paymentDetails: {
+      methodTitle: 'Cash on Delivery',
+      subtotal: 180,
+      deliveryFee: 10,
+      platformFee: 12.60,
+      totalAmount: 190,
+      paidAt: '2026-10-25T11:30:00.000Z'
+    }
   }
 ];
 

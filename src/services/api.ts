@@ -12,8 +12,9 @@
 import { 
   WorkerProfile, 
   Category, 
-  Booking, 
-  WorkerFilterParams, 
+  Booking,
+  BookingStatus,
+WorkerFilterParams, 
   WorkerServiceItem, 
   Review,
   User 
@@ -563,18 +564,39 @@ export const categoryService = {
 const BOOKINGS_STORAGE_KEY = 'tegagn_bookings_store_v2';
 const REVIEWS_STORAGE_KEY = 'tegagn_reviews_store_v2';
 
+function normalizeBooking(b: Booking): Booking {
+  const norm: Booking = { ...b };
+  if (!norm.paymentMethod) {
+    norm.paymentMethod = 'Mobile Money';
+  }
+  if (!norm.paymentStatus) {
+    norm.paymentStatus = (norm.status === 'completed' || norm.status === 'accepted') ? 'Completed' : 'Pending Payment';
+  }
+  if (norm.status === 'accepted' && !norm.rebackGuarantee) {
+    const now = Date.now();
+    norm.rebackGuarantee = {
+      deadlineMinutes: 45,
+      acceptedAt: norm.createdAt || new Date(now - 15 * 60 * 1000).toISOString(),
+      arrivalDeadline: new Date(now + 30 * 60 * 1000).toISOString(),
+      isOverdue: false,
+    };
+  }
+  return norm;
+}
+
 function readStoredBookings(): Booking[] {
-  if (typeof window === 'undefined') return [...PLACEHOLDER_CUSTOMER_BOOKINGS, ...PLACEHOLDER_WORKER_REQUESTS];
+  if (typeof window === 'undefined') return [...PLACEHOLDER_CUSTOMER_BOOKINGS, ...PLACEHOLDER_WORKER_REQUESTS].map(normalizeBooking);
   try {
     const raw = localStorage.getItem(BOOKINGS_STORAGE_KEY);
     if (!raw) {
-      const initial = [...PLACEHOLDER_CUSTOMER_BOOKINGS, ...PLACEHOLDER_WORKER_REQUESTS];
+      const initial = [...PLACEHOLDER_CUSTOMER_BOOKINGS, ...PLACEHOLDER_WORKER_REQUESTS].map(normalizeBooking);
       localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(initial));
       return initial;
     }
-    return JSON.parse(raw);
+    const list: Booking[] = JSON.parse(raw);
+    return list.map(normalizeBooking);
   } catch {
-    return [...PLACEHOLDER_CUSTOMER_BOOKINGS, ...PLACEHOLDER_WORKER_REQUESTS];
+    return [...PLACEHOLDER_CUSTOMER_BOOKINGS, ...PLACEHOLDER_WORKER_REQUESTS].map(normalizeBooking);
   }
 }
 
@@ -872,9 +894,146 @@ export const bookingService = {
     }
 
     const all = readStoredBookings();
-    const updated = all.map(b => (b.id === id ? { ...b, status: newStatus as any } : b));
+    const updated = all.map(b => {
+      if (b.id === id) {
+        const now = new Date();
+        const deadline = new Date(now.getTime() + 45 * 60 * 1000);
+        return {
+          ...b,
+          status: newStatus as any,
+          rebackGuarantee: (newStatus === 'accepted' && !b.rebackGuarantee) ? {
+            deadlineMinutes: 45,
+            acceptedAt: now.toISOString(),
+            arrivalDeadline: deadline.toISOString(),
+            isOverdue: false,
+          } : b.rebackGuarantee
+        };
+      }
+      return b;
+    });
     writeStoredBookings(updated);
     return { success: true, id, status: newStatus, reason };
+  },
+
+  async completePayment(
+    bookingId: string, 
+    paymentData: { 
+      method: string; 
+      provider?: string; 
+      phoneOrAccount?: string; 
+      subtotal?: number;
+      deliveryFee?: number;
+      platformFee?: number;
+      totalAmount: number;
+    }
+  ): Promise<Booking | null> {
+    const all = readStoredBookings();
+    let updatedBooking: Booking | null = null;
+    const now = new Date();
+    const deadline = new Date(now.getTime() + 45 * 60 * 1000);
+
+    const updated = all.map(b => {
+      if (b.id === bookingId) {
+        updatedBooking = {
+          ...b,
+          paymentMethod: paymentData.method,
+          paymentStatus: 'Completed',
+          paymentDetails: {
+            methodTitle: paymentData.method,
+            mobileProvider: paymentData.provider || 'Telebirr',
+            phoneOrAccount: paymentData.phoneOrAccount || b.customerPhone || '+251 91 123 4567',
+            subtotal: paymentData.subtotal ?? (paymentData.totalAmount - 10),
+            deliveryFee: paymentData.deliveryFee ?? 10,
+            platformFee: paymentData.platformFee ?? 16.94,
+            totalAmount: paymentData.totalAmount,
+            transactionId: 'TX-' + Math.floor(100000 + Math.random() * 900000),
+            paidAt: now.toISOString(),
+          },
+          rebackGuarantee: b.rebackGuarantee || {
+            deadlineMinutes: 45,
+            acceptedAt: now.toISOString(),
+            arrivalDeadline: deadline.toISOString(),
+            isOverdue: false,
+          }
+        };
+        return updatedBooking;
+      }
+      return b;
+    });
+
+    writeStoredBookings(updated);
+    return updatedBooking;
+  },
+
+  async processRebackRefund(
+    bookingId: string, 
+    refundData: { reason: string; refundAmount?: number; refundAccount?: string }
+  ): Promise<{ success: boolean; transactionId: string; amount: number }> {
+    const all = readStoredBookings();
+    const txId = 'RF-' + Math.floor(100000 + Math.random() * 900000);
+    let refundAmount = 0;
+
+    const updated = all.map(b => {
+      if (b.id === bookingId) {
+        refundAmount = refundData.refundAmount ?? (b.estimatedCost + 10);
+        return {
+          ...b,
+          status: 'cancelled' as BookingStatus,
+          paymentStatus: 'Refunded',
+          rebackGuarantee: {
+            deadlineMinutes: b.rebackGuarantee?.deadlineMinutes || 45,
+            acceptedAt: b.rebackGuarantee?.acceptedAt,
+            arrivalDeadline: b.rebackGuarantee?.arrivalDeadline,
+            isOverdue: true,
+            refundedAt: new Date().toISOString(),
+            refundAmount,
+            refundReason: refundData.reason,
+            refundTransactionId: txId,
+          }
+        };
+      }
+      return b;
+    });
+
+    writeStoredBookings(updated);
+
+    try {
+      const notifKey = 'tegagn_worker_notifications';
+      const existingRaw = localStorage.getItem(notifKey);
+      const existingList = existingRaw ? JSON.parse(existingRaw) : [];
+      const notif = {
+        id: 'notif-' + Date.now(),
+        title: '⚠️ Booking Cancelled & Re-back Refund Issued',
+        message: 'Booking #' + bookingId + ' was cancelled by client under the 100% Re-back Guarantee. Reason: ' + refundData.reason + '. Refund of $' + refundAmount.toFixed(2) + ' processed to customer.',
+        time: 'Just now',
+        type: 'booking',
+        unread: true,
+        bookingId
+      };
+      localStorage.setItem(notifKey, JSON.stringify([notif, ...existingList]));
+      window.dispatchEvent(new Event('tegagn_worker_notifications_changed'));
+    } catch {}
+
+    return { success: true, transactionId: txId, amount: refundAmount };
+  },
+
+  async simulateArrivalWindowExpired(bookingId: string): Promise<void> {
+    const all = readStoredBookings();
+    const updated = all.map(b => {
+      if (b.id === bookingId) {
+        return {
+          ...b,
+          rebackGuarantee: {
+            deadlineMinutes: 45,
+            acceptedAt: b.rebackGuarantee?.acceptedAt || new Date(Date.now() - 50 * 60 * 1000).toISOString(),
+            arrivalDeadline: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+            isOverdue: true
+          }
+        };
+      }
+      return b;
+    });
+    writeStoredBookings(updated);
   }
 };
 
