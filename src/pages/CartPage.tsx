@@ -51,10 +51,10 @@ export const CartPage: React.FC = () => {
 
   const handleProceedToCheckout = () => {
     if (!storedUser) {
-      navigate(`/login?redirect=${encodeURIComponent('/cart')}`);
+      navigate(`/login?redirect=${encodeURIComponent('/checkout')}`);
       return;
     }
-    setCheckoutModalOpen(true);
+    navigate('/checkout');
   };
 
   const handleConfirmOrder = async (e: React.FormEvent) => {
