@@ -22,7 +22,7 @@ import { Button } from '../common/Button';
 
 interface CustomerAiAgentProps {
   customerName?: string;
-  onNavigateTab?: (tab: 'marketplace' | 'bookings' | 'feed') => void;
+  onNavigateTab?: (tab: 'marketplace' | 'bookings') => void;
 }
 
 export const CustomerAiAgent: React.FC<CustomerAiAgentProps> = ({
@@ -86,7 +86,7 @@ export const CustomerAiAgent: React.FC<CustomerAiAgentProps> = ({
       const responseText = await geminiService.askAgent(text, messages);
 
       // Determine smart contextual actions based on response
-      const suggestedActions: { label: string; action: 'marketplace' | 'bookings' | 'feed' | 'telegram' | 'contact' }[] = [];
+      const suggestedActions: { label: string; action: 'marketplace' | 'bookings' | 'telegram' | 'contact' }[] = [];
       const lowerResp = responseText.toLowerCase();
       if (lowerResp.includes('marketplace') || lowerResp.includes('browse') || lowerResp.includes('select a specialist')) {
         suggestedActions.push({ label: 'Open Marketplace', action: 'marketplace' });
@@ -147,7 +147,7 @@ export const CustomerAiAgent: React.FC<CustomerAiAgentProps> = ({
     setTimeout(() => setCopiedId(null), 1500);
   };
 
-  const handleActionClick = (action: 'marketplace' | 'bookings' | 'feed' | 'telegram' | 'contact') => {
+  const handleActionClick = (action: 'marketplace' | 'bookings' | 'telegram' | 'contact') => {
     if (action === 'telegram') {
       window.open('https://t.me/CocaCola_factory', '_blank');
     } else if (action === 'contact') {

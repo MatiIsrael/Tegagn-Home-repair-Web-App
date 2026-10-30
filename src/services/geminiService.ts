@@ -5,7 +5,7 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   timestamp: string;
-  suggestedActions?: { label: string; action: 'marketplace' | 'bookings' | 'feed' | 'telegram' | 'contact' }[];
+  suggestedActions?: { label: string; action: 'marketplace' | 'bookings' | 'telegram' | 'contact' }[];
 }
 
 const TEGAGN_SYSTEM_INSTRUCTION = `
