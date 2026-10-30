@@ -34,6 +34,7 @@ import { authService, bookingService, workerService } from '../services/api';
 import { postService } from '../services/postService';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
 import { CustomerAiAgent } from '../components/customer/CustomerAiAgent';
+import { OrdersView } from '../components/customer/OrdersView';
 
 export const CustomerDashboard: React.FC = () => {
   const { t } = useThemeLanguage();
@@ -66,7 +67,7 @@ export const CustomerDashboard: React.FC = () => {
   const getInitialTab = (): 'marketplace' | 'bookings' | 'feed' | 'ai' => {
     if (tabQuery === 'ai' || isAiPath) return 'ai';
     if (tabQuery === 'feed') return 'feed';
-    if (tabQuery === 'rate' || tabQuery === 'bookings' || tabQuery === 'cart') return 'bookings';
+    if (tabQuery === 'orders' || tabQuery === 'rate' || tabQuery === 'bookings' || tabQuery === 'cart') return 'bookings';
     return 'marketplace';
   };
   const [selectedTab, setSelectedTab] = useState<'marketplace' | 'bookings' | 'feed' | 'ai'>(getInitialTab);
@@ -75,17 +76,18 @@ export const CustomerDashboard: React.FC = () => {
     const tab = searchParams.get('tab');
     if (tab === 'ai' || location.pathname.endsWith('/ai')) setSelectedTab('ai');
     else if (tab === 'feed') setSelectedTab('feed');
-    else if (tab === 'rate' || tab === 'bookings' || tab === 'cart') setSelectedTab('bookings');
+    else if (tab === 'orders' || tab === 'rate' || tab === 'bookings' || tab === 'cart') setSelectedTab('bookings');
     else if (tab === 'marketplace') setSelectedTab('marketplace');
   }, [searchParams, location.pathname]);
 
   // Bookings State
   const [bookings, setBookings] = useState<Booking[]>(PLACEHOLDER_CUSTOMER_BOOKINGS);
 
+  const loadBookings = () => {
+    bookingService.getCustomerBookings().then(setBookings);
+  };
+
   useEffect(() => {
-    const loadBookings = () => {
-      bookingService.getCustomerBookings().then(setBookings);
-    };
     loadBookings();
     window.addEventListener('tegagn_bookings_changed', loadBookings);
     return () => window.removeEventListener('tegagn_bookings_changed', loadBookings);
@@ -335,7 +337,7 @@ export const CustomerDashboard: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => { setSelectedTab('bookings'); setSearchParams({ tab: 'bookings' }); }}
+            onClick={() => { setSelectedTab('bookings'); setSearchParams({ tab: 'orders' }); }}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
               selectedTab === 'bookings'
                 ? 'bg-amber-500 text-slate-950 shadow-sm'
@@ -343,7 +345,7 @@ export const CustomerDashboard: React.FC = () => {
             }`}
           >
             <ShoppingBag className="w-4 h-4" />
-            <span>My Requests (Cart)</span>
+            <span>My Orders</span>
             {activeBookings.length > 0 && (
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
                 selectedTab === 'bookings' ? 'bg-slate-950 text-amber-400' : 'bg-amber-500 text-slate-950'
@@ -573,156 +575,13 @@ export const CustomerDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* 3. TAB 2: MY REQUESTS & SHOPPING CART (Matching Screenshot 2: 2-Column Layout with Order Summary) */}
+      {/* 3. TAB 2: MY ORDERS (Matching User Screenshot 1 & 2 with Payment & 100% Re-back Guarantee) */}
       {selectedTab === 'bookings' && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Left Column (8 cols): Shopping Cart Items */}
-            <div className="lg:col-span-8 space-y-4">
-              <div>
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                  Shopping Cart & Requests
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Review and manage your pending service bookings and technician appointments.
-                </p>
-              </div>
-
-              {activeBookings.length === 0 ? (
-                <div className="p-12 text-center rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
-                  <ShoppingBag className="w-12 h-12 text-slate-400 mx-auto" />
-                  <p className="text-base font-bold text-slate-700 dark:text-slate-300">Your requests list is empty</p>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    Browse the marketplace to select from verified plumbing, electrical, and home repair professionals.
-                  </p>
-                  <Button
-                    variant="accent"
-                    size="md"
-                    onClick={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
-                  >
-                    Browse Marketplace
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {activeBookings.map((b) => (
-                    <div 
-                      key={b.id}
-                      className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                    >
-                      {/* Left: Thumbnail and Details (matching Screenshot 2 item layout) */}
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700">
-                          <img 
-                            src={getTradeCoverImage(b.workerTrade)} 
-                            alt={b.workerName}
-                            className="w-full h-full object-cover" 
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
-                            {b.workerName}
-                          </h3>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                            by {b.workerTrade}
-                          </p>
-                          <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-                            <span>📅 {b.scheduledDate}</span>
-                            <span>•</span>
-                            <span>⏰ {b.scheduledTime}</span>
-                          </div>
-                          <div className="pt-0.5">
-                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              b.status === 'completed' 
-                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' 
-                                : b.status === 'accepted'
-                                ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400'
-                                : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400'
-                            }`}>
-                              {b.status === 'accepted' ? 'Confirmed' : b.status}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right: Price & Delete Trash Icon (matching Screenshot 2) */}
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
-                        <button
-                          type="button"
-                          onClick={() => handleCancelBooking(b.id)}
-                          className="text-rose-500 hover:text-rose-700 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
-                          title="Remove booking"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                        <div className="text-right">
-                          <span className="text-lg font-black text-amber-600 dark:text-amber-400">
-                            {b.estimatedCost || 350} ETB
-                          </span>
-                        </div>
-                      </div>
-
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Right Column (4 cols): Order Summary Card (Matching Screenshot 2) */}
-            <div className="lg:col-span-4">
-              <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 sticky top-24">
-                
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                  Order Summary
-                </h3>
-
-                <div className="space-y-3 text-xs">
-                  <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
-                    <span>Services ({activeBookings.length})</span>
-                    <span className="font-bold text-slate-900 dark:text-white font-mono">{totalCartCost} ETB</span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
-                    <span>Direct Connection Fee</span>
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400">FREE</span>
-                  </div>
-
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-900 dark:text-white">Total</span>
-                    <span className="text-xl font-black text-amber-600 dark:text-amber-400 font-mono">
-                      {totalCartCost} ETB
-                    </span>
-                  </div>
-                </div>
-
-                {/* Two Action Buttons (matching Screenshot 2: Proceed to Checkout & Continue Shopping) */}
-                <div className="space-y-2.5 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
-                    className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm shadow-md shadow-amber-500/20 text-center transition-all cursor-pointer"
-                  >
-                    Proceed to Book More Trades
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
-                    className="w-full py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs text-center transition-colors cursor-pointer"
-                  >
-                    Continue Browsing
-                  </button>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-
-        </div>
+        <OrdersView 
+          bookings={bookings} 
+          onRefresh={loadBookings} 
+          onBrowseMarketplace={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
+        />
       )}
 
       {/* 4. TAB 3: SHOWCASE FEED */}

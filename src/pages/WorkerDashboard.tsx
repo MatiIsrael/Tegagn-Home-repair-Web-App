@@ -612,6 +612,21 @@ export const WorkerDashboard: React.FC = () => {
                             <span>Call Client</span>
                           </button>
                         </>
+                      ) : req.status === 'cancelled' ? (
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold text-rose-600 flex items-center gap-1">
+                            <X className="w-4 h-4" />
+                            <span>{req.rebackGuarantee?.refundTransactionId ? 'Cancelled (100% Re-back Refund Issued)' : 'Cancelled'}</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => handleCallClient(e, req.customerPhone, req.customerName)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-amber-500 text-xs font-medium cursor-pointer"
+                          >
+                            <Phone className="w-3 h-3 text-amber-500" />
+                            <span>{req.customerPhone || '+251 92 555 6677'}</span>
+                          </button>
+                        </div>
                       ) : (
                         <div className="flex items-center gap-3">
                           <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">

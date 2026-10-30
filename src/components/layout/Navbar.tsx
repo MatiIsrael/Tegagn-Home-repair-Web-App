@@ -11,6 +11,7 @@ import {
   LogIn,
   LogOut,
   ShoppingCart,
+  ShoppingBag,
   Calendar,
 
   Sparkles
@@ -104,7 +105,7 @@ export const Navbar: React.FC = () => {
       : []),
     ...(!isHomePage && storedUser && storedUser.role === 'customer'
       ? [
-          { name: 'My Orders', path: '/customer/dashboard', icon: <Calendar className="w-4 h-4 text-amber-500" /> },
+          { name: 'My Orders', path: '/customer/dashboard?tab=orders', icon: <ShoppingBag className="w-4 h-4 text-amber-500" /> },
           
           { name: 'AI Features', path: '/customer/dashboard?tab=ai', icon: <Sparkles className="w-4 h-4 text-amber-500" /> }
         ]

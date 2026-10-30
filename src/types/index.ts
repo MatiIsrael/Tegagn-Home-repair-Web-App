@@ -104,6 +104,29 @@ export interface Booking {
   estimatedCost: number;
   createdAt: string;
   notes?: string;
+  paymentMethod?: 'Mobile Money' | 'Credit/Debit Card' | 'Bank Transfer' | 'Cash on Delivery' | string;
+  paymentStatus?: 'Completed' | 'Pending Payment' | 'Refunded' | string;
+  paymentDetails?: {
+    methodTitle?: string;
+    mobileProvider?: string;
+    phoneOrAccount?: string;
+    subtotal?: number;
+    deliveryFee?: number;
+    platformFee?: number;
+    totalAmount?: number;
+    transactionId?: string;
+    paidAt?: string;
+  };
+  rebackGuarantee?: {
+    deadlineMinutes: number;
+    acceptedAt?: string;
+    arrivalDeadline?: string;
+    isOverdue?: boolean;
+    refundedAt?: string;
+    refundAmount?: number;
+    refundReason?: string;
+    refundTransactionId?: string;
+  };
 }
 
 export interface WorkerPostComment {
