@@ -4,6 +4,7 @@ import { Layout } from './components/layout/Layout';
 import { HomePage } from './pages/HomePage';
 import { WorkersPage } from './pages/WorkersPage';
 import { CartPage } from './pages/CartPage';
+import { CheckoutPage } from './pages/CheckoutPage';
 import { WorkerDetailPage } from './pages/WorkerDetailPage';
 import { CustomerSignUpPage } from './pages/CustomerSignUpPage';
 import { WorkerSignUpPage } from './pages/WorkerSignUpPage';
@@ -49,6 +50,7 @@ export const App: React.FC = () => {
           <Route path="workers" element={<WorkersPage />} />
           <Route path="marketplace" element={<WorkersPage />} />
           <Route path="cart" element={<CartPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
 
           {/* 3. Worker Details */}
           <Route path="workers/:id" element={<WorkerDetailPage />} />

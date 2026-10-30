@@ -243,7 +243,15 @@ export const CustomerDashboard: React.FC = () => {
       images: bookingFormData.images,
       status: 'pending',
       estimatedCost: bookingModalWorker.hourlyRate * 2,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      paymentMethod: 'Mobile Money',
+      paymentStatus: 'Completed',
+      rebackGuarantee: {
+        deadlineMinutes: 45,
+        acceptedAt: new Date().toISOString(),
+        arrivalDeadline: new Date(Date.now() + 45 * 60 * 1000).toISOString(),
+        isOverdue: false
+      }
     };
 
     bookingService.createBooking(newBooking);
@@ -252,6 +260,7 @@ export const CustomerDashboard: React.FC = () => {
       setBookingSuccessNotice(false);
       setBookingModalWorker(null);
       setSelectedTab('bookings');
+      setSearchParams({ tab: 'orders' });
     }, 1000);
   };
 

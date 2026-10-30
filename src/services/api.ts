@@ -815,6 +815,10 @@ export const bookingService = {
             estimatedCost: parseFloat(dbBooking.estimated_cost) || 0,
             notes: dbBooking.notes || '',
             createdAt: dbBooking.created_at,
+            paymentMethod: payload.paymentMethod || 'Mobile Money',
+            paymentStatus: payload.paymentStatus || 'Completed',
+            paymentDetails: payload.paymentDetails,
+            rebackGuarantee: payload.rebackGuarantee,
           };
 
           const all = readStoredBookings();
@@ -861,6 +865,10 @@ export const bookingService = {
       estimatedCost: payload.estimatedCost || 700,
       notes: payload.notes || '',
       createdAt: new Date().toISOString(),
+      paymentMethod: payload.paymentMethod || 'Mobile Money',
+      paymentStatus: payload.paymentStatus || 'Completed',
+      paymentDetails: payload.paymentDetails,
+      rebackGuarantee: payload.rebackGuarantee,
     };
 
     const updated = [newBooking, ...all];
