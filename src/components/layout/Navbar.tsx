@@ -90,9 +90,14 @@ export const Navbar: React.FC = () => {
   }, [location.pathname]);
 
   const isHomePage = location.pathname === '/' || location.pathname === '';
+  const isWorkerContext = (storedUser && storedUser.role === 'worker') || location.pathname.startsWith('/worker');
+  const isAdminContext = (storedUser && storedUser.role === 'admin') || location.pathname.startsWith('/admin');
+
+  // Do not show customer Marketplace or Cart links when in worker or admin portal
+  const showMarketplaceAndCart = !isHomePage && !isWorkerContext && !isAdminContext;
 
   const navLinks = [
-    ...(!isHomePage
+    ...(showMarketplaceAndCart
       ? [
           { name: 'Marketplace', path: '/marketplace', icon: <Search className="w-4 h-4 text-amber-500" /> },
           { 
@@ -110,10 +115,10 @@ export const Navbar: React.FC = () => {
           { name: 'AI Features', path: '/customer/dashboard?tab=ai', icon: <Sparkles className="w-4 h-4 text-amber-500" /> }
         ]
       : []),
-    ...(!isHomePage && storedUser && storedUser.role === 'worker'
+    ...(!isHomePage && (isWorkerContext || (storedUser && storedUser.role === 'worker'))
       ? [{ name: t('workerPortal'), path: '/worker/dashboard', icon: <Briefcase className="w-4 h-4 text-amber-500" /> }]
       : []),
-    ...(!isHomePage && storedUser && storedUser.role === 'admin'
+    ...(!isHomePage && (isAdminContext || (storedUser && storedUser.role === 'admin'))
       ? [{ name: t('adminPortal'), path: '/admin', icon: <ShieldCheck className="w-4 h-4 text-sky-500" /> }]
       : []),
   ];

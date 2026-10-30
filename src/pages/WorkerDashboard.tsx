@@ -33,7 +33,7 @@ import {
   PLACEHOLDER_WORKERS, 
   PLACEHOLDER_WORKER_POSTS 
 } from '../data/mockData';
-import { Booking, BookingStatus, WorkerPost } from '../types';
+import { Booking, BookingStatus, TradeCategory, WorkerPost } from '../types';
 import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
@@ -99,7 +99,7 @@ export const WorkerDashboard: React.FC = () => {
   };
 
   // Tab state: 'requests' | 'posts' | 'profile' | 'notifications'
-  const [activeTab, setActiveTab] = useState<'requests' | 'posts' | 'profile' | 'notifications'>('requests');
+  const [activeTab, setActiveTab] = useState<'requests' | 'post-work' | 'posts' | 'earnings' | 'profile' | 'notifications'>('requests');
 
   // Worker Posts Showcase state loaded from centralized postService
   const [posts, setPosts] = useState<WorkerPost[]>(() => {
@@ -129,9 +129,22 @@ export const WorkerDashboard: React.FC = () => {
   });
   const [profileSavedNotice, setProfileSavedNotice] = useState(false);
 
-  // Modal State: "Publish New Work Post"
+  // Post My Work State (With Image upload, Location, Pricing, Description, Phone)
+  const postFileInputRef = React.useRef<HTMLInputElement>(null);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-  const [newPost, setNewPost] = useState({
+  const [newPost, setNewPost] = useState<{
+    title: string;
+    category: TradeCategory | string;
+    description: string;
+    imageUrl: string;
+    priceCharged: number;
+    currency: string;
+    duration: string;
+    location: string;
+    workerPhone: string;
+    lat: number;
+    lng: number;
+  }>({
     title: '',
     category: currentWorker.trade,
     description: '',
@@ -140,9 +153,44 @@ export const WorkerDashboard: React.FC = () => {
     currency: 'ETB',
     duration: '3 hours',
     location: 'Bole Medhanialem, Addis Ababa',
+    workerPhone: storedUser?.phoneNumber || '+251 91 123 4567',
     lat: 9.0084,
     lng: 38.7891
   });
+
+  const [isDetectingPostGps, setIsDetectingPostGps] = useState(false);
+
+  const handlePostImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (loadEvent) => {
+      const result = loadEvent.target?.result as string;
+      if (result) {
+        setNewPost(prev => ({ ...prev, imageUrl: result }));
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDetectPostGps = () => {
+    if (!navigator.geolocation) return;
+    setIsDetectingPostGps(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setNewPost(prev => ({
+          ...prev,
+          lat: parseFloat(pos.coords.latitude.toFixed(4)),
+          lng: parseFloat(pos.coords.longitude.toFixed(4))
+        }));
+        setIsDetectingPostGps(false);
+      },
+      () => {
+        setIsDetectingPostGps(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
 
   // Initial default notifications
   const DEFAULT_NOTIFICATIONS = [
@@ -247,6 +295,7 @@ export const WorkerDashboard: React.FC = () => {
       currency: 'ETB',
       duration: '2 hours',
       location: 'Addis Ababa',
+      workerPhone: storedUser?.phoneNumber || '+251 91 123 4567',
       lat: 9.0200,
       lng: 38.7500
     });
@@ -655,7 +704,254 @@ export const WorkerDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: MY WORK POSTS & SHOWCASE */}
+            {/* TAB 2: POST MY WORK (Image upload, location, pricing, description, phone) */}
+      {activeTab === 'post-work' && (
+        <Card className="p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
+            <div>
+              <div className="flex items-center gap-2">
+                <PlusCircle className="w-5 h-5 text-amber-500" />
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                  Post My Work & Project Showcase
+                </h2>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Upload photos of your completed repairs, set price charged, your location, description, and contact phone number.
+              </p>
+            </div>
+            <span className="text-xs px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 font-bold self-start sm:self-auto">
+              Showcase Studio
+            </span>
+          </div>
+
+          <form onSubmit={handlePublishPost} className="space-y-6">
+            
+            {/* 1. Job Title & Trade */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  Job / Project Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newPost.title}
+                  onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+                  placeholder="e.g. Copper Pipe Overhaul & Silent Booster Pump Installation"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  Trade Category
+                </label>
+                <select
+                  value={newPost.category}
+                  onChange={(e) => setNewPost({ ...newPost, category: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-white"
+                >
+                  <option value="plumber">Plumbing</option>
+                  <option value="electrician">Electrical</option>
+                  <option value="carpenter">Carpentry</option>
+                  <option value="painter">Painting</option>
+                  <option value="cleaning">Cleaning</option>
+                  <option value="builder">Masonry / Builder</option>
+                  <option value="locksmith">Locksmith</option>
+                  <option value="hvac">HVAC / Heating</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 2. Photo Upload (Image upload requirement) */}
+            <div className="space-y-3">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Photo of Completed Work (Upload from device / camera) *
+              </label>
+
+              {/* Hidden file input */}
+              <input
+                ref={postFileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePostImageUpload}
+                className="hidden"
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                <div
+                  onClick={() => postFileInputRef.current?.click()}
+                  className="md:col-span-8 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-500 rounded-2xl p-6 text-center transition-all cursor-pointer bg-slate-50/60 dark:bg-slate-800/40 hover:bg-amber-50/20 dark:hover:bg-amber-950/20"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-2">
+                    <Camera className="w-6 h-6" />
+                  </div>
+                  <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                    Click to Upload Finished Work Photo
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Select a photo from your phone gallery or take a live picture on-site
+                  </p>
+                  <button
+                    type="button"
+                    className="mt-3 px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs cursor-pointer"
+                  >
+                    Browse Device / Capture Camera
+                  </button>
+                </div>
+
+                {/* Preview Thumbnail */}
+                <div className="md:col-span-4 flex flex-col items-center justify-center">
+                  <div className="relative w-full h-44 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm">
+                    <img
+                      src={newPost.imageUrl}
+                      alt="Work preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-slate-950/70 text-white text-[10px] font-mono">
+                      Preview
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Optional URL input fallback */}
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-slate-400 shrink-0">Or paste image URL:</span>
+                <input
+                  type="url"
+                  value={newPost.imageUrl.startsWith('data:') ? '' : newPost.imageUrl}
+                  onChange={(e) => setNewPost({ ...newPost, imageUrl: e.target.value })}
+                  placeholder="https://images.unsplash.com/photo-..."
+                  className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-300"
+                />
+              </div>
+            </div>
+
+            {/* 3. Pricing & Duration */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  Price Charged / Money (ETB) 💰 *
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    required
+                    min={50}
+                    step={10}
+                    value={newPost.priceCharged}
+                    onChange={(e) => setNewPost({ ...newPost, priceCharged: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500"
+                  />
+                  <span className="absolute right-3 top-2.5 text-xs font-bold text-slate-400">ETB</span>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Your standard rate: <strong className="text-amber-600 dark:text-amber-400 font-mono">{profileData.hourlyRate} ETB/hr</strong>
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  Job Duration
+                </label>
+                <input
+                  type="text"
+                  value={newPost.duration}
+                  onChange={(e) => setNewPost({ ...newPost, duration: e.target.value })}
+                  placeholder="e.g. 2 hours / 1 day"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+            </div>
+
+            {/* 4. Description of Repairs */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                Description of Repairs & Solution Provided *
+              </label>
+              <textarea
+                required
+                rows={4}
+                value={newPost.description}
+                onChange={(e) => setNewPost({ ...newPost, description: e.target.value })}
+                placeholder="Explain what was wrong, replacement parts installed, techniques used, and quality warranty offered..."
+                className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm leading-relaxed text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500"
+              />
+            </div>
+
+            {/* 5. Location and Phone Number */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Job Location / Sub-city *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleDetectPostGps}
+                    className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Navigation className="w-3 h-3" />
+                    <span>{isDetectingPostGps ? 'Pinning...' : 'Detect GPS Pin'}</span>
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={newPost.location}
+                  onChange={(e) => setNewPost({ ...newPost, location: e.target.value })}
+                  placeholder="e.g. Bole Medhanialem, Addis Ababa"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500"
+                />
+                <p className="text-[10px] text-slate-400 mt-1 font-mono">
+                  Coordinates: Lat {newPost.lat}° N, Lng {newPost.lng}° E
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <span>Your Contact Phone Number *</span>
+                  <span className="text-[10px] text-amber-600 dark:text-amber-400 normal-case font-bold">For Client Inquiries</span>
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="tel"
+                    required
+                    value={newPost.workerPhone}
+                    onChange={(e) => setNewPost({ ...newPost, workerPhone: e.target.value })}
+                    placeholder="+251 91 123 4567"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 font-mono"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Homeowners who view your work can tap to call or message you directly.
+                </p>
+              </div>
+            </div>
+
+            {/* Submit Action */}
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Post is routed to community feed with price benchmarks for fair marketplace assurance.
+              </p>
+              <Button
+                type="submit"
+                variant="accent"
+                size="md"
+                className="font-bold flex items-center justify-center gap-2 shadow-md shadow-amber-500/20"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Publish Work Showcase</span>
+              </Button>
+            </div>
+
+          </form>
+        </Card>
+      )}
+
+      {/* TAB 3: MY WORK POSTS & SHOWCASE */}
       {activeTab === 'posts' && (
         <div className="space-y-6">
           
@@ -913,7 +1209,7 @@ export const WorkerDashboard: React.FC = () => {
         </Card>
       )}
 
-      {/* TAB 4: CUSTOMER ACTIVITY & NOTIFICATIONS */}
+      {/* TAB 6: CUSTOMER ACTIVITY & NOTIFICATIONS */}
       {activeTab === 'notifications' && (
         <Card className="p-6 space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-200">
