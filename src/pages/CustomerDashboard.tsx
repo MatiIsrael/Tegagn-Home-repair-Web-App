@@ -315,13 +315,13 @@ export const CustomerDashboard: React.FC = () => {
   const totalCartCost = activeBookings.reduce((sum, b) => sum + (b.estimatedCost || 350), 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8">
       
       {/* 1. TOP SUB-NAV BAR (Inspired by Screenshot 1 Header: Marketplace | Cart | Orders | Profile) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 sm:gap-3 overflow-x-auto">
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 overflow-x-auto pb-1 scrollbar-none -mx-3 px-3 sm:mx-0 sm:px-0">
           <button
             type="button"
             onClick={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
@@ -676,7 +676,7 @@ export const CustomerDashboard: React.FC = () => {
       {/* 5. MODAL: BOOK TECHNICIAN (With Warm Amber Accents) */}
       {bookingModalWorker && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl max-w-lg w-full p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-5 shadow-2xl max-h-[92vh] overflow-y-auto border border-slate-200 dark:border-slate-800 my-auto">
             
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">

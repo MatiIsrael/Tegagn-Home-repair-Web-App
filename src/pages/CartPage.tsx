@@ -84,7 +84,7 @@ export const CartPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-12">
       
       {/* Page Title */}
       <div className="mb-8">
@@ -280,7 +280,7 @@ export const CartPage: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setCheckoutModalOpen(false);
-                  navigate('/customer/dashboard');
+                  navigate('/customer/dashboard?tab=orders');
                 }}
                 className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm cursor-pointer shadow-xs"
               >
