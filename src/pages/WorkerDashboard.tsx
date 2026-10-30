@@ -1091,8 +1091,8 @@ export const WorkerDashboard: React.FC = () => {
 
       {/* Floating Active Call Notice */}
       {callNotice && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-200">
-          <div className="bg-slate-900 text-white border border-amber-500/50 rounded-2xl p-4 shadow-2xl flex items-center gap-3.5 max-w-sm ring-1 ring-amber-500/30">
+        <div className="fixed bottom-4 sm:bottom-6 left-3 sm:left-auto right-3 sm:right-6 z-50 animate-in slide-in-from-bottom-5 duration-200">
+          <div className="bg-slate-900 text-white border border-amber-500/50 rounded-2xl p-3 sm:p-4 shadow-2xl flex items-center gap-2.5 sm:gap-3.5 w-full sm:max-w-sm ring-1 ring-amber-500/30">
             <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-md">
               <Phone className="w-5 h-5 animate-pulse" />
             </div>

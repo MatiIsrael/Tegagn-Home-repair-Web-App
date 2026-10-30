@@ -85,84 +85,85 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-4xl w-full shadow-2xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/75 backdrop-blur-xs overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-4xl w-full shadow-2xl overflow-hidden my-auto max-h-[94vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40 shrink-0">
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               Checkout
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Finalize payment method & confirm booking service order
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {successNotice ? (
-          <div className="p-12 text-center space-y-4">
-            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-emerald-50 dark:ring-emerald-900/20">
-              <CheckCircle2 className="w-8 h-8" />
+          <div className="p-8 sm:p-12 text-center space-y-4 my-auto">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-emerald-50 dark:ring-emerald-900/20">
+              <CheckCircle2 className="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">
+            <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
               Payment Completed & Protected!
             </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto">
               Your payment of <strong className="text-emerald-600 dark:text-emerald-400">${totalAmount.toFixed(2)}</strong> via {paymentMethod} is secured in Tegagn Escrow with 100% Re-back Guarantee.
             </p>
           </div>
         ) : (
-          <form onSubmit={handlePlaceOrder} className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <form onSubmit={handlePlaceOrder} className="p-4 sm:p-6 overflow-y-auto flex-1">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
               
               {/* Left Column (7 cols): Order Items, Address, Payment Method */}
-              <div className="lg:col-span-7 space-y-6">
+              <div className="lg:col-span-7 space-y-5 sm:space-y-6">
                 
                 {/* 1. Order Items */}
-                <div className="space-y-3">
-                  <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                <div className="space-y-2.5 sm:space-y-3">
+                  <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
                     Order Items
                   </h3>
-                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-center shrink-0">
-                        <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                  <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-center shrink-0">
+                        <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600 dark:text-amber-400" />
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
+                      <div className="min-w-0">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
                           {booking.serviceDescription}
                         </h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                        <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
                           by <span className="font-semibold text-slate-800 dark:text-slate-200">{booking.workerName}</span> ({booking.workerTrade})
                         </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
+                        <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">
                           1 × ${productSubtotal.toFixed(2)}
                         </p>
                       </div>
                     </div>
-                    <span className="text-base font-black text-slate-900 dark:text-white font-mono shrink-0">
+                    <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white font-mono shrink-0">
                       ${productSubtotal.toFixed(2)}
                     </span>
                   </div>
                 </div>
 
                 {/* 2. Delivery Address */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-1.5 text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                    <MapPin className="w-4 h-4 text-emerald-600" />
+                <div className="space-y-2.5 sm:space-y-3">
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                    <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>Delivery Address</span>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2.5 sm:space-y-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                      <label className="block text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase mb-1">
                         Street Address
                       </label>
                       <input
@@ -171,12 +172,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         value={streetAddress}
                         onChange={(e) => setStreetAddress(e.target.value)}
                         placeholder="123 Main Street"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs sm:text-sm font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                        <label className="block text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase mb-1">
                           City
                         </label>
                         <input
@@ -185,11 +186,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           value={city}
                           onChange={(e) => setCity(e.target.value)}
                           placeholder="Addis Ababa"
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs sm:text-sm font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                        <label className="block text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase mb-1">
                           Phone Number
                         </label>
                         <input
@@ -198,7 +199,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           value={phoneNumber}
                           onChange={(e) => setPhoneNumber(e.target.value)}
                           placeholder="+251 912 345 678"
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs sm:text-sm font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
                         />
                       </div>
                     </div>
@@ -206,22 +207,22 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </div>
 
                 {/* 3. Payment Method (Exact 4 options from Screenshot 2) */}
-                <div className="space-y-3">
+                <div className="space-y-2.5 sm:space-y-3">
                   <div>
-                    <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                    <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
                       Payment Method
                     </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
                       Select Payment Method
                     </p>
                   </div>
 
-                  <div className="space-y-2.5">
+                  <div className="space-y-2 sm:space-y-2.5">
                     
                     {/* Option 1: Mobile Money */}
                     <div
                       onClick={() => setPaymentMethod('Mobile Money')}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                      className={`p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer ${
                         paymentMethod === 'Mobile Money'
                           ? 'border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 ring-1 ring-emerald-500'
                           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
@@ -233,16 +234,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           name="paymentMethod"
                           checked={paymentMethod === 'Mobile Money'}
                           onChange={() => setPaymentMethod('Mobile Money')}
-                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 shrink-0"
                         />
                         <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center shrink-0">
                           <Smartphone className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-slate-900 dark:text-white">
+                          <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                             Mobile Money
                           </p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">
                             Telebirr, M-Pesa, HelloCash, CBE Birr
                           </p>
                         </div>
@@ -250,7 +251,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
                       {paymentMethod === 'Mobile Money' && (
                         <div className="mt-3 pt-3 border-t border-emerald-100 dark:border-emerald-900/30 pl-7 space-y-2.5">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                             {(['Telebirr', 'CBE Birr', 'M-Pesa'] as const).map((prov) => (
                               <button
                                 key={prov}
@@ -288,7 +289,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     {/* Option 2: Credit/Debit Card */}
                     <div
                       onClick={() => setPaymentMethod('Credit/Debit Card')}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                      className={`p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer ${
                         paymentMethod === 'Credit/Debit Card'
                           ? 'border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 ring-1 ring-emerald-500'
                           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
@@ -300,16 +301,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           name="paymentMethod"
                           checked={paymentMethod === 'Credit/Debit Card'}
                           onChange={() => setPaymentMethod('Credit/Debit Card')}
-                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 shrink-0"
                         />
                         <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center shrink-0">
                           <CreditCard className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-slate-900 dark:text-white">
+                          <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                             Credit/Debit Card
                           </p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
                             Visa, Mastercard
                           </p>
                         </div>
@@ -350,7 +351,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     {/* Option 3: Bank Transfer */}
                     <div
                       onClick={() => setPaymentMethod('Bank Transfer')}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                      className={`p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer ${
                         paymentMethod === 'Bank Transfer'
                           ? 'border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 ring-1 ring-emerald-500'
                           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
@@ -362,16 +363,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           name="paymentMethod"
                           checked={paymentMethod === 'Bank Transfer'}
                           onChange={() => setPaymentMethod('Bank Transfer')}
-                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 shrink-0"
                         />
                         <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-950/60 text-teal-600 flex items-center justify-center shrink-0">
                           <Building2 className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-slate-900 dark:text-white">
+                          <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                             Bank Transfer
                           </p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
                             Upload payment receipt / Transaction reference
                           </p>
                         </div>
@@ -404,7 +405,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     {/* Option 4: Cash on Delivery / Completion */}
                     <div
                       onClick={() => setPaymentMethod('Cash on Delivery')}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                      className={`p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer ${
                         paymentMethod === 'Cash on Delivery'
                           ? 'border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 ring-1 ring-emerald-500'
                           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
@@ -416,16 +417,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           name="paymentMethod"
                           checked={paymentMethod === 'Cash on Delivery'}
                           onChange={() => setPaymentMethod('Cash on Delivery')}
-                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 shrink-0"
                         />
                         <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center shrink-0">
                           <Banknote className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-slate-900 dark:text-white">
+                          <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                             Cash on Delivery
                           </p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
                             Pay when you receive / After repair inspection
                           </p>
                         </div>
@@ -438,13 +439,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </div>
 
               {/* Right Column (5 cols): Payment Summary (Matching Screenshot 2) */}
-              <div className="lg:col-span-5">
-                <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
-                  <h3 className="text-base font-black text-slate-900 dark:text-white">
+              <div className="lg:col-span-5 w-full">
+                <div className="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 sm:space-y-5 lg:sticky lg:top-2">
+                  <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
                     Payment Summary
                   </h3>
 
-                  <div className="space-y-3 text-xs">
+                  <div className="space-y-2.5 sm:space-y-3 text-xs">
                     <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                       <span>Product Subtotal</span>
                       <span className="font-bold text-slate-900 dark:text-white font-mono">
@@ -472,26 +473,26 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       </p>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">
+                    <div className="pt-3 sm:pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                      <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                         Total Amount
                       </span>
-                      <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                      <span className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
                         ${totalAmount.toFixed(2)}
                       </span>
                     </div>
                   </div>
 
-                  {/* Place Order Button (Matching Screenshot 2) */}
+                  {/* Place Order Button */}
                   <div className="space-y-2 pt-2">
                     <button
                       type="submit"
                       disabled={isProcessing}
-                      className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 text-center transition-all cursor-pointer disabled:opacity-50"
+                      className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 text-center transition-all cursor-pointer disabled:opacity-50"
                     >
                       {isProcessing ? 'Processing Payment...' : 'Place Order'}
                     </button>
-                    <p className="text-[11px] text-slate-400 text-center">
+                    <p className="text-[10px] sm:text-[11px] text-slate-400 text-center">
                       By placing this order, you agree to our terms and conditions
                     </p>
                   </div>
@@ -502,7 +503,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span>100% Re-back Guarantee Included</span>
                     </div>
-                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400">
+                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 leading-relaxed">
                       If the technician cannot arrive at your home within the designated time window, your funds are returned instantly to your account.
                     </p>
                   </div>

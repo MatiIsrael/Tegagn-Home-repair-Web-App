@@ -67,20 +67,20 @@ export const RebackModal: React.FC<RebackModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/75 backdrop-blur-xs overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-rose-50/50 dark:bg-rose-950/20">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-900/40 text-rose-600 flex items-center justify-center shrink-0">
-              <RotateCcw className="w-5 h-5" />
+        <div className="px-4 sm:px-6 py-3.5 sm:py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-rose-50/50 dark:bg-rose-950/20 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-rose-100 dark:bg-rose-900/40 text-rose-600 flex items-center justify-center shrink-0">
+              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+              <h2 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white">
                 100% Re-back Guarantee
               </h2>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
                 Cancel order & return full payment to your account
               </p>
             </div>
@@ -88,31 +88,32 @@ export const RebackModal: React.FC<RebackModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {refundResult ? (
-          <div className="p-8 text-center space-y-5 animate-in fade-in">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center mx-auto ring-8 ring-emerald-50 dark:ring-emerald-900/20">
-              <CheckCircle2 className="w-9 h-9" />
+          <div className="p-6 sm:p-8 text-center space-y-4 sm:space-y-5 my-auto overflow-y-auto">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center mx-auto ring-8 ring-emerald-50 dark:ring-emerald-900/20">
+              <CheckCircle2 className="w-8 h-8 sm:w-9 sm:h-9" />
             </div>
 
             <div className="space-y-1">
-              <span className="text-xs font-black text-emerald-600 uppercase tracking-widest block">
+              <span className="text-[10px] sm:text-xs font-black text-emerald-600 uppercase tracking-widest block">
                 Re-back Successful
               </span>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+              <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
                 ${refundResult.amount.toFixed(2)} Refund Processed
               </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
+              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
                 100% of your funds have been returned to your <strong className="text-slate-900 dark:text-white">{refundDestination}</strong> ({customerPhone}).
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-left space-y-1.5 font-mono">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-left space-y-1.5 font-mono">
               <div className="flex justify-between">
                 <span className="text-slate-500">Refund Ref:</span>
                 <span className="font-bold text-slate-900 dark:text-white">{refundResult.transactionId}</span>
@@ -136,24 +137,24 @@ export const RebackModal: React.FC<RebackModalProps> = ({
             </button>
           </div>
         ) : (
-          <form onSubmit={handleConfirmReback} className="p-6 space-y-5">
+          <form onSubmit={handleConfirmReback} className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1">
             
             {/* Policy Info Card */}
-            <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex items-start gap-3">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex items-start gap-2.5 sm:gap-3">
               <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div className="text-xs text-amber-900 dark:text-amber-200">
                 <span className="font-bold block">Tegagn Punctuality & Arrival Guarantee</span>
-                <p className="text-[11px] text-amber-800 dark:text-amber-300 mt-0.5">
+                <p className="text-[10px] sm:text-[11px] text-amber-800 dark:text-amber-300 mt-0.5 leading-relaxed">
                   If your technician cannot reach your home within the scheduled arrival window, you are entitled to a full 100% instant refund with zero penalties.
                 </p>
               </div>
             </div>
 
             {/* Refund Summary */}
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs">
-              <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-2 sm:space-y-2.5 text-xs">
+              <div className="flex justify-between items-center text-slate-600 dark:text-slate-400 gap-2">
                 <span>Service Booking:</span>
-                <span className="font-bold text-slate-900 dark:text-white line-clamp-1 max-w-[200px]">
+                <span className="font-bold text-slate-900 dark:text-white truncate max-w-[200px] text-right">
                   {booking.serviceDescription}
                 </span>
               </div>
@@ -161,15 +162,15 @@ export const RebackModal: React.FC<RebackModalProps> = ({
                 <span>Technician:</span>
                 <span className="font-bold text-slate-900 dark:text-white">{booking.workerName}</span>
               </div>
-              <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
+              <div className="flex justify-between items-center text-slate-600 dark:text-slate-400 gap-2">
                 <span>Re-back Destination:</span>
-                <span className="font-bold text-slate-900 dark:text-white">
+                <span className="font-bold text-slate-900 dark:text-white truncate text-right">
                   {refundDestination} ({customerPhone})
                 </span>
               </div>
               <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
                 <span className="font-bold text-slate-900 dark:text-white">100% Refund Amount:</span>
-                <span className="text-base font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                <span className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 font-mono">
                   ${totalCost.toFixed(2)}
                 </span>
               </div>
@@ -190,7 +191,7 @@ export const RebackModal: React.FC<RebackModalProps> = ({
                 ].map((reason) => (
                   <label
                     key={reason}
-                    className={`flex items-center gap-2.5 p-3 rounded-xl border transition-all cursor-pointer ${
+                    className={`flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer ${
                       selectedReason === reason
                         ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20 text-slate-900 dark:text-white font-semibold'
                         : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
@@ -201,9 +202,9 @@ export const RebackModal: React.FC<RebackModalProps> = ({
                       name="rebackReason"
                       checked={selectedReason === reason}
                       onChange={() => setSelectedReason(reason)}
-                      className="w-4 h-4 text-rose-600 focus:ring-rose-500"
+                      className="w-4 h-4 text-rose-600 focus:ring-rose-500 shrink-0"
                     />
-                    <span>{reason}</span>
+                    <span className="leading-snug">{reason}</span>
                   </label>
                 ))}
               </div>
@@ -224,18 +225,18 @@ export const RebackModal: React.FC<RebackModalProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center gap-2.5">
+            <div className="pt-2 flex flex-col sm:flex-row items-center gap-2 sm:gap-2.5">
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full sm:w-1/2 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                className="w-full sm:w-1/2 py-2.5 sm:py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-center"
               >
                 Keep Order
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full sm:w-1/2 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="w-full sm:w-1/2 py-2.5 sm:py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>{isSubmitting ? 'Processing Re-back...' : 'Confirm & Re-back Refund'}</span>
