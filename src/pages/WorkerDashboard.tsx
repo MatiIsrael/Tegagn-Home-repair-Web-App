@@ -73,6 +73,31 @@ export const WorkerDashboard: React.FC = () => {
     return () => window.removeEventListener('tegagn_bookings_changed', loadRequests);
   }, [workerId]);
 
+  const [callNotice, setCallNotice] = useState<{ phone: string; clientName: string } | null>(null);
+
+  const handleCallClient = (e: React.MouseEvent | null, phoneNumber?: string, clientName?: string) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const cleanPhone = (phoneNumber || '+251 92 555 6677').trim();
+    
+    // 1. Copy to clipboard for easy dial/paste on any device
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(cleanPhone).catch(() => {});
+    }
+
+    // 2. Trigger native telephone link
+    const dialDigits = cleanPhone.replace(/[\s-]/g, '');
+    window.location.href = `tel:${dialDigits}`;
+
+    // 3. Display interactive calling banner
+    setCallNotice({ phone: cleanPhone, clientName: clientName || 'Client' });
+    setTimeout(() => {
+      setCallNotice(null);
+    }, 4500);
+  };
+
   // Tab state: 'requests' | 'posts' | 'profile' | 'notifications'
   const [activeTab, setActiveTab] = useState<'requests' | 'posts' | 'profile' | 'notifications'>('requests');
 
@@ -444,22 +469,27 @@ export const WorkerDashboard: React.FC = () => {
                   
                   {/* Left Column: Details & Customer Info (7 cols) */}
                   <div className="lg:col-span-7 space-y-3">
-                    <h3 className="font-bold text-base text-slate-900">
+                    <h3 className="font-bold text-base text-slate-900 dark:text-white">
                       {req.serviceDescription}
                     </h3>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300">
                       <span className="flex items-center gap-1 font-medium">
-                        <strong>Client:</strong> {req.customerName}
+                        <strong className="text-slate-800 dark:text-slate-100">Client:</strong> {req.customerName}
                       </span>
-                      <span className="flex items-center gap-1 font-medium">
-                        <Phone className="w-3.5 h-3.5 text-amber-600" />
-                        <a href={`tel:${req.customerPhone}`} className="hover:underline text-slate-900">
-                          {req.customerPhone || '+251 91 222 3344'}
-                        </a>
+                      <span className="flex items-center gap-1.5 font-bold">
+                        <Phone className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                        <button
+                          type="button"
+                          onClick={(e) => handleCallClient(e, req.customerPhone, req.customerName)}
+                          className="text-amber-600 dark:text-amber-400 hover:underline font-mono font-bold cursor-pointer"
+                          title="Click to dial client directly"
+                        >
+                          {req.customerPhone || '+251 92 555 6677'}
+                        </button>
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                      <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+                        <Calendar className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                         {req.scheduledDate} at {req.scheduledTime}
                       </span>
                     </div>
@@ -552,6 +582,15 @@ export const WorkerDashboard: React.FC = () => {
                           >
                             {t('declineJob')}
                           </Button>
+                          <button
+                            type="button"
+                            onClick={(e) => handleCallClient(e, req.customerPhone, req.customerName)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                            title={`Call Client: ${req.customerPhone || '+251 92 555 6677'}`}
+                          >
+                            <Phone className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                            <span>Call Client</span>
+                          </button>
                         </>
                       ) : req.status === 'accepted' ? (
                         <>
@@ -563,17 +602,31 @@ export const WorkerDashboard: React.FC = () => {
                           >
                             {t('markJobCompleted')}
                           </Button>
-                          <a href={`tel:${req.customerPhone}`}>
-                            <Button variant="outline" size="sm" icon={<Phone className="w-3.5 h-3.5" />}>
-                              {t('callClient')}
-                            </Button>
-                          </a>
+                          <button
+                            type="button"
+                            onClick={(e) => handleCallClient(e, req.customerPhone, req.customerName)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-amber-600 dark:hover:text-amber-400 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                            title={`Call Client: ${req.customerPhone || '+251 92 555 6677'}`}
+                          >
+                            <Phone className="w-3.5 h-3.5 text-amber-500" />
+                            <span>Call Client</span>
+                          </button>
                         </>
                       ) : (
-                        <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                          <CheckCircle2 className="w-4 h-4" />
-                          {t('statusCompleted')}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                            <CheckCircle2 className="w-4 h-4" />
+                            {t('statusCompleted')}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => handleCallClient(e, req.customerPhone, req.customerName)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-amber-500 text-xs font-medium cursor-pointer"
+                          >
+                            <Phone className="w-3 h-3 text-amber-500" />
+                            <span>{req.customerPhone || '+251 92 555 6677'}</span>
+                          </button>
+                        </div>
                       )}
                     </div>
 
@@ -1017,6 +1070,32 @@ export const WorkerDashboard: React.FC = () => {
 
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* Floating Active Call Notice */}
+      {callNotice && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-200">
+          <div className="bg-slate-900 text-white border border-amber-500/50 rounded-2xl p-4 shadow-2xl flex items-center gap-3.5 max-w-sm ring-1 ring-amber-500/30">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-md">
+              <Phone className="w-5 h-5 animate-pulse" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider block">
+                Calling Client...
+              </span>
+              <p className="text-sm font-bold truncate text-white">{callNotice.clientName}</p>
+              <p className="text-xs font-mono font-bold text-amber-300">
+                {callNotice.phone} <span className="text-[10px] text-emerald-400 font-sans font-normal">(Copied)</span>
+              </p>
+            </div>
+            <a
+              href={`tel:${callNotice.phone.replace(/[\s-]/g, '')}`}
+              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold shrink-0 transition-colors shadow-sm"
+            >
+              Dial Now
+            </a>
           </div>
         </div>
       )}

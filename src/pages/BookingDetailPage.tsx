@@ -229,12 +229,16 @@ export const BookingDetailPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-slate-400 block font-medium">Contact Phone</span>
-                <span className="font-semibold text-slate-800">{booking.customerPhone || '+251 91 123 4567'}</span>
+                <span className="font-bold text-amber-600 dark:text-amber-400 font-mono text-sm">
+                  {booking.customerPhone || '+251 91 123 4567'}
+                </span>
               </div>
-              <a href={`tel:${booking.customerPhone || '+251911234567'}`}>
-                <Button variant="outline" size="sm" icon={<Phone className="w-3.5 h-3.5" />}>
-                  Call
-                </Button>
+              <a 
+                href={`tel:${(booking.customerPhone || '+251911234567').replace(/[\s-]/g, '')}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 text-xs font-bold transition-colors shadow-2xs"
+              >
+                <Phone className="w-3.5 h-3.5 text-amber-600" />
+                <span>Call Client</span>
               </a>
             </div>
 

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { Layout } from './components/layout/Layout';
 import { HomePage } from './pages/HomePage';
 import { WorkersPage } from './pages/WorkersPage';
+import { CartPage } from './pages/CartPage';
 import { WorkerDetailPage } from './pages/WorkerDetailPage';
 import { CustomerSignUpPage } from './pages/CustomerSignUpPage';
 import { WorkerSignUpPage } from './pages/WorkerSignUpPage';
@@ -44,8 +45,10 @@ export const App: React.FC = () => {
           {/* 1. Home */}
           <Route index element={<HomePage />} />
 
-          {/* 2. Find Workers */}
+          {/* 2. Find Workers & Marketplace */}
           <Route path="workers" element={<WorkersPage />} />
+          <Route path="marketplace" element={<WorkersPage />} />
+          <Route path="cart" element={<CartPage />} />
 
           {/* 3. Worker Details */}
           <Route path="workers/:id" element={<WorkerDetailPage />} />
@@ -69,6 +72,8 @@ export const App: React.FC = () => {
 
           {/* 7. Customer Dashboard */}
           <Route path="customer/dashboard" element={<CustomerDashboard />} />
+          <Route path="customer/ai" element={<CustomerDashboard />} />
+          <Route path="ai" element={<CustomerDashboard />} />
 
           {/* 8. Worker Dashboard */}
           <Route path="worker/dashboard" element={<WorkerDashboard />} />

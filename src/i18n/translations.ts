@@ -27,7 +27,7 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
     'worker': 'Worker',
 
     // Hero Section
-    'heroBadge': 'Addis Ababa Home Repair Marketplace',
+    'heroBadge': 'Home Repair Marketplace',
     'heroTitle': 'Connecting Homeowners and',
     'heroHighlight': 'Service Professionals Directly',
     'heroSubtitle': 'Quality home repairs from trusted local technicians delivered straight to your door. Enjoy verified workmanship, direct contact, and fair prices across Addis Ababa.',
@@ -337,7 +337,7 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
     'worker': 'ባለሙያ',
 
     // Hero Section
-    'heroBadge': 'የአዲስ አበባ የቤት ጥገና መድረክ',
+    'heroBadge': 'የቤት ጥገና የገበያ መድረክ',
     'heroTitle': 'የቤት ባለቤቶችን እና የጥገና',
     'heroHighlight': 'ባለሙያዎችን በቀጥታ እናገናኛለን',
     'heroSubtitle': 'ጥራት ያለው የቤት ውስጥ ጥገና አገልግሎት በቀጥታ ወደ ቤትዎ። ፍትሃዊ ዋጋ፣ ቀጥተኛ ግንኙነት እና ታማኝ የአካባቢ ባለሙያዎች በአዲስ አበባ።',
@@ -647,7 +647,7 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
     'worker': 'Ogeessa',
 
     // Hero Section
-    'heroBadge': 'Gabaa Suphaa Manaa Finfinnee',
+    'heroBadge': 'Gabaa Suphaa Manaa',
     'heroTitle': 'Abbootii Manaa fi Ogeeyyii',
     'heroHighlight': 'Kallattiin Walqunnamsiisa',
     'heroSubtitle': 'Tajaajila suphaa mana qulqullina qabu Finfinnee keessatti kallattiin gara mana keessaniitti. Gatii madaalawaa, qunnamtii kallattii fi ogeeyyii naannoo amanamoo.',

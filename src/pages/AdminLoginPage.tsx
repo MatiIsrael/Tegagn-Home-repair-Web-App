@@ -19,8 +19,54 @@ import { Button } from '../components/common/Button';
 export const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
 
+  const storedUser = authService.getStoredUser();
+
+  React.useEffect(() => {
+    if (storedUser && storedUser.role === 'admin') {
+      navigate('/admin', { replace: true });
+    }
+  }, [storedUser, navigate]);
+
+  if (storedUser && storedUser.role === 'admin') {
+    return (
+      <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <Card className="max-w-md w-full p-8 text-center space-y-6 shadow-xl border-amber-200 dark:border-amber-800 dark:bg-slate-900">
+          <div className="w-16 h-16 rounded-3xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center border border-amber-500/20 shadow-xs">
+            <Lock className="w-8 h-8" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Already Signed In</h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
+              You are currently logged in as Administrator <strong className="text-slate-900 dark:text-white">{storedUser.firstName || storedUser.email}</strong>.
+            </p>
+          </div>
+          <div className="space-y-3 pt-2">
+            <Button
+              variant="accent"
+              size="lg"
+              className="w-full justify-center font-bold"
+              onClick={() => navigate('/admin')}
+            >
+              Continue to Admin Portal
+            </Button>
+            <button
+              type="button"
+              onClick={() => {
+                authService.logout();
+                window.location.reload();
+              }}
+              className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-bold transition-all cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   // Controlled form state
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(storedUser?.role === 'admin' ? storedUser.email : (localStorage.getItem('tegagn_remembered_email') || ''));
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberSession, setRememberSession] = useState(true);

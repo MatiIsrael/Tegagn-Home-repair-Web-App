@@ -61,7 +61,9 @@ export class ApiError extends Error {
 }
 
 function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('tegagn_access_token');
+  const token = typeof window !== 'undefined'
+    ? (sessionStorage.getItem('tegagn_access_token') || localStorage.getItem('tegagn_access_token'))
+    : null;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -74,17 +76,31 @@ function getAuthHeaders(): HeadersInit {
 // ---------------------------------------------------------------------------
 // 1. Authentication & User Profile Service
 // ---------------------------------------------------------------------------
+// Clear any stale persistent user session from localStorage so entering fresh never auto-logins
+if (typeof window !== 'undefined') {
+  try {
+    localStorage.removeItem('tegagn_user');
+    localStorage.removeItem('tegagn_access_token');
+    localStorage.removeItem('tegagn_refresh_token');
+  } catch {
+    // ignore
+  }
+}
+
 export const authService = {
   getToken(): string | null {
-    return localStorage.getItem('tegagn_access_token');
+    if (typeof window === 'undefined') return null;
+    return sessionStorage.getItem('tegagn_access_token');
   },
 
   getRefreshToken(): string | null {
-    return localStorage.getItem('tegagn_refresh_token');
+    if (typeof window === 'undefined') return null;
+    return sessionStorage.getItem('tegagn_refresh_token');
   },
 
   getStoredUser(): User | null {
-    const raw = localStorage.getItem('tegagn_user');
+    if (typeof window === 'undefined') return null;
+    const raw = sessionStorage.getItem('tegagn_user');
     if (!raw) return null;
     try {
       return JSON.parse(raw);
@@ -93,19 +109,29 @@ export const authService = {
     }
   },
 
-  setSession(access: string, refresh: string, user: User) {
-    localStorage.setItem('tegagn_access_token', access);
-    localStorage.setItem('tegagn_refresh_token', refresh);
-    localStorage.setItem('tegagn_user', JSON.stringify(user));
+  setSession(access: string, refresh: string, user: User, rememberEmail: boolean = true) {
+    sessionStorage.setItem('tegagn_access_token', access);
+    sessionStorage.setItem('tegagn_refresh_token', refresh);
+    sessionStorage.setItem('tegagn_user', JSON.stringify(user));
+    localStorage.removeItem('tegagn_user');
+    localStorage.removeItem('tegagn_access_token');
+    localStorage.removeItem('tegagn_refresh_token');
+    if (rememberEmail && user.email) {
+      localStorage.setItem('tegagn_remembered_email', user.email);
+    }
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('tegagn_auth_changed'));
     }
   },
 
   clearSession() {
+    sessionStorage.removeItem('tegagn_access_token');
+    sessionStorage.removeItem('tegagn_refresh_token');
+    sessionStorage.removeItem('tegagn_user');
     localStorage.removeItem('tegagn_access_token');
     localStorage.removeItem('tegagn_refresh_token');
     localStorage.removeItem('tegagn_user');
+    // Keep tegagn_remembered_email so returning users are always remembered!
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('tegagn_auth_changed'));
     }
@@ -377,8 +403,10 @@ export const workerService = {
       // Fall through to mock foundation
     }
 
-    // Frontend fallback with placeholder mock data
-    let result = [...PLACEHOLDER_WORKERS];
+    // 2. Fetch and merge real database registered workers with mock foundation
+    const dbWorkers = realDb.getWorkerProfiles();
+    const existingIds = new Set(dbWorkers.map(w => w.id));
+    let result = [...dbWorkers, ...PLACEHOLDER_WORKERS.filter(p => !existingIds.has(p.id))];
     if (filters) {
       if (filters.search) {
         const query = filters.search.toLowerCase();
@@ -472,7 +500,12 @@ export const workerService = {
       // Fallback
     }
 
-    const worker = PLACEHOLDER_WORKERS.find(w => w.id === id);
+    // Fallback to real database workers + placeholder workers
+    const dbWorkers = realDb.getWorkerProfiles();
+    const foundInDb = dbWorkers.find(w => w.id === id || w.userId === id);
+    if (foundInDb) return foundInDb;
+
+    const worker = PLACEHOLDER_WORKERS.find(w => w.id === id || w.userId === id);
     if (!worker) return null;
     const reviews = PLACEHOLDER_REVIEWS.filter(r => r.workerId === id);
     return { ...worker, reviews };

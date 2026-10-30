@@ -1,27 +1,29 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
-  Search, 
   CheckCircle2, 
   ShieldCheck, 
   Sparkles,
   Users
 } from 'lucide-react';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
+import { authService } from '../services/api';
 
 export const HomePage: React.FC = () => {
-  const navigate = useNavigate();
   const { t } = useThemeLanguage();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [storedUser, setStoredUser] = useState(() => authService.getStoredUser());
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (searchQuery.trim()) {
-      params.set('search', searchQuery.trim());
-    }
-    navigate(`/workers?${params.toString()}`);
-  };
+  useEffect(() => {
+    const handleAuthChange = () => setStoredUser(authService.getStoredUser());
+    window.addEventListener('tegagn_auth_changed', handleAuthChange);
+    return () => window.removeEventListener('tegagn_auth_changed', handleAuthChange);
+  }, []);
+
+  const dashboardPath = storedUser?.role === 'worker'
+    ? '/worker/dashboard'
+    : storedUser?.role === 'admin'
+    ? '/admin'
+    : '/customer/dashboard';
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-b from-amber-50/30 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors">
@@ -37,7 +39,7 @@ export const HomePage: React.FC = () => {
           {/* Category badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100/80 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-300 text-xs font-bold uppercase tracking-wider shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-            <span>Addis Ababa Home Repair Marketplace</span>
+            <span>{t('heroBadge')}</span>
           </div>
 
           {/* Main Headline */}
@@ -62,36 +64,21 @@ export const HomePage: React.FC = () => {
               {t('exploreMarketplace')}
             </Link>
 
-            <Link
-              to="/register"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 border-2 border-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 font-bold text-base transition-all duration-200 text-center cursor-pointer"
-            >
-              {t('getStarted')}
-            </Link>
-          </div>
-
-          {/* Sleek Minimal Search Bar */}
-          <div className="pt-4 max-w-xl mx-auto w-full">
-            <form
-              onSubmit={handleSearchSubmit}
-              className="bg-white dark:bg-slate-900 p-2 sm:p-2.5 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 flex items-center gap-2"
-            >
-              <Search className="w-5 h-5 text-amber-500 dark:text-amber-400 ml-3 shrink-0" />
-              <input
-                id="search-input"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('searchPlaceholder')}
-                className="w-full text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 bg-transparent focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm px-6 py-2.5 rounded-xl transition-all shrink-0 cursor-pointer shadow-xs"
+            {storedUser ? (
+              <Link
+                to={dashboardPath}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 border-2 border-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 font-bold text-base transition-all duration-200 text-center cursor-pointer shadow-xs"
               >
-                {t('findButton')}
-              </button>
-            </form>
+                Go to Dashboard →
+              </Link>
+            ) : (
+              <Link
+                to="/register"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 border-2 border-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 font-bold text-base transition-all duration-200 text-center cursor-pointer"
+              >
+                {t('getStarted')}
+              </Link>
+            )}
           </div>
 
         </div>
