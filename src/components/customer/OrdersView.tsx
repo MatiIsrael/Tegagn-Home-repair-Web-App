@@ -12,7 +12,10 @@ import {
   ExternalLink,
   ChevronRight,
   Sparkles,
-  ShoppingBag
+  ShoppingBag,
+  Camera,
+  FileText,
+  Navigation
 } from 'lucide-react';
 import { Booking } from '../../types';
 import { bookingService } from '../../services/api';
@@ -32,6 +35,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
 }) => {
   const [activeCheckoutBooking, setActiveCheckoutBooking] = useState<Booking | null>(null);
   const [activeRebackBooking, setActiveRebackBooking] = useState<Booking | null>(null);
+  const [selectedEnlargedImage, setSelectedEnlargedImage] = useState<string | null>(null);
 
   // Live timer tick for arrival windows
   const [tick, setTick] = useState(0);
@@ -53,49 +57,54 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-200 w-full max-w-full overflow-hidden">
+    <div className="space-y-6 animate-in fade-in duration-200">
       
-      {/* Page Header (Matching Image 1: My Orders) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-2">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
         <div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             My Orders
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1">
-            Track technician arrival, complete escrow payments, and access 100% Re-back Guarantee protection.
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Track technician arrival, view attached problem photos, exact GPS location, and access 100% Re-back Guarantee protection.
           </p>
         </div>
 
-        {/* Protection Badge */}
-        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-800 dark:text-emerald-300 self-start sm:self-auto shrink-0 shadow-2xs">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-800 dark:text-emerald-300 self-start sm:self-auto">
           <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>100% Re-back Guarantee Active</span>
         </div>
       </div>
 
       {bookings.length === 0 ? (
-        <div className="p-8 sm:p-12 text-center rounded-2xl sm:rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
-          <ShoppingBag className="w-10 h-10 sm:w-12 sm:h-12 text-slate-400 mx-auto" />
-          <p className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300">
-            You don't have any orders yet
-          </p>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            Book verified plumbing, electrical, and repair professionals from our marketplace.
-          </p>
+        /* Empty State */
+        <div className="p-12 text-center rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
+            <ShoppingBag className="w-8 h-8" />
+          </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              No service orders yet
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-1">
+              Browse our verified trade professionals in Addis Ababa and book with guaranteed arrival times and zero upfront fees.
+            </p>
+          </div>
           <button
             type="button"
             onClick={onBrowseMarketplace}
-            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-sm cursor-pointer transition-colors"
+            className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer inline-flex items-center gap-2"
           >
-            Explore Marketplace
+            <span>Explore Marketplace</span>
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       ) : (
+        /* Orders List */
         <div className="space-y-4 sm:space-y-6">
           {bookings.map((booking) => {
             const subtotal = booking.estimatedCost || 242;
-            const deliveryFee = 10;
-            const totalCost = subtotal + deliveryFee;
+            const totalCost = subtotal + 10;
             const remainingSeconds = calculateRemainingSeconds(booking);
             const isOverdue = booking.rebackGuarantee?.isOverdue || remainingSeconds <= 0;
 
@@ -168,6 +177,70 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   </span>
                 </div>
 
+                {/* Problem Photos & Description & GPS Info Box */}
+                {((booking.images && booking.images.length > 0) || booking.notes || booking.gpsCoordinates) && (
+                  <div className="p-3 sm:p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 space-y-3 my-3 text-xs">
+                    
+                    {/* Description */}
+                    {booking.notes && (
+                      <div>
+                        <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300 mb-1">
+                          <FileText className="w-3.5 h-3.5 text-amber-500" />
+                          <span>Problem Description / Machine Notes:</span>
+                        </div>
+                        <p className="text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200/60 dark:border-slate-800 leading-relaxed">
+                          {booking.notes}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Attached Photos */}
+                    {booking.images && booking.images.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                          <Camera className="w-3.5 h-3.5 text-amber-500" />
+                          <span>Attached Problem Photos ({booking.images.length}):</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+                          {booking.images.map((photo, i) => (
+                            <div key={i} className="relative group shrink-0">
+                              <img
+                                src={photo}
+                                alt={`Problem photo ${i + 1}`}
+                                className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-slate-200 dark:border-slate-700 cursor-pointer hover:scale-105 transition-transform shadow-xs"
+                                onClick={() => setSelectedEnlargedImage(photo)}
+                              />
+                              <span className="absolute bottom-1 right-1 px-1 rounded bg-slate-950/70 text-white text-[9px] font-mono">
+                                #{i + 1}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* GPS Coordinates */}
+                    {booking.gpsCoordinates && (
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200/50 dark:border-slate-700/50 text-[11px]">
+                        <span className="text-slate-600 dark:text-slate-400 flex items-center gap-1.5 font-mono">
+                          <Navigation className="w-3.5 h-3.5 text-emerald-500" />
+                          <span>GPS Pin: Lat: {booking.gpsCoordinates.lat}° N, Lng: {booking.gpsCoordinates.lng}° E</span>
+                        </span>
+                        <a
+                          href={`https://www.google.com/maps?q=${booking.gpsCoordinates.lat},${booking.gpsCoordinates.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                        >
+                          <span>Open in Google Maps</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    )}
+
+                  </div>
+                )}
+
                 {/* 3. Re-backing Arrival Guarantee Banner (When Accepted or In Progress) */}
                 {(booking.status === 'accepted' || booking.status === 'pending') && (
                   <div className={`p-3 sm:p-4 rounded-xl border my-3 sm:my-4 transition-all ${
@@ -236,7 +309,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                       Payment
                     </span>
                     <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white block mt-0.5 truncate">
-                      {booking.paymentMethod || 'Mobile Money'}
+                      {booking.paymentMethod || 'Pay After Inspection'}
                     </span>
                   </div>
 
@@ -259,7 +332,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                       ) : (
                         <div className="flex items-center gap-2">
                           <span className="text-xs sm:text-sm font-extrabold text-amber-600 dark:text-amber-400">
-                            Pending
+                            Pending (Pay After Repair)
                           </span>
                           <button
                             type="button"
@@ -313,6 +386,32 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
             onRefresh();
           }}
         />
+      )}
+
+      {/* Enlarged Photo Modal */}
+      {selectedEnlargedImage && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setSelectedEnlargedImage(null)}
+        >
+          <div
+            className="relative max-w-2xl w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl p-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedEnlargedImage(null)}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-950/80 text-white flex items-center justify-center hover:bg-rose-600 transition-colors z-10 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <img
+              src={selectedEnlargedImage}
+              alt="Problem zoomed"
+              className="w-full max-h-[80vh] object-contain rounded-2xl"
+            />
+          </div>
+        </div>
       )}
 
     </div>
