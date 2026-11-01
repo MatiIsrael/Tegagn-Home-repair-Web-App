@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { 
   Briefcase, 
   DollarSign, 
@@ -98,8 +98,16 @@ export const WorkerDashboard: React.FC = () => {
     }, 4500);
   };
 
-  // Tab state: 'requests' | 'posts' | 'profile' | 'notifications'
-  const [activeTab, setActiveTab] = useState<'requests' | 'post-work' | 'posts' | 'earnings' | 'profile' | 'notifications'>('requests');
+  // Tab state from URL query (driven by top Navbar worker features)
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const activeTab: 'requests' | 'post-work' | 'posts' | 'earnings' | 'profile' | 'notifications' =
+    tabParam === 'post-work' ? 'post-work'
+    : tabParam === 'posts' ? 'posts'
+    : tabParam === 'earnings' ? 'earnings'
+    : tabParam === 'profile' ? 'profile'
+    : tabParam === 'notifications' ? 'notifications'
+    : 'requests';
 
   // Worker Posts Showcase state loaded from centralized postService
   const [posts, setPosts] = useState<WorkerPost[]>(() => {
@@ -341,32 +349,9 @@ export const WorkerDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Availability Toggle */}
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => setIsAvailable(!isAvailable)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer ${
-              isAvailable
-                ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400'
-                : 'bg-slate-800 border-slate-700 text-slate-400'
-            }`}
-          >
-            <span className={`w-2 h-2 rounded-full ${isAvailable ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
-            {isAvailable ? t('statusAccepting') : t('statusPaused')}
-          </button>
-
-          <Button 
-            variant="accent" 
-            size="md" 
-            className="font-bold flex items-center gap-1.5"
-            onClick={() => setActiveTab('post-work')}
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>{t('postMyWork')}</span>
-          </Button>
-
-          <button
-            onClick={() => setActiveTab('notifications')}
+            onClick={() => setSearchParams({ tab: 'notifications' })}
             className="p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white relative cursor-pointer"
             title="Customer Notifications"
           >
@@ -411,82 +396,7 @@ export const WorkerDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Navigation Tabs Bar */}
-      <div className="border-b border-slate-200 dark:border-slate-800">
-        <nav className="flex space-x-3 sm:space-x-6 overflow-x-auto pb-1 scrollbar-none">
-          <button
-            onClick={() => setActiveTab('requests')}
-            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'requests'
-                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
-                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            <Compass className="w-4 h-4" />
-            <span>{t('requestsTab')} ({requests.length})</span>
-          </button>
 
-          <button
-            onClick={() => setActiveTab('post-work')}
-            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'post-work'
-                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
-                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>Post My Work</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('posts')}
-            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'posts'
-                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
-                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            <Camera className="w-4 h-4" />
-            <span>{t('myPostsTab')} ({posts.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('earnings')}
-            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'earnings'
-                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
-                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            <DollarSign className="w-4 h-4" />
-            <span>Estimated Earnings & Payouts</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'profile'
-                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
-                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            <Sliders className="w-4 h-4" />
-            <span>{t('profileTab')}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('notifications')}
-            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'notifications'
-                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
-                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            <Bell className="w-4 h-4" />
-            <span>{t('notificationsTab')} ({notifications.filter(n => n.unread).length})</span>
-          </button>
-        </nav>
-      </div>
 
       {/* TAB 1: CUSTOMER REQUESTS & GPS LOCATION */}
       {activeTab === 'requests' && (
@@ -987,7 +897,7 @@ export const WorkerDashboard: React.FC = () => {
               variant="accent"
               size="md"
               className="font-bold flex items-center gap-1.5 shadow-md shadow-amber-500/20"
-              onClick={() => setIsPostModalOpen(true)}
+              onClick={() => setSearchParams({ tab: 'post-work' })}
             >
               <PlusCircle className="w-4 h-4" />
               <span>Create New Work Post</span>
@@ -1212,7 +1122,7 @@ export const WorkerDashboard: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => setActiveTab('profile')}
+              onClick={() => setSearchParams({ tab: 'profile' })}
               className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer self-start sm:self-auto"
             >
               Update Payout Account →

@@ -16,7 +16,12 @@ import {
 
   Sparkles,
   Star,
-  HelpCircle
+  HelpCircle,
+  Compass,
+  PlusCircle,
+  Camera,
+  DollarSign,
+  Sliders
 } from 'lucide-react';
 import { Button } from '../common/Button';
 import { authService } from '../../services/api';
@@ -36,7 +41,11 @@ export const Navbar: React.FC = () => {
       const [basePath, query] = path.split('?');
       return location.pathname === basePath && location.search.includes(query);
     }
-    if (path === '/customer/dashboard' && (location.search.includes('tab=ai') || location.search.includes('tab=rate'))) {
+    if (path === '/worker/dashboard') {
+      const currentTab = new URLSearchParams(location.search).get('tab');
+      return location.pathname === '/worker/dashboard' && (!currentTab || currentTab === 'overview');
+    }
+    if (path === '/customer/dashboard' && (location.search.includes('tab=ai') || location.search.includes('tab=support') || location.search.includes('tab=rate') || location.search.includes('tab=orders'))) {
       return false;
     }
     return location.pathname === path;
@@ -118,7 +127,14 @@ export const Navbar: React.FC = () => {
         ]
       : []),
     ...(!isHomePage && (isWorkerContext || (storedUser && storedUser.role === 'worker'))
-      ? [{ name: t('workerPortal'), path: '/worker/dashboard', icon: <Briefcase className="w-4 h-4 text-amber-500" /> }]
+      ? [
+          { name: t('workerPortal'), path: '/worker/dashboard', icon: <Briefcase className="w-4 h-4 text-amber-500" /> },
+          { name: 'Incoming Requests', path: '/worker/dashboard?tab=requests', icon: <Compass className="w-4 h-4 text-amber-500" /> },
+          { name: 'Post My Work', path: '/worker/dashboard?tab=post-work', icon: <PlusCircle className="w-4 h-4 text-amber-500" /> },
+          { name: 'My Showcase', path: '/worker/dashboard?tab=posts', icon: <Camera className="w-4 h-4 text-amber-500" /> },
+          { name: 'Estimated Earnings', path: '/worker/dashboard?tab=earnings', icon: <DollarSign className="w-4 h-4 text-amber-500" /> },
+          { name: 'Profile & Pricing', path: '/worker/dashboard?tab=profile', icon: <Sliders className="w-4 h-4 text-amber-500" /> }
+        ]
       : []),
     ...(!isHomePage && (isAdminContext || (storedUser && storedUser.role === 'admin'))
       ? [{ name: t('adminPortal'), path: '/admin', icon: <ShieldCheck className="w-4 h-4 text-sky-500" /> }]
@@ -157,7 +173,7 @@ export const Navbar: React.FC = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-150 ${
+                className={`inline-flex items-center gap-2 px-2.5 xl:px-3.5 py-1.5 xl:py-2 rounded-xl text-xs xl:text-sm font-medium transition-all duration-150 ${
                   isActive(link.path)
                     ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-800'
                     : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
