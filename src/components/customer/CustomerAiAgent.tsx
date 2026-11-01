@@ -34,7 +34,7 @@ export const CustomerAiAgent: React.FC<CustomerAiAgentProps> = ({
       {
         id: 'msg-welcome',
         role: 'model',
-        text: `👋 Hello **${customerName}**! I am your **Tegagn AI Assistant**, powered by the **Google Gemini API**.\n\nI can answer anything about how our home repair marketplace works, including:\n- 🛠️ **How to book** a verified plumber, electrician, carpenter, or painter\n- 💰 **Hourly rates** and pricing in Addis Ababa (ETB)\n- 📍 **GPS location detection** and uploading problem photos\n- 📦 **Tracking your requests** in your Cart\n- ⭐ **Rating and reviewing** technicians\n\nHow can I help you today?`,
+        text: `👋 Hello **${customerName}**! Welcome to **Tegagn 24/7 Support Desk**.\n\nI can answer anything about how our home repair marketplace works, including:\n- 🛠️ **How to book** a verified plumber, electrician, carpenter, or painter\n- 💰 **Hourly rates** and pricing in Addis Ababa (ETB)\n- 📍 **GPS location detection** and uploading problem photos\n- 📦 **Tracking your requests** in your Cart\n- ⭐ **Rating and reviewing** technicians\n\nHow can I help you today?`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         suggestedActions: [
           { label: 'Explore Marketplace', action: 'marketplace' },
@@ -238,11 +238,9 @@ export const CustomerAiAgent: React.FC<CustomerAiAgentProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                  Tegagn AI Assistant
+                  Tegagn 24/7 Support Desk
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-300">
-                  Gemini API
-                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-300">Live Help</span>
               </div>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                 Ask anything about booking, trade crafts, transparent pricing, or using Tegagn.
@@ -258,7 +256,7 @@ export const CustomerAiAgent: React.FC<CustomerAiAgentProps> = ({
                 : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300'
             }`}>
               <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500' : 'bg-amber-500'} animate-pulse`} />
-              <span>{isLive ? 'Gemini 2.5 Flash Connected' : 'Smart Knowledge Engine'}</span>
+              <span>{isLive ? 'Live Support Active' : 'Help Desk Online'}</span>
             </div>
 
             <button
@@ -391,7 +389,7 @@ export const CustomerAiAgent: React.FC<CustomerAiAgentProps> = ({
                 <Sparkles className="w-4 h-4 animate-spin" />
               </div>
               <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60 rounded-2xl rounded-tl-none p-4 flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Gemini is thinking</span>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Support agent is typing...</span>
                 <span className="flex gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '0ms' }} />
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -433,13 +431,13 @@ export const CustomerAiAgent: React.FC<CustomerAiAgentProps> = ({
             </Button>
           </form>
           <div className="flex items-center justify-between text-[11px] text-slate-400 mt-2 px-1">
-            <span>Powered by Google Gemini 2.5 Flash & Tegagn Knowledge Base</span>
+            <span>Tegagn Verified Homeowner Protection & 24/7 Support</span>
             <button
               type="button"
               onClick={() => setShowKeyModal(true)}
               className="hover:text-amber-500 underline transition-colors cursor-pointer"
             >
-              Gemini API Key Settings
+              Support Engine Settings
             </button>
           </div>
         </div>
@@ -457,10 +455,10 @@ export const CustomerAiAgent: React.FC<CustomerAiAgentProps> = ({
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                    Google Gemini API Key
+                    Support Assistant Engine Settings
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Connect live Google Gemini API
+                    Connect Live Support Engine
                   </p>
                 </div>
               </div>

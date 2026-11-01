@@ -128,6 +128,7 @@ export const WorkerDashboard: React.FC = () => {
     serviceAreas: currentWorker.serviceAreas.join(', '),
   });
   const [profileSavedNotice, setProfileSavedNotice] = useState(false);
+  const [payoutNotice, setPayoutNotice] = useState(false);
 
   // Post My Work State (With Image upload, Location, Pricing, Description, Phone)
   const postFileInputRef = React.useRef<HTMLInputElement>(null);
@@ -358,7 +359,7 @@ export const WorkerDashboard: React.FC = () => {
             variant="accent" 
             size="md" 
             className="font-bold flex items-center gap-1.5"
-            onClick={() => setIsPostModalOpen(true)}
+            onClick={() => setActiveTab('post-work')}
           >
             <PlusCircle className="w-4 h-4" />
             <span>{t('postMyWork')}</span>
@@ -377,18 +378,8 @@ export const WorkerDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* KPI Cards Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-5 flex items-center gap-4 dark:bg-slate-900 dark:border-slate-800">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
-            <DollarSign className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-extrabold text-slate-900 dark:text-white">18,400 ETB</div>
-            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Estimated Earnings (Month)</div>
-          </div>
-        </Card>
-
+      {/* KPI Cards Strip (Focused Operational Metrics - No Estimated Earnings on Enter) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <Card className="p-5 flex items-center gap-4 dark:bg-slate-900 dark:border-slate-800">
           <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-slate-800 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
             <Briefcase className="w-6 h-6" />
@@ -422,10 +413,10 @@ export const WorkerDashboard: React.FC = () => {
 
       {/* Navigation Tabs Bar */}
       <div className="border-b border-slate-200 dark:border-slate-800">
-        <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto pb-1">
+        <nav className="flex space-x-3 sm:space-x-6 overflow-x-auto pb-1 scrollbar-none">
           <button
             onClick={() => setActiveTab('requests')}
-            className={`py-3 px-1 border-b-2 font-bold text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'requests'
                 ? 'border-amber-500 text-amber-600 dark:text-amber-400'
                 : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
@@ -436,8 +427,20 @@ export const WorkerDashboard: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('post-work')}
+            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+              activeTab === 'post-work'
+                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+            }`}
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span>Post My Work</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('posts')}
-            className={`py-3 px-1 border-b-2 font-bold text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'posts'
                 ? 'border-amber-500 text-amber-600 dark:text-amber-400'
                 : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
@@ -448,8 +451,20 @@ export const WorkerDashboard: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('earnings')}
+            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+              activeTab === 'earnings'
+                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+            }`}
+          >
+            <DollarSign className="w-4 h-4" />
+            <span>Estimated Earnings & Payouts</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('profile')}
-            className={`py-3 px-1 border-b-2 font-bold text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'profile'
                 ? 'border-amber-500 text-amber-600 dark:text-amber-400'
                 : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
@@ -461,7 +476,7 @@ export const WorkerDashboard: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('notifications')}
-            className={`py-3 px-1 border-b-2 font-bold text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+            className={`py-3 px-1 border-b-2 font-bold text-xs sm:text-sm cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'notifications'
                 ? 'border-amber-500 text-amber-600 dark:text-amber-400'
                 : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
@@ -1086,6 +1101,197 @@ export const WorkerDashboard: React.FC = () => {
 
               </Card>
             ))}
+          </div>
+
+        </div>
+      )}
+
+            {/* TAB 4: ESTIMATED EARNINGS & PAYOUTS (Dedicated Nav Feature) */}
+      {activeTab === 'earnings' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-emerald-950/20 via-slate-50 dark:via-slate-900 to-amber-950/20 border border-emerald-500/20 shadow-xs">
+            <div>
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-6 h-6 text-emerald-500" />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                  Estimated Earnings & Payout Breakdown
+                </h2>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
+                Track your monthly income from completed home repairs, transparent 7% platform fee, and instant Telebirr / CBE Birr escrow settlements.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setPayoutNotice(true);
+                setTimeout(() => setPayoutNotice(false), 5000);
+              }}
+              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 flex items-center gap-2 cursor-pointer transition-all self-start sm:self-auto shrink-0"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Withdraw to Telebirr</span>
+            </button>
+          </div>
+
+          {payoutNotice && (
+            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs sm:text-sm text-emerald-900 dark:text-emerald-200 flex items-center gap-3 shadow-xs animate-in zoom-in-95">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <div>
+                <strong>Withdrawal Request Initiated:</strong> 17,112.00 ETB sent for instant payout to your Telebirr phone (+251 91 123 4567). Reference #TX-784910.
+              </div>
+            </div>
+          )}
+
+          {/* 4 Financial Metric Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <Card className="p-5 space-y-2 dark:bg-slate-900 dark:border-slate-800 border-l-4 border-l-emerald-500">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Gross Monthly Revenue
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+                18,400 <span className="text-sm font-bold text-emerald-600">ETB</span>
+              </div>
+              <p className="text-[11px] text-slate-500">From 136 completed repairs</p>
+            </Card>
+
+            <Card className="p-5 space-y-2 dark:bg-slate-900 dark:border-slate-800 border-l-4 border-l-amber-500">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Net Payout Available
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                17,112 <span className="text-sm font-bold text-slate-400">ETB</span>
+              </div>
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">Ready for instant mobile withdrawal</p>
+            </Card>
+
+            <Card className="p-5 space-y-2 dark:bg-slate-900 dark:border-slate-800 border-l-4 border-l-indigo-500">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Platform Service Fee (7%)
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-slate-700 dark:text-slate-300 font-mono">
+                1,288 <span className="text-sm font-bold text-slate-400">ETB</span>
+              </div>
+              <p className="text-[11px] text-slate-500">Includes server & escrow guarantee</p>
+            </Card>
+
+            <Card className="p-5 space-y-2 dark:bg-slate-900 dark:border-slate-800 border-l-4 border-l-sky-500">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Average Job Rate
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+                850 <span className="text-sm font-bold text-sky-600">ETB</span>
+              </div>
+              <p className="text-[11px] text-slate-500">Based on standard 2-hour callout</p>
+            </Card>
+          </div>
+
+          {/* Direct Payout Method Strip */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold shrink-0">
+                <Phone className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-sm text-slate-900 dark:text-white">
+                    Primary Mobile Payout: Telebirr
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                    Verified
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                  Linked Phone: {storedUser?.phoneNumber || '+251 91 123 4567'} • Automatic settlement upon job completion
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('profile')}
+              className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer self-start sm:self-auto"
+            >
+              Update Payout Account →
+            </button>
+          </div>
+
+          {/* Recent Completed Job Earnings Table */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4">
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+              Recent Completed Job Receipts
+            </h3>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
+                    <th className="pb-3">Client & Date</th>
+                    <th className="pb-3">Repair Description</th>
+                    <th className="pb-3">Gross</th>
+                    <th className="pb-3">Fee (7%)</th>
+                    <th className="pb-3">Your Payout</th>
+                    <th className="pb-3">Payment</th>
+                    <th className="pb-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                  <tr>
+                    <td className="py-3.5">
+                      <strong className="block text-slate-900 dark:text-white font-bold">Kaleb Getachew</strong>
+                      <span className="text-slate-400 text-[11px]">Oct 30, 2026 • Kazanchis</span>
+                    </td>
+                    <td className="py-3.5 text-slate-600 dark:text-slate-300">Main PPR Valve & Drain Repair</td>
+                    <td className="py-3.5 font-mono font-bold text-slate-900 dark:text-white">850 ETB</td>
+                    <td className="py-3.5 font-mono text-slate-400">-59.50 ETB</td>
+                    <td className="py-3.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">790.50 ETB</td>
+                    <td className="py-3.5 text-slate-600 dark:text-slate-300">Mobile Money (Telebirr)</td>
+                    <td className="py-3.5">
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-[10px] font-bold">
+                        Settled ✓
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td className="py-3.5">
+                      <strong className="block text-slate-900 dark:text-white font-bold">Liya Wolde</strong>
+                      <span className="text-slate-400 text-[11px]">Oct 29, 2026 • Sarbet</span>
+                    </td>
+                    <td className="py-3.5 text-slate-600 dark:text-slate-300">Booster Pump Pressure Switch</td>
+                    <td className="py-3.5 font-mono font-bold text-slate-900 dark:text-white">1,200 ETB</td>
+                    <td className="py-3.5 font-mono text-slate-400">-84.00 ETB</td>
+                    <td className="py-3.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">1,116.00 ETB</td>
+                    <td className="py-3.5 text-slate-600 dark:text-slate-300">CBE Birr Escrow</td>
+                    <td className="py-3.5">
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-[10px] font-bold">
+                        Settled ✓
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td className="py-3.5">
+                      <strong className="block text-slate-900 dark:text-white font-bold">Mati Israel</strong>
+                      <span className="text-slate-400 text-[11px]">Oct 28, 2026 • Bole Atlas</span>
+                    </td>
+                    <td className="py-3.5 text-slate-600 dark:text-slate-300">Kitchen Sink Faucet & Trap Seal</td>
+                    <td className="py-3.5 font-mono font-bold text-slate-900 dark:text-white">500 ETB</td>
+                    <td className="py-3.5 font-mono text-slate-400">-35.00 ETB</td>
+                    <td className="py-3.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">465.00 ETB</td>
+                    <td className="py-3.5 text-slate-600 dark:text-slate-300">Cash on Inspection</td>
+                    <td className="py-3.5">
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-[10px] font-bold">
+                        Settled ✓
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>

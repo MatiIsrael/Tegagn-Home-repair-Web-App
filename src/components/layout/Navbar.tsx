@@ -14,7 +14,9 @@ import {
   ShoppingBag,
   Calendar,
 
-  Sparkles
+  Sparkles,
+  Star,
+  HelpCircle
 } from 'lucide-react';
 import { Button } from '../common/Button';
 import { authService } from '../../services/api';
@@ -111,8 +113,8 @@ export const Navbar: React.FC = () => {
     ...(!isHomePage && storedUser && storedUser.role === 'customer'
       ? [
           { name: 'My Orders', path: '/customer/dashboard?tab=orders', icon: <ShoppingBag className="w-4 h-4 text-amber-500" /> },
-          
-          { name: 'AI Features', path: '/customer/dashboard?tab=ai', icon: <Sparkles className="w-4 h-4 text-amber-500" /> }
+          { name: 'Rate Pros', path: '/customer/dashboard?tab=rate', icon: <Star className="w-4 h-4 text-amber-500" /> },
+          { name: '24/7 Support', path: '/customer/dashboard?tab=support', icon: <HelpCircle className="w-4 h-4 text-amber-500" /> }
         ]
       : []),
     ...(!isHomePage && (isWorkerContext || (storedUser && storedUser.role === 'worker'))

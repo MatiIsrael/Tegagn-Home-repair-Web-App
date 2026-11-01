@@ -18,6 +18,7 @@ import {
   ShoppingBag, 
   Layers,
   ArrowRight,
+  HelpCircle,
   LogOut
 } from 'lucide-react';
 import { 
@@ -31,6 +32,7 @@ import { authService, bookingService, workerService } from '../services/api';
 import { useThemeLanguage } from '../context/ThemeLanguageContext';
 import { CustomerAiAgent } from '../components/customer/CustomerAiAgent';
 import { OrdersView } from '../components/customer/OrdersView';
+import { RateReviewModal } from '../components/customer/RateReviewModal';
 
 export const CustomerDashboard: React.FC = () => {
   const { t } = useThemeLanguage();
@@ -60,17 +62,19 @@ export const CustomerDashboard: React.FC = () => {
   const location = useLocation();
   const tabQuery = searchParams.get('tab');
   const isAiPath = location.pathname.endsWith('/ai');
-  const getInitialTab = (): 'marketplace' | 'bookings' | 'ai' => {
-    if (tabQuery === 'ai' || isAiPath) return 'ai';
-    if (tabQuery === 'orders' || tabQuery === 'rate' || tabQuery === 'bookings' || tabQuery === 'cart') return 'bookings';
+  const getInitialTab = (): 'marketplace' | 'bookings' | 'rate' | 'ai' => {
+    if (tabQuery === 'ai' || tabQuery === 'support' || isAiPath) return 'ai';
+    if (tabQuery === 'rate') return 'rate';
+    if (tabQuery === 'orders' || tabQuery === 'bookings' || tabQuery === 'cart') return 'bookings';
     return 'marketplace';
   };
-  const [selectedTab, setSelectedTab] = useState<'marketplace' | 'bookings' | 'ai'>(getInitialTab);
+  const [selectedTab, setSelectedTab] = useState<'marketplace' | 'bookings' | 'rate' | 'ai'>(getInitialTab);
 
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab === 'ai' || location.pathname.endsWith('/ai')) setSelectedTab('ai');
-    else if (tab === 'orders' || tab === 'rate' || tab === 'bookings' || tab === 'cart') setSelectedTab('bookings');
+    if (tab === 'ai' || tab === 'support' || location.pathname.endsWith('/ai')) setSelectedTab('ai');
+    else if (tab === 'rate') setSelectedTab('rate');
+    else if (tab === 'orders' || tab === 'bookings' || tab === 'cart') setSelectedTab('bookings');
     else if (tab === 'marketplace') setSelectedTab('marketplace');
   }, [searchParams, location.pathname]);
 
@@ -320,9 +324,29 @@ export const CustomerDashboard: React.FC = () => {
 
           <button
             type="button"
+            onClick={() => { setSelectedTab('rate'); setSearchParams({ tab: 'rate' }); }}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
+              selectedTab === 'rate'
+                ? 'bg-amber-500 text-slate-950 shadow-sm'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+            <span>Rate Pros</span>
+            {bookings.filter(b => (b.status === 'completed' || b.status === 'accepted') && !b.rating).length > 0 && (
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                selectedTab === 'rate' ? 'bg-slate-950 text-amber-400' : 'bg-amber-500 text-slate-950'
+              }`}>
+                {bookings.filter(b => (b.status === 'completed' || b.status === 'accepted') && !b.rating).length}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
             onClick={() => {
               setSelectedTab('ai');
-              setSearchParams({ tab: 'ai' });
+              setSearchParams({ tab: 'support' });
             }}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
               selectedTab === 'ai'
@@ -330,14 +354,15 @@ export const CustomerDashboard: React.FC = () => {
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
-            <Sparkles className="w-4 h-4" />
-            <span>AI Features</span>
-            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-black ${
+            <HelpCircle className="w-4 h-4" />
+            <span>24/7 Support</span>
+            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
               selectedTab === 'ai'
-                ? 'bg-slate-950 text-amber-400'
-                : 'bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
+                ? 'bg-slate-950 text-emerald-400'
+                : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
             }`}>
-              Gemini
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Online
             </span>
           </button>
         </div>
@@ -385,10 +410,9 @@ export const CustomerDashboard: React.FC = () => {
               placeholder="Search services or trade specialists... (try: 'pipe repair' or 'circuit breaker')"
               className="w-full pl-12 pr-28 py-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-semibold text-slate-900 dark:text-slate-100 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
             />
-            <div className="absolute right-2 flex items-center">
-              <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-200/60 dark:border-amber-800/40">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                AI Search
+            <div className="absolute right-3 flex items-center">
+              <span className="text-xs font-semibold text-slate-400">
+                Search
               </span>
             </div>
           </div>
@@ -533,7 +557,185 @@ export const CustomerDashboard: React.FC = () => {
           onBrowseMarketplace={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
         />
       )}
-      {/* 3. TAB 3: AI FEATURES (Powered by Google Gemini API) */}
+            {/* TAB 3: RATE PROS (Dedicated 1-Click Technician Ratings & Reviews) */}
+      {selectedTab === 'rate' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div>
+            <div className="flex items-center gap-2">
+              <Star className="w-6 h-6 fill-amber-400 text-amber-400" />
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Rate & Review Technicians
+              </h1>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              Share your honest rating and feedback for repairs completed at your home. Verified reviews help community homeowners choose trustworthy specialists.
+            </p>
+          </div>
+
+          {bookings.filter(b => b.status === 'completed' || b.status === 'accepted').length === 0 ? (
+            <div className="p-12 text-center rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
+                <Star className="w-8 h-8 fill-amber-400 text-amber-400" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                  No Completed Repairs to Rate Yet
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-1">
+                  Once a technician completes a repair service for you, they will appear here ready for your 1-tap rating and review.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setSelectedTab('marketplace'); setSearchParams({ tab: 'marketplace' }); }}
+                className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer inline-flex items-center gap-2"
+              >
+                <span>Browse Marketplace</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {bookings
+                .filter(b => b.status === 'completed' || b.status === 'accepted')
+                .map((b) => {
+                  const isRated = Boolean(b.rating);
+                  return (
+                    <div
+                      key={b.id}
+                      className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 flex flex-col justify-between hover:border-amber-400/50 transition-colors"
+                    >
+                      <div className="space-y-3">
+                        {/* Top Pro details */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-lg ring-1 ring-amber-500/20 shrink-0">
+                              <Briefcase className="w-6 h-6 text-amber-500" />
+                            </div>
+                            <div>
+                              <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                                {b.workerName}
+                              </h3>
+                              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                {b.workerTrade}
+                              </p>
+                            </div>
+                          </div>
+
+                          {isRated ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                              <span>Verified Review</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-300 text-xs font-bold">
+                              <span>Ready to Rate</span>
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Service & Cost snippet */}
+                        <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 text-xs space-y-1">
+                          <div className="flex justify-between text-slate-700 dark:text-slate-300 font-semibold">
+                            <span>Service: {b.serviceDescription}</span>
+                            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{b.estimatedCost || 350} ETB</span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 flex items-center gap-2">
+                            <span>📅 {b.scheduledDate}</span>
+                            <span>•</span>
+                            <span>📍 {b.location}</span>
+                          </div>
+                        </div>
+
+                        {/* Rating Display / Fast Star Selector */}
+                        {isRated ? (
+                          <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 space-y-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex text-amber-400">
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                  <Star
+                                    key={s}
+                                    className={`w-4 h-4 ${s <= (b.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-700'}`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="font-bold text-xs text-amber-950 dark:text-amber-200">
+                                {b.rating}.0 / 5.0
+                              </span>
+                            </div>
+                            {b.reviewComment && (
+                              <p className="text-xs text-amber-900 dark:text-amber-200 italic leading-relaxed">
+                                "{b.reviewComment}"
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="space-y-2 pt-1">
+                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                              Tap a star to rate directly:
+                            </span>
+                            <div className="flex items-center gap-2">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => setReviewModalBooking(b)}
+                                  className="p-1 rounded-lg hover:scale-125 transition-transform text-amber-400 cursor-pointer"
+                                  title={`Rate ${s} stars`}
+                                >
+                                  <Star className="w-6 h-6 fill-amber-400 hover:text-amber-500" />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Card Action Button */}
+                      <div className="pt-2">
+                        {isRated ? (
+                          <button
+                            type="button"
+                            onClick={() => setReviewModalBooking(b)}
+                            className="w-full py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                            <span>Update Review</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setReviewModalBooking(b)}
+                            className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                          >
+                            <Star className="w-3.5 h-3.5 fill-slate-950 text-slate-950" />
+                            <span>Rate & Review Professional</span>
+                          </button>
+                        )}
+                      </div>
+
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+
+        </div>
+      )}
+
+      {/* Rate & Review Modal */}
+      {reviewModalBooking && (
+        <RateReviewModal
+          isOpen={Boolean(reviewModalBooking)}
+          onClose={() => setReviewModalBooking(null)}
+          booking={reviewModalBooking}
+          onSuccess={() => {
+            loadBookings();
+          }}
+        />
+      )}
+
+      {/* TAB 4: 24/7 SUPPORT */}
       {selectedTab === 'ai' && (
         <CustomerAiAgent
           customerName={customerDisplayName}

@@ -973,6 +973,44 @@ export const bookingService = {
     return updatedBooking;
   },
 
+  async submitReview(bookingId: string, rating: number, comment: string): Promise<Booking | null> {
+    const all = readStoredBookings();
+    let updatedBooking: Booking | null = null;
+    const now = new Date();
+
+    const updated = all.map(b => {
+      if (b.id === bookingId) {
+        updatedBooking = {
+          ...b,
+          rating,
+          reviewComment: comment,
+          ratedAt: now.toISOString()
+        };
+        return updatedBooking;
+      }
+      return b;
+    });
+
+    writeStoredBookings(updated);
+
+    if (updatedBooking) {
+      try {
+        await reviewService.submitReview({
+          booking_id: bookingId,
+          worker_id: (updatedBooking as Booking).workerId,
+          customer_name: (updatedBooking as Booking).customerName,
+          rating,
+          comment
+        });
+      } catch (err) {
+        console.warn('Review save notice', err);
+      }
+    }
+
+    window.dispatchEvent(new Event('tegagn_bookings_changed'));
+    return updatedBooking;
+  },
+
   async processRebackRefund(
     bookingId: string, 
     refundData: { reason: string; refundAmount?: number; refundAccount?: string }
@@ -1079,6 +1117,8 @@ export const reviewService = {
     booking_id: string;
     rating: number;
     comment: string;
+    worker_id?: string;
+    customer_name?: string;
     punctuality_rating?: number;
     quality_rating?: number;
     cleanliness_rating?: number;
@@ -1101,8 +1141,8 @@ export const reviewService = {
     const all = readStoredReviews();
     const newReview: Review = {
       id: `rev-${Date.now()}`,
-      workerId: 'worker-101',
-      customerName: 'Verified Customer',
+      workerId: payload.worker_id || 'worker-101',
+      customerName: payload.customer_name || 'Verified Customer',
       rating: payload.rating,
       comment: payload.comment,
       createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),

@@ -9,7 +9,7 @@ export interface ChatMessage {
 }
 
 const TEGAGN_SYSTEM_INSTRUCTION = `
-You are the official Tegagn AI Assistant — the intelligent, friendly, and expert customer guide for the Tegagn Home Repair Marketplace in Addis Ababa, Ethiopia.
+You are the official Tegagn Customer Support Concierge — the dedicated, friendly, and expert support representative for the Tegagn Home Repair Marketplace in Addis Ababa, Ethiopia.
 
 ### ABOUT TEGAGN:
 - Tegagn is an open, direct home repair marketplace connecting homeowners, tenants, and property managers directly with verified independent local trade professionals across Addis Ababa.
@@ -206,7 +206,7 @@ You can reach the Tegagn team directly anytime:
 - You can message or call the technician directly with zero broker interference.`;
     }
 
-    return `Hello! I am your **Tegagn AI Assistant** (Powered by Google Gemini). 
+    return `Hello! Welcome to **Tegagn Customer Support Desk**. 
 
 I am here to help you navigate the marketplace, find reliable trade professionals in Addis Ababa, and guide you through booking:
 

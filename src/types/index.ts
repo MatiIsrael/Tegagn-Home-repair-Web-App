@@ -128,6 +128,9 @@ export interface Booking {
     refundReason?: string;
     refundTransactionId?: string;
   };
+  rating?: number;
+  reviewComment?: string;
+  ratedAt?: string;
 }
 
 export interface WorkerPostComment {

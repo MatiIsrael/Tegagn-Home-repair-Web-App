@@ -15,26 +15,31 @@ import {
   ShoppingBag,
   Camera,
   FileText,
-  Navigation
+  Navigation,
+  Star
 } from 'lucide-react';
 import { Booking } from '../../types';
 import { bookingService } from '../../services/api';
 import { CheckoutModal } from './CheckoutModal';
 import { RebackModal } from './RebackModal';
+import { RateReviewModal } from './RateReviewModal';
 
 interface OrdersViewProps {
   bookings: Booking[];
   onRefresh: () => void;
   onBrowseMarketplace: () => void;
+  onOpenRateModal?: (booking: Booking) => void;
 }
 
 export const OrdersView: React.FC<OrdersViewProps> = ({
   bookings,
   onRefresh,
   onBrowseMarketplace,
+  onOpenRateModal
 }) => {
   const [activeCheckoutBooking, setActiveCheckoutBooking] = useState<Booking | null>(null);
   const [activeRebackBooking, setActiveRebackBooking] = useState<Booking | null>(null);
+  const [activeRateBooking, setActiveRateBooking] = useState<Booking | null>(null);
   const [selectedEnlargedImage, setSelectedEnlargedImage] = useState<string | null>(null);
 
   // Live timer tick for arrival windows
@@ -51,9 +56,12 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
     return remaining;
   };
 
-  const handleSimulateExpired = async (bookingId: string) => {
-    await bookingService.simulateArrivalWindowExpired(bookingId);
-    onRefresh();
+  const handleRateClick = (booking: Booking) => {
+    if (onOpenRateModal) {
+      onOpenRateModal(booking);
+    } else {
+      setActiveRateBooking(booking);
+    }
   };
 
   return (
@@ -66,7 +74,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
             My Orders
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Track technician arrival, view attached problem photos, exact GPS location, and access 100% Re-back Guarantee protection.
+            Track technician arrival, view attached problem photos, exact GPS location, and rate verified technicians upon completion.
           </p>
         </div>
 
@@ -117,7 +125,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                 className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all overflow-hidden"
               >
                 
-                {/* 1. Header (Matching Screenshot 1) */}
+                {/* 1. Header */}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                   <div className="space-y-1 min-w-0 flex-1">
                     <span className="text-base font-black text-slate-900 dark:text-white block">
@@ -135,7 +143,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                     </p>
                   </div>
 
-                  {/* Right Header: Status Badge & Red Cancel Order Button */}
+                  {/* Right Header: Status Badge & Actions */}
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 self-start sm:self-auto shrink-0">
                     <span className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold capitalize ${
                       booking.status === 'pending'
@@ -148,6 +156,45 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                     }`}>
                       {booking.status === 'accepted' ? 'Accepted' : booking.status}
                     </span>
+
+                    {/* Rate & Review Button for Completed Orders */}
+                    {booking.status === 'completed' && (
+                      booking.rating ? (
+                        <button
+                          type="button"
+                          onClick={() => handleRateClick(booking)}
+                          className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-300 text-xs font-bold flex items-center gap-1.5 hover:bg-amber-100 transition-colors cursor-pointer"
+                        >
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <span>Rated {booking.rating}/5 (Edit)</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleRateClick(booking)}
+                          className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                        >
+                          <Star className="w-3.5 h-3.5 fill-slate-950" />
+                          <span>Rate & Review Pro</span>
+                        </button>
+                      )
+                    )}
+
+                    {/* Mark Work Done & Rate Button for Accepted Orders */}
+                    {booking.status === 'accepted' && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await bookingService.updateBookingStatus(booking.id, 'completed');
+                          onRefresh();
+                          handleRateClick(booking);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Work Done? Rate Pro</span>
+                      </button>
+                    )}
 
                     {/* Red Cancel Order Button */}
                     {booking.status !== 'cancelled' && booking.status !== 'completed' && (
@@ -164,7 +211,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   </div>
                 </div>
 
-                {/* 2. Middle Row: Service Item & Cost (Matching Screenshot 1 Gray Bar) */}
+                {/* 2. Middle Row: Service Item & Cost */}
                 <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl px-3.5 sm:px-4 py-3 my-3 sm:my-4 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
@@ -178,9 +225,33 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                 </div>
 
                 {/* Problem Photos & Description & GPS Info Box */}
-                {((booking.images && booking.images.length > 0) || booking.notes || booking.gpsCoordinates) && (
+                {((booking.images && booking.images.length > 0) || booking.notes || booking.gpsCoordinates || booking.rating) && (
                   <div className="p-3 sm:p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 space-y-3 my-3 text-xs">
                     
+                    {/* Customer Review Quote if already rated */}
+                    {booking.rating && (
+                      <div className="p-2.5 rounded-lg bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1 font-bold text-amber-900 dark:text-amber-300">
+                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                            <span>Your Verified Rating: {booking.rating} / 5</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRateClick(booking)}
+                            className="text-[11px] font-bold text-amber-700 dark:text-amber-300 hover:underline"
+                          >
+                            Edit
+                          </button>
+                        </div>
+                        {booking.reviewComment && (
+                          <p className="text-amber-900 dark:text-amber-200 mt-1 italic leading-relaxed">
+                            "{booking.reviewComment}"
+                          </p>
+                        )}
+                      </div>
+                    )}
+
                     {/* Description */}
                     {booking.notes && (
                       <div>
@@ -241,7 +312,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   </div>
                 )}
 
-                {/* 3. Re-backing Arrival Guarantee Banner (When Accepted or In Progress) */}
+                {/* 3. Re-backing Arrival Guarantee Banner */}
                 {(booking.status === 'accepted' || booking.status === 'pending') && (
                   <div className={`p-3 sm:p-4 rounded-xl border my-3 sm:my-4 transition-all ${
                     isOverdue
@@ -274,7 +345,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                         </div>
                       </div>
 
-                      {/* Action Buttons for Re-back / Simulation */}
+                      {/* Action Button for Overdue Re-back */}
                       <div className="flex items-center gap-2 shrink-0 self-start md:self-center pt-1 md:pt-0">
                         {isOverdue ? (
                           <button
@@ -286,21 +357,17 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                             <span>Claim 100% Re-back Refund</span>
                           </button>
                         ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleSimulateExpired(booking.id)}
-                            className="px-2.5 py-1.5 rounded-lg border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-[10px] font-bold text-amber-800 dark:text-amber-300 cursor-pointer"
-                            title="Simulate 45 minutes elapsed to test the overdue re-back refund flow"
-                          >
-                            ⚡ Test: Simulate Timeout
-                          </button>
+                          <div className="flex items-center gap-1.5 text-xs text-amber-800 dark:text-amber-300 font-bold bg-amber-100/70 dark:bg-amber-900/40 px-3 py-1.5 rounded-lg">
+                            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>Arrival Guarantee Active</span>
+                          </div>
                         )}
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* 4. Bottom Row (Matching Screenshot 1: 3 Columns) */}
+                {/* 4. Bottom Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-3 sm:pt-4 border-t border-slate-100 dark:border-slate-800">
                   
                   {/* Column 1: Payment */}
@@ -362,6 +429,18 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
             );
           })}
         </div>
+      )}
+
+      {/* Rate & Review Modal */}
+      {activeRateBooking && (
+        <RateReviewModal
+          isOpen={Boolean(activeRateBooking)}
+          onClose={() => setActiveRateBooking(null)}
+          booking={activeRateBooking}
+          onSuccess={() => {
+            onRefresh();
+          }}
+        />
       )}
 
       {/* Checkout Modal */}
